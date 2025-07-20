@@ -1,0 +1,36 @@
+@inherits LayoutComponentBase
+
+@inject IHttpContextAccessor HttpContextAccessor
+@using System.Security.Claims
+
+<div class="top-bar">
+    <a class="logo" href="">
+        <img src="img/logo2.png" />
+    </a>
+    <div class="user-info">
+        <LoginDisplay />
+        <div class="nav-links">
+            <NavLink href="" class="nav-tab" Match="NavLinkMatch.All">
+                <img src="img/cards.png" />
+                <div>الشركات</div>
+            </NavLink>
+            @if (HttpContextAccessor.HttpContext.User?.Identity?.IsAuthenticated == true)
+            {
+                <NavLink href="myorders" class="nav-tab">
+                    <img src="img/bike.svg" />
+                    <div>طلباتي</div>
+                </NavLink>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    @Body
+</div>
+
+<div id="blazor-error-ui">
+    حدث خطأ غير متوقع.
+    <a href="" class="reload">إعادة تحميل</a>
+    <a class="dismiss">🗙</a>
+</div>

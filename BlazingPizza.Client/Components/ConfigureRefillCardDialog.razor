@@ -1,0 +1,51 @@
+@if (Card != null)
+{
+    <div class="dialog-title">
+        <h2>@Card.ProductName</h2>
+    </div>
+    <div class="dialog-body">
+        <div class="form-group">
+            <label>السعر</label>
+            <div class="price">@Card.price ₪</div>
+        </div>
+        <div class="form-group">
+            <label>الوصف</label>
+            <p>@Card.description</p>
+        </div>
+        <div class="form-group">
+            <label>الكمية</label>
+            <div class="quantity-controls">
+                <button class="btn btn-outline-secondary" @onclick="() => UpdateQuantity(-1)" disabled="@(quantity <= 1)">-</button>
+                <span class="quantity">@quantity</span>
+                <button class="btn btn-outline-secondary" @onclick="() => UpdateQuantity(1)">+</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>الإجمالي</label>
+            <div class="price">@(Card.price * quantity) ₪</div>
+        </div>
+    </div>
+    <div class="dialog-buttons">
+        <button class="btn btn-secondary" @onclick="OnCancel">إلغاء</button>
+        <button class="btn btn-success" @onclick="() => OnConfirm.InvokeAsync(quantity)">
+            إضافة للسلة
+        </button>
+    </div>
+}
+
+@code {
+    [Parameter] public RefillCard? Card { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback<int> OnConfirm { get; set; }
+
+    private int quantity = 1;
+
+    private void UpdateQuantity(int change)
+    {
+        var newQuantity = quantity + change;
+        if (newQuantity >= 1)
+        {
+            quantity = newQuantity;
+        }
+    }
+}

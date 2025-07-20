@@ -1,0 +1,52 @@
+﻿@inject IServiceScopeFactory ScopeFactory
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using System.Security.Claims
+
+<div class="user-info">
+    @if (IsLoggedIn)
+    {
+        <img src="img/user.svg" />
+        <div>
+            <a href="Account/Manage" class="username">@UserNameDisplay</a>
+            <a href="Account/Logout" class="btn btn-link sign-out">تسجيل الخروج</a>
+        </div>
+    }
+    else
+    {
+        <a class="sign-in" href="Account/Register">انشاء حساب</a>
+        <a class="sign-in" href="Account/Login">تسجيل الدخول</a>
+    }
+</div>
+
+@code {
+    private string? currentUrl;
+    bool IsLoggedIn => HttpContextAccessor.HttpContext.User?.Identity?.IsAuthenticated == true;
+    string? UserNameDisplay = "My Account";
+
+    protected override async Task OnInitializedAsync( )
+    {
+        currentUrl = Navigation.ToBaseRelativePath(Navigation.Uri);
+        Navigation.LocationChanged += OnLocationChanged;
+        if (IsLoggedIn)
+        {
+            var userName = HttpContextAccessor.HttpContext.User.Identity.Name;
+            if (!string.IsNullOrEmpty(userName))
+                UserNameDisplay = userName;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void OnLocationChanged(object? sender , LocationChangedEventArgs e)
+    {
+        currentUrl = Navigation.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose( )
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+}

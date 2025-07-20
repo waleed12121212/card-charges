@@ -1,0 +1,15 @@
+# Ignore Visual Studio temp files
+.vs/
+*.user
+*.suo
+
+# Ignore build folders
+bin/
+obj/
+
+# Ignore other common .NET/IDE junk
+*.log
+*.dbmdl
+*.pdb
+*.cache
+*.vscode/

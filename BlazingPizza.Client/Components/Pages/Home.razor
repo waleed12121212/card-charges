@@ -1,0 +1,292 @@
+﻿@page "/"
+@rendermode InteractiveWebAssembly
+@inject ICarrierRepository CarrierRepository
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject IRefillCardRepository RefillCardRepository
+@inject OrderState OrderState
+@inject IOrderRepository OrderRepository
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>الرئيسية</PageTitle>
+
+<div class="sidebar financial-sidebar">
+    <div style="display:flex; gap:1rem; margin-bottom:1rem;">
+        <button class="btn btn-outline-secondary" @onclick='@(() => SetSidebarTab("financial"))' style="flex:1;@(sidebarTab=="financial" ? "background:#00668c;color:#fff;" : "")">
+            الحركات المالية
+        </button>
+        <button class="btn btn-outline-secondary" @onclick='@(() => SetSidebarTab("checkout"))' style="flex:1;@(sidebarTab=="checkout" ? "background:#00668c;color:#fff;" : "")">
+            طلبك
+        </button>
+    </div>
+    @if (sidebarTab == "financial")
+    {
+        <h3 style="margin-top:0">سجل الحركات المالية</h3>
+        @if (financialOrders == null)
+        {
+            <p>جاري تحميل الحركات المالية...</p>
+        }
+        else if (!financialOrders.Any())
+        {
+            <p>لا توجد حركات مالية.</p>
+        }
+        else
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>رقم الحركة</th>
+                        <th>اسم المنتج</th>
+                        <th>تاريخ الحركة</th>
+                        <th>المبلغ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in financialOrders)
+                    {
+                        foreach (var card in order.Order.Cards)
+                        {
+                            <tr>
+                                <td>@order.Order.OrderId</td>
+                                <td>@card.ProductName</td>
+                                <td>@order.Order.CreatedTime.ToString("yyyy/MM/dd HH:mm")</td>
+                                <td>@($"{card.TotalPrice:0.00} ₪")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        }
+    }
+    else if (sidebarTab == "checkout")
+    {
+        <h3 style="margin-top:0">طلبك</h3>
+        @if (OrderState.Order.Cards.Any())
+        {
+            <div class="order-contents">
+                <table class="sidebar-order-table">
+                    <thead>
+                        <tr>
+                            <th>المنتج</th>
+                            <th>الكمية</th>
+                            <th>سعر الوحدة</th>
+                            <th>الإجمالي</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var card in OrderState.Order.Cards)
+                        {
+                            <tr>
+                                <td>@card.ProductName</td>
+                                <td>@card.Quantity</td>
+                                <td>@($"{card.UnitPrice:0.00} ₪")</td>
+                                <td>@($"{card.TotalPrice:0.00} ₪")</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger sidebar-remove-btn" @onclick="() => RemoveCard(card.RefillCardId)">x</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="order-total @(OrderState.Order.Cards.Any() ? "" : "hidden")">
+                الإجمالي:
+                <span class="total-price">@OrderState.Order.TotalPrice ₪</span>
+                <a href="/checkout" class="@(OrderState.Order.Cards.Count == 0 ? "btn btn-warning disabled" : "btn btn-warning")">
+                    إتمام الطلب >
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="empty-cart">اختر بطاقة للبدء</div>
+        }
+    }
+</div>
+
+<div class="main">
+    @if (selectedCarrier == null)
+    {
+        <!-- Carrier Selection View -->
+        <div class="carrier-view @(showCarriers ? "show" : "")">
+            <ul class="pizza-cards">
+                @if (carriers is not null)
+                {
+                    @foreach (var carrier in carriers)
+                    {
+                        <li @onclick="@(() => SelectCarrier(carrier))" style="cursor: pointer;">
+                            <div class="card-content">
+                                <img src="@GetCarrierImagePath(carrier.carrierName)" alt="@carrier.carrierName" class="card-logo" />
+                                <div class="pizza-info">
+                                    <span class="title">@carrier.carrierName</span>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    }
+    else
+    {
+        <!-- Refill Cards View -->
+        <div class="refill-cards-view @(showRefillCards ? "show" : "")">
+            <div class="back-button-container">
+                <button class="btn btn-secondary back-btn" @onclick="GoBackToCarriers">
+                    <span>← العودة للشركات</span>
+                </button>
+            </div>
+            <h2 class="carrier-title">@selectedCarrier?.carrierName - بطاقات الشحن</h2>
+            <ul class="pizza-cards">
+                @if (refillCards == null)
+                {
+                    <li><p>جاري التحميل...</p></li>
+                }
+                else if (!refillCards.Any())
+                {
+                    <li><p>لا توجد بطاقات شحن متاحة لهذه الشركة.</p></li>
+                }
+                else
+                {
+                    @foreach (var card in refillCards)
+                    {
+                        <li @onclick="@(() => ShowDialog(card))" style="cursor: pointer;">
+                            <div class="card-content">
+                                <img src="@GetRefillCardImagePath(card)" alt="@card.ProductName" class="card-logo" />
+                                <div class="pizza-info">
+                                    <span class="title">@card.ProductName</span>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    }
+</div>
+
+@if (OrderState.ShowingConfigureDialog)
+{
+    <div class="dialog-container">
+        <div class="dialog">
+            <ConfigureRefillCardDialog Card="OrderState.ConfiguringRefillCard"
+                                       OnCancel="OnDialogCancel"
+                                       OnConfirm="OnDialogConfirm" />
+        </div>
+    </div>
+}
+
+@code {
+    List<Carrier>? carriers;
+    List<RefillCard>? refillCards;
+    Carrier? selectedCarrier;
+    bool showCarriers = true;
+    bool showRefillCards = false;
+    List<OrderWithStatus>? financialOrders;
+    string sidebarTab = "financial"; // New state variable for sidebar tab
+
+    protected override async Task OnInitializedAsync()
+    {
+        carriers = await CarrierRepository.GetCarriers();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            financialOrders = await OrderRepository.GetOrdersAsync();
+            StateHasChanged();
+        }
+    }
+
+    // Helper method to get carrier image path
+    private string GetCarrierImagePath(string carrierName)
+    {
+        if (string.IsNullOrEmpty(carrierName))
+            return "img/pizzas/1.jpg"; // fallback image
+
+        // Get the first part of the carrier name (before any space or special characters)
+        var firstPart = carrierName.Split(' ')[0].ToLower();
+
+        // Common image extensions to check
+        var extensions = new[] { ".png" , ".jpg" , ".jpeg" , ".gif" };
+
+        foreach (var ext in extensions)
+        {
+            var imagePath = $"img/carrier/{firstPart}{ext}";
+            // For now, we'll return the path and let the browser handle missing images
+            // In a production app, you might want to check if the file exists
+            return imagePath;
+        }
+
+        return "img/pizzas/1.jpg"; // fallback image
+    }
+    private string GetRefillCardImagePath(RefillCard card)
+    {
+        if (!string.IsNullOrEmpty(card.imageName))
+            return $"img/refillcard/{card.imageName}";
+        return "img/pizzas/1.jpg"; // صورة افتراضية
+    }
+
+    async Task SelectCarrier(Carrier carrier)
+    {
+        selectedCarrier = carrier;
+        showCarriers = false;
+        StateHasChanged();
+
+        // Load refill cards for the selected carrier
+        refillCards = await RefillCardRepository.GetRefillCardsByCarrier(carrier.id);
+
+        // Trigger animation
+        await Task.Delay(100);
+        showRefillCards = true;
+        StateHasChanged();
+    }
+
+    void GoBackToCarriers( )
+    {
+        showRefillCards = false;
+        StateHasChanged();
+
+        // Wait for animation to complete
+        Task.Delay(300).ContinueWith(_ =>
+        {
+            selectedCarrier = null;
+            refillCards = null;
+            showCarriers = true;
+            InvokeAsync(StateHasChanged);
+        });
+    }
+
+    void RemoveCard(int refillCardId)
+    {
+        OrderState.RemoveRefillCard(refillCardId);
+        StateHasChanged();
+    }
+
+    void OnDialogCancel( )
+    {
+        OrderState.CancelConfigureRefillCardDialog();
+    }
+
+    void OnDialogConfirm(int quantity)
+    {
+        OrderState.ConfirmConfigureRefillCardDialog(quantity);
+    }
+
+    void ShowDialog(RefillCard card)
+    {
+        OrderState.ShowConfigureRefillCardDialog(card);
+    }
+
+    void SetSidebarTab(string tab)
+    {
+        sidebarTab = tab;
+        StateHasChanged();
+    }
+}

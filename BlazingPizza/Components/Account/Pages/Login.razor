@@ -1,0 +1,90 @@
+﻿@page "/Account/Login"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using System.Security.Claims
+@using BCrypt.Net
+@inject BlazingPizza.PizzaStoreContext Db
+@inject NavigationManager NavigationManager
+@inject IHttpContextAccessor HttpContextAccessor
+
+<div class="login-container">
+    <div class="login-left">
+        <div class="login-title">تسجيل دخول</div>
+        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+            <DataAnnotationsValidator />
+            <label class="login-form-label" for="username">اسم المستخدم</label>
+            <InputText @bind-Value="Input.UserName" class="login-input" autocomplete="username" aria-required="true" placeholder="اسم المستخدم" />
+            <ValidationMessage For="() => Input.UserName" class="text-danger" />
+            <label class="login-form-label" for="password">كلمة المرور</label>
+            <InputText type="password" @bind-Value="Input.Password" class="login-input" autocomplete="current-password" aria-required="true" placeholder="كلمة المرور" />
+            <ValidationMessage For="() => Input.Password" class="text-danger" />
+            <button type="submit" class="login-btn">تسجيل دخول</button>
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="text-danger">@ErrorMessage</div>
+            }
+        </EditForm>
+    </div>
+    <div class="login-right">
+        <div class="login-right-title">مرحباً بعودتك</div>
+        <div class="login-right-desc">ليس لديك حساب؟</div>
+        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))" class="login-signup-btn">إنشاء حساب</a>
+    </div>
+</div>
+
+@code {
+    private string? ErrorMessage;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    public async Task LoginUser( )
+    {
+        var user = await Db.Users.FirstOrDefaultAsync(u => u.UserName == Input.UserName);
+        if (user is not null && BCrypt.Verify(Input.Password , user.PasswordHash))
+        {
+            // تسجيل الدخول باستخدام كوكيز المصادقة
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Role, user.Role)
+            };
+            var claimsIdentity = new ClaimsIdentity(claims , CookieAuthenticationDefaults.AuthenticationScheme);
+            var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = Input.RememberMe ,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+                };
+            await HttpContextAccessor.HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme ,
+                new ClaimsPrincipal(claimsIdentity) ,
+                authProperties
+            );
+            NavigationManager.NavigateTo(ReturnUrl ?? "/" , true); // forceLoad لإعادة تحميل الصفحة
+        }
+        else
+        {
+            ErrorMessage = "بيانات الدخول غير صحيحة.";
+        }
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        public string UserName { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
+    }
+}

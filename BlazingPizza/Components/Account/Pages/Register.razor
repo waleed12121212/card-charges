@@ -1,0 +1,89 @@
+﻿@page "/Account/Register"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using BCrypt.Net
+@inject BlazingPizza.PizzaStoreContext Db
+@inject NavigationManager NavigationManager
+
+<PageTitle>Register</PageTitle>
+
+<div class="login-container">
+    <div class="login-left">
+        <div class="login-title">إنشاء حساب</div>
+        <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register">
+            <DataAnnotationsValidator />
+            <label class="login-form-label" for="username">اسم المستخدم</label>
+            <InputText @bind-Value="Input.UserName" class="login-input" autocomplete="username" aria-required="true" placeholder="اسم المستخدم" />
+            <ValidationMessage For="() => Input.UserName" class="text-danger" />
+            <label class="login-form-label" for="password">كلمة المرور</label>
+            <InputText type="password" @bind-Value="Input.Password" class="login-input" autocomplete="new-password" aria-required="true" placeholder="كلمة المرور" />
+            <ValidationMessage For="() => Input.Password" class="text-danger" />
+            <!-- حقل الإيميل (اختياري) -->
+            <label class="login-form-label" for="email">البريد الإلكتروني (اختياري)</label>
+            <InputText @bind-Value="Input.Email" class="login-input" autocomplete="email" placeholder="البريد الإلكتروني" />
+            <ValidationMessage For="() => Input.Email" class="text-danger" />
+            <!-- حقل رقم الهاتف (اختياري) -->
+            <label class="login-form-label" for="phone">رقم الجوال (اختياري)</label>
+            <InputText @bind-Value="Input.PhoneNumber" class="login-input" autocomplete="tel" placeholder="رقم الجوال" />
+            <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
+            <button type="submit" class="login-btn">تسجيل</button>
+            @if (!string.IsNullOrEmpty(Message))
+            {
+                <div class="text-danger">@Message</div>
+            }
+        </EditForm>
+    </div>
+    <div class="login-right">
+        <div class="login-right-title">مرحباً بك!</div>
+        <div class="login-right-desc">لديك حساب بالفعل؟</div>
+        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))" class="login-signup-btn">تسجيل دخول</a>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    private string? Message { get; set; }
+
+    public async Task RegisterUser(EditContext editContext)
+    {
+        if (await Db.Users.AnyAsync(u => u.UserName == Input.UserName))
+        {
+            Message = "اسم المستخدم مستخدم بالفعل.";
+            return;
+        }
+        var user = new CarrierStoreUser
+            {
+                UserName = Input.UserName ,
+                PasswordHash = BCrypt.HashPassword(Input.Password) ,
+                Email = Input.Email ,
+                PhoneNumber = Input.PhoneNumber
+            };
+        Db.Users.Add(user);
+        await Db.SaveChangesAsync();
+        NavigationManager.NavigateTo(ReturnUrl ?? "/");
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        public string UserName { get; set; } = "";
+
+        [Required]
+        [StringLength(100 , ErrorMessage = "The {0} must be at least {2} and at max {1} characters long." , MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        [Display(Name = "Password")]
+        public string Password { get; set; } = "";
+
+        [EmailAddress]
+        public string? Email { get; set; }
+
+        [Phone]
+        public string? PhoneNumber { get; set; }
+    }
+}

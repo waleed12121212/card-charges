@@ -1,0 +1,145 @@
+@page "/Account/Manage/Profile"
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
+@inject BlazingPizza.PizzaStoreContext Db
+@inject NavigationManager NavigationManager
+@inject IHttpContextAccessor HttpContextAccessor
+
+<PageTitle>الملف الشخصي</PageTitle>
+
+@if (isLoading)
+{
+    <div style="text-align:center; margin:2rem;">جاري تحميل البيانات...</div>
+}
+else if (userNotFound)
+{
+    <div style="text-align:center; margin:2rem; color:red;">تعذر العثور على بيانات المستخدم.</div>
+}
+else
+{
+    <div class="profile-card-new">
+        <div class="profile-avatar-new">
+            <span>@(UserName.Length > 0 ? UserName.Substring(0 , 1) : "؟")</span>
+        </div>
+        <div class="profile-info-new">
+            <div class="profile-row-new">
+                <span class="profile-label-new">الاسم:</span>
+                <span>@UserName</span>
+            </div>
+            <div class="profile-row-new">
+                <span class="profile-label-new">البريد الإلكتروني:</span>
+                <span>@Email</span>
+            </div>
+            <div class="profile-row-new">
+                <span class="profile-label-new">رقم الجوال:</span>
+                <span>@PhoneNumber</span>
+            </div>
+        </div>
+        <div class="profile-actions-new">
+            <button class="profile-btn-new" @onclick="() => ShowEdit = true">تعديل البيانات</button>
+            <button class="profile-btn-outline-new" @onclick="ChangePassword">تغيير كلمة المرور</button>
+        </div>
+    </div>
+}
+
+@if (ShowEdit)
+{
+    <div class="profile-edit-overlay" @onclick="CloseEdit">
+        <div class="profile-edit-dialog" @onclick:stopPropagation>
+            <h3 class="profile-edit-title">تعديل البيانات الشخصية</h3>
+            <EditForm Model="EditModel" OnValidSubmit="SaveEdit">
+                <div class="profile-edit-field">
+                    <label>الاسم</label>
+                    <InputText @bind-Value="EditModel.UserName" class="profile-edit-input" />
+                </div>
+                <div class="profile-edit-field">
+                    <label>البريد الإلكتروني</label>
+                    <InputText @bind-Value="EditModel.Email" class="profile-edit-input" />
+                </div>
+                <div class="profile-edit-field">
+                    <label>رقم الجوال</label>
+                    <InputText @bind-Value="EditModel.PhoneNumber" class="profile-edit-input" />
+                </div>
+                <div class="profile-edit-actions">
+                    <button type="submit" class="profile-btn-new">حفظ</button>
+                    <button type="button" class="profile-btn-outline-new" @onclick="CloseEdit">إلغاء</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    string UserName = "";
+    string Email = "";
+    string PhoneNumber = "";
+    bool isLoading = true;
+    bool userNotFound = false;
+
+    bool ShowEdit = false;
+    EditProfileModel EditModel = new();
+
+    protected override async Task OnInitializedAsync( )
+    {
+        var userId = HttpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            userNotFound = true;
+            isLoading = false;
+            return;
+        }
+        var user = await Db.Users.FindAsync(userId);
+        if (user == null)
+        {
+            userNotFound = true;
+            isLoading = false;
+            return;
+        }
+        UserName = user.UserName;
+        Email = user.Email ?? "";
+        PhoneNumber = user.PhoneNumber ?? "";
+        EditModel.UserName = UserName;
+        EditModel.Email = Email;
+        EditModel.PhoneNumber = PhoneNumber;
+        isLoading = false;
+    }
+
+    void CloseEdit( )
+    {
+        ShowEdit = false;
+        // إعادة القيم القديمة في حال الإلغاء
+        EditModel.UserName = UserName;
+        EditModel.Email = Email;
+        EditModel.PhoneNumber = PhoneNumber;
+    }
+
+    async Task SaveEdit( )
+    {
+        var userId = HttpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId)) return;
+        var user = await Db.Users.FindAsync(userId);
+        if (user == null) return;
+        user.UserName = EditModel.UserName;
+        user.Email = EditModel.Email;
+        user.PhoneNumber = EditModel.PhoneNumber;
+        await Db.SaveChangesAsync();
+        UserName = user.UserName;
+        Email = user.Email ?? "";
+        PhoneNumber = user.PhoneNumber ?? "";
+        ShowEdit = false;
+    }
+
+    void ChangePassword( )
+    {
+    }
+
+    class EditProfileModel
+    {
+        [Required]
+        public string UserName { get; set; } = "";
+        [Required, EmailAddress]
+        public string Email { get; set; } = "";
+        [Phone]
+        public string PhoneNumber { get; set; } = "";
+    }
+} 

@@ -1,0 +1,47 @@
+@page "/Account/Logout"
+
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@inject NavigationManager NavigationManager
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IJSRuntime JSRuntime
+
+@code {
+    protected override async Task OnInitializedAsync( )
+    {
+        try
+        {
+            await HttpContextAccessor.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var cookieOptions = new CookieOptions
+                {
+                    Path = "/" ,
+                    Expires = DateTime.Now.AddDays(-1) ,
+                    HttpOnly = true ,
+                    Secure = HttpContextAccessor.HttpContext.Request.IsHttps
+                };
+
+            var cookieNames = new[]
+            {
+                ".AspNetCore.Cookies",
+                ".AspNetCore.Identity.Application",
+                "Identity.External",
+                "__RequestVerificationToken"
+            };
+
+            foreach (var cookieName in cookieNames)
+            {
+                HttpContextAccessor.HttpContext.Response.Cookies.Delete(cookieName , cookieOptions);
+            }
+
+            await JSRuntime.InvokeVoidAsync("sessionStorage.clear");
+            await JSRuntime.InvokeVoidAsync("localStorage.clear");
+
+            NavigationManager.NavigateTo("/" , true);
+        }
+        catch (Exception ex)
+        {
+            NavigationManager.NavigateTo("/" , true);
+        }
+    }
+} 

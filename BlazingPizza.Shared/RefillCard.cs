@@ -1,0 +1,41 @@
+public class RefillCard
+{
+    public int id { get; set; }
+    public string ProductName { get; set; }
+    public int CardAmount { get; set; }
+    public int CarrierID { get; set; }
+    public int? apiProductId { get; set; }
+    public string description { get; set; }
+    public bool isActive { get; set; }
+    public bool isTemp { get; set; }
+    public string imageName { get; set; }
+    public string ProductIdenfity { get; set; }
+    public DateTime CreatedOn { get; set; }
+    public DateTime? UpdatedOn { get; set; }
+    public double price { get; set; }
+    public double wholeSalePercent { get; set; }
+    public double Cost { get; set; }
+    public string ProductNameHe { get; set; }
+    public string ProductNameEn { get; set; }
+    public string DescriptionHe { get; set; }
+    public string DescriptionEn { get; set; }
+    public bool SendByEmail { get; set; }
+    public string EmailCode { get; set; }
+    public int? ApiProductId1 { get; set; }
+    public int? ApiProductId2 { get; set; }
+    public string ApiProductIdStr { get; set; }
+    public int? SiteId { get; set; }
+    public int SortOrder { get; set; }
+    public bool IsFav { get; set; }
+    public int? Group { get; set; }
+    public int? RemoteProviderId { get; set; }
+    public string DetailsUrl { get; set; }
+    public bool Lotto { get; set; }
+    public decimal PriceExcempt { get; set; }
+    public int PointsEndUser { get; set; }
+    public int PointsUser { get; set; }
+    public int PointsReseller { get; set; }
+    public string SendMsgBy { get; set; }
+    public string AdsCardSms { get; set; }
+    public string AdsCardWhatsapp { get; set; }
+} 
