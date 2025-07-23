@@ -1,9 +1,11 @@
+@attribute [Authorize]
 @page "/Account/Manage"
+@using Microsoft.AspNetCore.Authorization
 @inject NavigationManager NavigationManager
 
 @code {
-    protected override void OnInitialized()
+    protected override void OnInitialized( )
     {
-        NavigationManager.NavigateTo("/Account/Manage/Profile", true);
+        NavigationManager.NavigateTo("/Account/Manage/Profile" , true);
     }
 } 

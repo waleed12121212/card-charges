@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using BlazingPizza.Shared.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,8 @@ builder.Services.AddRazorComponents()
 // Add Security
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options => {
+    .AddCookie(options =>
+    {
         options.LoginPath = "/Account/Login";
         options.LogoutPath = "/Account/Logout";
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
@@ -47,7 +49,14 @@ builder.Services.AddScoped<OrderState>();
 builder.Services.AddScoped<ICarrierRepository , CarrierRepository>();
 builder.Services.AddScoped<IOrderRepository , OrderRepository>();
 builder.Services.AddScoped<INotificationRepository , NotificationRepository>();
-builder.Services.AddScoped<IRefillCardRepository, RefillCardRepository>();
+builder.Services.AddScoped<IRefillCardRepository , RefillCardRepository>();
+builder.Services.AddScoped<IRechargeRepository , RechargeRepository>();
+builder.Services.AddScoped<ITransactionRepository , TransactionRepository>();
+builder.Services.AddScoped<HttpClient>(sp =>
+{
+    var navigationManager = sp.GetRequiredService<Microsoft.AspNetCore.Components.NavigationManager>();
+    return new HttpClient { BaseAddress = new Uri(navigationManager.BaseUri) };
+});
 
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();

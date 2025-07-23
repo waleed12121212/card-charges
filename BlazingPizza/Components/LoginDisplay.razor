@@ -13,10 +13,14 @@
             <a href="Account/Manage" class="username">@UserNameDisplay</a>
             <a href="Account/Logout" class="btn btn-link sign-out">تسجيل الخروج</a>
         </div>
+        var isAdmin = HttpContextAccessor.HttpContext.User?.IsInRole("Admin") == true;
+        if (isAdmin)
+        {
+            <a class="sign-in" href="Account/Register">انشاء حساب</a>
+        }
     }
     else
     {
-        <a class="sign-in" href="Account/Register">انشاء حساب</a>
         <a class="sign-in" href="Account/Login">تسجيل الدخول</a>
     }
 </div>

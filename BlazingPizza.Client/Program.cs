@@ -6,6 +6,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.Authorization;
+using BlazingPizza.Shared.Interfaces;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -17,10 +18,12 @@ builder.Services.AddScoped<HttpClient>(sp =>
     });
 
 builder.Services.AddScoped<OrderState>();
-builder.Services.AddScoped<IRefillCardRepository, HttpRefillCardRepository>();
-builder.Services.AddScoped<IOrderRepository, HttpOrderRepository>();
-builder.Services.AddScoped<ICarrierRepository, HttpCarrierRepository>();
-builder.Services.AddScoped<INotificationRepository, HttpNotificationRepository>();
+builder.Services.AddScoped<IRefillCardRepository , HttpRefillCardRepository>();
+builder.Services.AddScoped<IOrderRepository , HttpOrderRepository>();
+builder.Services.AddScoped<ICarrierRepository , HttpCarrierRepository>();
+builder.Services.AddScoped<INotificationRepository , HttpNotificationRepository>();
+builder.Services.AddScoped<ITransactionRepository , HttpTransactionRepository>();
+builder.Services.AddScoped<IRechargeRepository , HttpRechargeRepository>();
 
 // Add Security
 builder.Services.AddAuthorizationCore();

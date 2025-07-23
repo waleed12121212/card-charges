@@ -21,17 +21,16 @@
             <label class="login-form-label" for="password">كلمة المرور</label>
             <InputText type="password" @bind-Value="Input.Password" class="login-input" autocomplete="current-password" aria-required="true" placeholder="كلمة المرور" />
             <ValidationMessage For="() => Input.Password" class="text-danger" />
+            <div style="margin-bottom: 1.2rem; display: flex; align-items: center;">
+                <input type="checkbox" id="rememberMe" @bind="Input.RememberMe" style="margin-left: 0.5rem; width: 1.1rem; height: 1.1rem;" />
+                <label for="rememberMe" style="margin: 0; font-size: 1rem; cursor: pointer;">تذكرني</label>
+            </div>
             <button type="submit" class="login-btn">تسجيل دخول</button>
             @if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 <div class="text-danger">@ErrorMessage</div>
             }
         </EditForm>
-    </div>
-    <div class="login-right">
-        <div class="login-right-title">مرحباً بعودتك</div>
-        <div class="login-right-desc">ليس لديك حساب؟</div>
-        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))" class="login-signup-btn">إنشاء حساب</a>
     </div>
 </div>
 
@@ -49,7 +48,6 @@
         var user = await Db.Users.FirstOrDefaultAsync(u => u.UserName == Input.UserName);
         if (user is not null && BCrypt.Verify(Input.Password , user.PasswordHash))
         {
-            // تسجيل الدخول باستخدام كوكيز المصادقة
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
@@ -67,7 +65,7 @@
                 new ClaimsPrincipal(claimsIdentity) ,
                 authProperties
             );
-            NavigationManager.NavigateTo(ReturnUrl ?? "/" , true); // forceLoad لإعادة تحميل الصفحة
+            NavigationManager.NavigateTo(ReturnUrl ?? "/" , true);
         }
         else
         {

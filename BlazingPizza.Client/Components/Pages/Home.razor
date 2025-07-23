@@ -1,4 +1,5 @@
-﻿@page "/"
+﻿@attribute [Authorize]
+@page "/"
 @rendermode InteractiveWebAssembly
 @inject ICarrierRepository CarrierRepository
 @inject IJSRuntime JSRuntime
@@ -6,11 +7,181 @@
 @inject IRefillCardRepository RefillCardRepository
 @inject OrderState OrderState
 @inject IOrderRepository OrderRepository
+@inject ITransactionRepository TransactionRepository
 @using System.Security.Claims
+@using BlazingPizza.Shared.Interfaces
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
 
 <PageTitle>الرئيسية</PageTitle>
+
+<!-- Main Section Selector -->
+@if (selectedSection == null)
+{
+    <div class="main-section-selector" style="background: none;">
+        <div class="card" style="width: 18rem;  cursor: pointer; @(selectedSection == "carrier" ? "active" : "")" @onclick="@(() => SelectSection("carrier"))">
+            <img class="card-img-top" src="img/home/product.jpg" alt="البضائع الالكترونية">
+            <div class="card-body @(selectedSection == "carrier" ? "active" : "")">
+                <h5 class="card-title">البضائع الالكترونية</h5>
+            </div>
+        </div>
+        <div class="card" style="width: 18rem; cursor: pointer;  @(selectedSection == "carrier" ? "active" : "")" @onclick="@(() => SelectSection("recharge"))">
+            <img class="card-img-top" src="img/home/refillbalance.png" alt="شحن رصيد">
+            <div class="card-body @(selectedSection == "recharge" ? "active" : "")">
+                <h5 class="card-title">شحن رصيد</h5>
+            </div>
+        </div>
+        <div class="card" style="width: 18rem;  cursor: pointer; @(selectedSection == "internet" ? "active" : "")" @onclick="@(() => SelectSection("internet"))">
+            <img class="card-img-top" src="img/home/3G.png" alt="حزم الانترنت">
+            <div class="card-body @(selectedSection == "internet" ? "active" : "")">
+                <h5 class="card-title">حزم الانترنت</h5>
+            </div>
+        </div>
+    </div>
+}
+else if (selectedSection == "carrier")
+{
+    <div class="main">
+        <button class="btn btn-outline-secondary mb-4" @onclick="BackToMainMenu">&larr; رجوع للقائمة الرئيسية</button>
+        @if (selectedCarrier == null)
+        {
+            <!-- Carrier Selection View -->
+            <div class="carrier-view @(showCarriers ? "show" : "")">
+                <ul class="pizza-cards">
+                    @if (carriers is not null)
+                    {
+                        @foreach (var carrier in carriers)
+                        {
+                            <li @onclick="@(() => SelectCarrier(carrier))" style="cursor: pointer;">
+                                <div class="card-content">
+                                    <img src="@($"img/carrier/{carrier.imageName}")" alt="@carrier.carrierName" class="card-logo" />
+                                    <div class="pizza-info">
+                                        <span class="title">@carrier.carrierName</span>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        }
+        else
+        {
+            <!-- Refill Cards View -->
+            <div class="refill-cards-view @(showRefillCards ? "show" : "")">
+                <button class="btn btn-outline-secondary mb-4" @onclick="GoBackToCarriers">&larr; رجوع للشركات</button>
+                <h2 class="carrier-title">@selectedCarrier?.carrierName - بطاقات الشحن</h2>
+                <ul class="pizza-cards">
+                    @if (refillCards == null)
+                    {
+                        <li><p>جاري التحميل...</p></li>
+                    }
+                    else if (!refillCards.Any())
+                    {
+                        <li><p>لا توجد بطاقات شحن متاحة لهذه الشركة.</p></li>
+                    }
+                    else
+                    {
+                        @foreach (var card in refillCards)
+                        {
+                            <li @onclick="@(() => ShowDialog(card))" style="cursor: pointer;">
+                                <div class="card-content">
+                                    <img src="@GetRefillCardImagePath(card)" alt="@card.ProductName" class="card-logo" />
+                                    <div class="pizza-info">
+                                        <span class="title">@card.ProductName</span>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+}
+else if (selectedSection == "recharge")
+{
+    <div class="recharge-card">
+        <button class="btn btn-outline-secondary mb-4" style="margin-bottom:2rem;width:100%;font-size:1.1rem;" @onclick="BackToMainMenu">&larr; رجوع للقائمة الرئيسية</button>
+        <div class="recharge-inner">
+            <div class="recharge-title">شحن رصيد</div>
+            @if (!string.IsNullOrEmpty(rechargeMessage))
+            {
+                <div class="@(rechargeSuccess ? "recharge-success" : "recharge-error")">@rechargeMessage</div>
+            }
+            <div>
+                <div class="recharge-section-title">اختر الشريحة</div>
+                <div class="recharge-operators">
+                    <button class="recharge-operator-btn @(selectedOperator == "Jawwal" ? "selected" : "")" @onclick="@(() => SelectOperator("Jawwal"))">
+                        <img src="img/recharge-balance/Jawwal.png" alt="Jawwal" />
+                        <span>جوال</span>
+                    </button>
+                    <button class="recharge-operator-btn @(selectedOperator == "Ooredoo" ? "selected" : "")" @onclick="@(() => SelectOperator("Ooredoo"))">
+                        <img src="img/recharge-balance/ooredoo.png" alt="Ooredoo" />
+                        <span>اوريدو</span>
+                    </button>
+                    <button class="recharge-operator-btn @(selectedOperator == "Cellcom" ? "selected" : "")" @onclick="@(() => SelectOperator("Cellcom"))">
+                        <img src="img/recharge-balance/celecom.png" alt="Cellcom" />
+                        <span>سيليكوم</span>
+                    </button>
+                </div>
+            </div>
+            <div>
+                <div class="recharge-section-title">اختر قيمة الشحن</div>
+                <div class="recharge-amounts">
+                    @foreach (var amount in rechargeAmounts)
+                    {
+                        <button class="recharge-amount-btn @(selectedAmount == amount && !isCustomAmount ? "selected" : "")" @onclick="() => SelectAmount(amount)">
+                            @amount شيكل
+                        </button>
+                    }
+                </div>
+                <div class="recharge-custom-amount">
+                    <label class="recharge-custom-label" for="customAmount">المبلغ</label>
+                    <input id="customAmount" class="recharge-custom-input @(isCustomAmount ? "selected" : "")" type="number" min="1" step="1" @bind="customAmount" @onfocus="SetCustomAmountSelected" @oninput="SetCustomAmountSelectedChanged" placeholder="مخصص" />
+                </div>
+            </div>
+            <div>
+                <div class="recharge-section-title">رقم الهاتف</div>
+                <div class="phone-input-wrapper">
+                    <input class="recharge-phone-input @(isPhoneInvalid ? "invalid" : "")"
+                           type="tel"
+                           maxlength="7"
+                           @bind="phoneNumber"
+                           @oninput="ValidatePhone"
+                           placeholder="XXXXXXX" />
+                    <span class="phone-prefix">@phonePrefix</span>
+                </div>
+                @if (isPhoneInvalid)
+                {
+                    <div class="phone-validation-message">
+                        رقم الهاتف غير صحيح. يجب أن يكون بالصيغة (@phonePrefix-XXXXXXX)
+                    </div>
+                }
+            </div>
+            <button class="recharge-submit-btn" @onclick="SubmitRecharge" disabled="@(!IsFormValid() || isLoading )">
+                @if (isLoading)
+                {
+                    <span>جاري الشحن...</span>
+                }
+                else
+                {
+                    <span>شحن الرصيد</span>
+                }
+            </button>
+        </div>
+    </div>
+}
+else if (selectedSection == "internet")
+{
+    <div class="main">
+        <button class="btn btn-outline-secondary mb-4" @onclick="BackToMainMenu">&larr; رجوع للقائمة الرئيسية</button>
+        <h1>حزم الانترنت</h1>
+        <p>قريباً...</p>
+    </div>
+}
 
 <div class="sidebar financial-sidebar">
     <div style="display:flex; gap:1rem; margin-bottom:1rem;">
@@ -24,11 +195,11 @@
     @if (sidebarTab == "financial")
     {
         <h3 style="margin-top:0">سجل الحركات المالية</h3>
-        @if (financialOrders == null)
+        @if (transactions == null)
         {
             <p>جاري تحميل الحركات المالية...</p>
         }
-        else if (!financialOrders.Any())
+        else if (!transactions.Any())
         {
             <p>لا توجد حركات مالية.</p>
         }
@@ -38,23 +209,20 @@
                 <thead>
                     <tr>
                         <th>رقم الحركة</th>
-                        <th>اسم المنتج</th>
+                        <th>الوصف</th>
                         <th>تاريخ الحركة</th>
                         <th>المبلغ</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var order in financialOrders)
+                    @foreach (var t in transactions.OrderByDescending(x => x.Date))
                     {
-                        foreach (var card in order.Order.Cards)
-                        {
-                            <tr>
-                                <td>@order.Order.OrderId</td>
-                                <td>@card.ProductName</td>
-                                <td>@order.Order.CreatedTime.ToString("yyyy/MM/dd HH:mm")</td>
-                                <td>@($"{card.TotalPrice:0.00} ₪")</td>
-                            </tr>
-                        }
+                        <tr>
+                            <td>@t.Id</td>
+                            <td>@t.Description</td>
+                            <td>@t.Date.ToString("yyyy/MM/dd HH:mm")</td>
+                            <td>@($"{t.Amount:0.00} ₪")</td>
+                        </tr>
                     }
                 </tbody>
             </table>
@@ -107,67 +275,6 @@
     }
 </div>
 
-<div class="main">
-    @if (selectedCarrier == null)
-    {
-        <!-- Carrier Selection View -->
-        <div class="carrier-view @(showCarriers ? "show" : "")">
-            <ul class="pizza-cards">
-                @if (carriers is not null)
-                {
-                    @foreach (var carrier in carriers)
-                    {
-                        <li @onclick="@(() => SelectCarrier(carrier))" style="cursor: pointer;">
-                            <div class="card-content">
-                                <img src="@GetCarrierImagePath(carrier.carrierName)" alt="@carrier.carrierName" class="card-logo" />
-                                <div class="pizza-info">
-                                    <span class="title">@carrier.carrierName</span>
-                                </div>
-                            </div>
-                        </li>
-                    }
-                }
-            </ul>
-        </div>
-    }
-    else
-    {
-        <!-- Refill Cards View -->
-        <div class="refill-cards-view @(showRefillCards ? "show" : "")">
-            <div class="back-button-container">
-                <button class="btn btn-secondary back-btn" @onclick="GoBackToCarriers">
-                    <span>← العودة للشركات</span>
-                </button>
-            </div>
-            <h2 class="carrier-title">@selectedCarrier?.carrierName - بطاقات الشحن</h2>
-            <ul class="pizza-cards">
-                @if (refillCards == null)
-                {
-                    <li><p>جاري التحميل...</p></li>
-                }
-                else if (!refillCards.Any())
-                {
-                    <li><p>لا توجد بطاقات شحن متاحة لهذه الشركة.</p></li>
-                }
-                else
-                {
-                    @foreach (var card in refillCards)
-                    {
-                        <li @onclick="@(() => ShowDialog(card))" style="cursor: pointer;">
-                            <div class="card-content">
-                                <img src="@GetRefillCardImagePath(card)" alt="@card.ProductName" class="card-logo" />
-                                <div class="pizza-info">
-                                    <span class="title">@card.ProductName</span>
-                                </div>
-                            </div>
-                        </li>
-                    }
-                }
-            </ul>
-        </div>
-    }
-</div>
-
 @if (OrderState.ShowingConfigureDialog)
 {
     <div class="dialog-container">
@@ -187,21 +294,41 @@
     bool showRefillCards = false;
     List<OrderWithStatus>? financialOrders;
     string sidebarTab = "financial"; // New state variable for sidebar tab
+    string selectedSection = null;
+    List<Transaction>? transactions;
 
-    protected override async Task OnInitializedAsync()
+    private string selectedOperator = "";
+    private decimal selectedAmount = 0;
+    private string phoneNumber = "";
+    private decimal[] rechargeAmounts = new[] { 5m , 10m , 20m , 50m , 100m , 200m };
+    private decimal customAmount = 0;
+    private bool isCustomAmount = false;
+    private string rechargeMessage = string.Empty;
+    private bool rechargeSuccess = false;
+    private bool isLoading = false;
+    private bool isPhoneInvalid = false;
+    private string phonePrefix = "059";
+
+    protected override async Task OnInitializedAsync( )
     {
         carriers = await CarrierRepository.GetCarriers();
+        // جلب معرف المستخدم الحالي من AuthenticationStateProvider
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(userId))
+        {
+            transactions = await TransactionRepository.GetByUserIdAsync(userId);
+        }
+        else
+        {
+            transactions = new List<Transaction>();
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-            financialOrders = await OrderRepository.GetOrdersAsync();
-            StateHasChanged();
-        }
+        // تم حذف تحميل financialOrders و StateHasChanged()
     }
 
     // Helper method to get carrier image path
@@ -288,5 +415,122 @@
     {
         sidebarTab = tab;
         StateHasChanged();
+    }
+
+    private void SelectOperator(string operatorName)
+    {
+        selectedOperator = operatorName;
+        phoneNumber = "";
+        phonePrefix = operatorName switch
+        {
+            "Jawwal" => "059",
+            "Ooredoo" => "056",
+            "Cellcom" => "052",
+            _ => ""
+        };
+        ValidatePhone();
+    }
+
+    private void SelectAmount(decimal amount)
+    {
+        selectedAmount = amount;
+        isCustomAmount = false;
+        customAmount = 0;
+    }
+
+    private void SetCustomAmountSelected( )
+    {
+        isCustomAmount = true;
+        if (customAmount > 0)
+            selectedAmount = customAmount;
+    }
+    private void SetCustomAmountSelectedChanged(ChangeEventArgs e)
+    {
+        isCustomAmount = true;
+        if (decimal.TryParse(e.Value?.ToString() , out var val))
+        {
+            customAmount = val;
+            selectedAmount = val;
+        }
+    }
+
+    private bool IsFormValid( )
+    {
+        return !string.IsNullOrEmpty(selectedOperator)
+            && selectedAmount > 0
+            && !string.IsNullOrEmpty(phoneNumber);
+    }
+
+    private async Task SubmitRecharge( )
+    {
+        rechargeMessage = string.Empty;
+        rechargeSuccess = false;
+        isLoading = true;
+        try
+        {
+            var rechargeData = new Recharge
+                {
+                    UserId = "" , // سيتم ملؤه في الـ API من المستخدم الحالي
+                    Operator = selectedOperator ,
+                    Amount = selectedAmount ,
+                    PhoneNumber = phonePrefix + phoneNumber , // إرسال الرقم مع البادئة
+                    Date = DateTime.Now
+                };
+            var response = await Http.PostAsJsonAsync("api/recharge" , rechargeData);
+            if (response.IsSuccessStatusCode)
+            {
+                rechargeMessage = "تم شحن الرصيد بنجاح!";
+                rechargeSuccess = true;
+                // إعادة تعيين الحقول
+                selectedOperator = "";
+                selectedAmount = 0;
+                customAmount = 0;
+                isCustomAmount = false;
+                phoneNumber = "";
+            }
+            else
+            {
+                rechargeMessage = "حدث خطأ أثناء الشحن. حاول مرة أخرى.";
+                rechargeSuccess = false;
+            }
+        }
+        catch
+        {
+            rechargeMessage = "تعذر الاتصال بالخادم. حاول لاحقاً.";
+            rechargeSuccess = false;
+        }
+        isLoading = false;
+    }
+
+    private void SelectSection(string section)
+    {
+        selectedSection = section;
+        if (section == "carrier")
+        {
+            selectedCarrier = null;
+            showCarriers = true;
+            showRefillCards = false;
+        }
+    }
+    private void BackToMainMenu( )
+    {
+        selectedSection = null;
+        selectedCarrier = null;
+        showCarriers = true;
+        showRefillCards = false;
+    }
+
+    void ValidatePhone(ChangeEventArgs e = null)
+    {
+        if (e != null)
+            phoneNumber = e.Value?.ToString() ?? "";
+        string pattern = phonePrefix switch
+        {
+            "059" => @"^059\d{7}$",
+            "056" => @"^056\d{7}$",
+            "052" => @"^052\d{7}$",
+            _ => @"^05\d{8}$"
+        };
+        isPhoneInvalid = !System.Text.RegularExpressions.Regex.IsMatch(phonePrefix + phoneNumber , pattern);
     }
 }

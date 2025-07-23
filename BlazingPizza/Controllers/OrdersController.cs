@@ -77,6 +77,23 @@ public class OrdersController : Controller
         _db.Orders.Attach(order);
         await _db.SaveChangesAsync();
 
+        // إضافة حركة مالية لكل بطاقة شحن في الطلب
+        foreach (var card in order.Cards)
+        {
+            var transaction = new Transaction
+            {
+                UserId = order.UserId!,
+                OrderId = order.OrderId,
+                RefillCardOrderId = card.Id,
+                Amount = (decimal)card.TotalPrice,
+                Type = "شراء بطاقة شحن",
+                Description = $"شراء بطاقة {card.ProductName} - كمية {card.Quantity}",
+                Date = DateTime.Now
+            };
+            _db.Transactions.Add(transaction);
+        }
+        await _db.SaveChangesAsync();
+
         // In the background, send push notifications if possible
         var subscription = await _db.NotificationSubscriptions.Where(e => e.UserId == PizzaApiExtensions.GetUserId(HttpContext)).SingleOrDefaultAsync();
         if (subscription != null)

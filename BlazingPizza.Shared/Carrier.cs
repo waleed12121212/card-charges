@@ -13,4 +13,5 @@ public class Carrier
     public bool AdsSendSMS { get; set; }
     public bool AdsSendWP { get; set; }
     public int? InvoiceCategory { get; set; }
-} 
+    public string imageName { get; set; }
+}

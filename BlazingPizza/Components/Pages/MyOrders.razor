@@ -1,45 +1,47 @@
-﻿@page "/myorders"
+﻿@attribute [Authorize]
+@page "/myorders"
 @using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
 @inject IOrderRepository OrderRepository
 
 <PageTitle>GameCharge - My Orders</PageTitle>
 
 <div class="main">
-	<TemplatedList Loader="LoadOrders" ListGroupClass="orders-list">
-		<Loading>Loading...</Loading>
-		<Empty>
-			<h2>No orders found</h2>
-			<a class="btn btn-success" href="">Order a refill card</a>
-		</Empty>
-		<Item Context="item">
-			<div class="col">
-				<h5>@item.Order.CreatedTime.ToLongDateString()</h5>
-				Cards count:
-				<strong>@item.Order.Cards.Count()</strong>;
-				Total:
-				<strong>@item.Order.TotalPrice ₪</strong>
-			</div>
-			<div class="col">
-				Status: <strong>@item.StatusText</strong>
-			</div>
-			<div class="col flex-grow-0">
-				<a href="myorders/@item.Order.OrderId" class="btn btn-success">
-					Track &gt;
-				</a>
-			</div>
-		</Item>
-	</TemplatedList>
+    <TemplatedList Loader="LoadOrders" ListGroupClass="orders-list">
+        <Loading>Loading...</Loading>
+        <Empty>
+            <h2>No orders found</h2>
+            <a class="btn btn-success" href="">Order a refill card</a>
+        </Empty>
+        <Item Context="item">
+            <div class="col">
+                <h5>@item.Order.CreatedTime.ToLongDateString()</h5>
+                Cards count:
+                <strong>@item.Order.Cards.Count()</strong>;
+                Total:
+                <strong>@item.Order.TotalPrice ₪</strong>
+            </div>
+            <div class="col">
+                Status: <strong>@item.StatusText</strong>
+            </div>
+            <div class="col flex-grow-0">
+                <a href="myorders/@item.Order.OrderId" class="btn btn-success">
+                    Track &gt;
+                </a>
+            </div>
+        </Item>
+    </TemplatedList>
 </div>
 @code {
-	IEnumerable<OrderWithStatus>? ordersWithStatus;
+    IEnumerable<OrderWithStatus>? ordersWithStatus;
 
-	[CascadingParameter]
-	public HttpContext HttpContext { get; set; } = default!;
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; } = default!;
 
-	async Task<IEnumerable<OrderWithStatus>> LoadOrders()
-	{
-		var ordersWithStatus = Enumerable.Empty<OrderWithStatus>();
-		ordersWithStatus = await OrderRepository.GetOrdersAsync(HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
-		return ordersWithStatus;
-	}
+    async Task<IEnumerable<OrderWithStatus>> LoadOrders( )
+    {
+        var ordersWithStatus = Enumerable.Empty<OrderWithStatus>();
+        ordersWithStatus = await OrderRepository.GetOrdersAsync(HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+        return ordersWithStatus;
+    }
 }

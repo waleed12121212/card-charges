@@ -24,7 +24,7 @@ body {
     padding-top: 5rem;
     flex-direction: column;
     font-family: 'quicksand';
-    overflow-y: hidden;
+    /* overflow-y: hidden; */
     background: var(--bg-100);
     color: var(--text-100);
 }
@@ -468,7 +468,7 @@ form {
 }
 
 .checkout-button:hover {
-    background: #45a049;
+    background:ar(--accent-200);
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0,0,0,0.3);
 }
@@ -1199,7 +1199,8 @@ form {
     overflow: hidden;
     background: #fff;
     margin: 3rem auto;
-    max-width: 800px;
+    max-width: 400px;
+    width: 100%;
 }
 
 .login-left {
@@ -1985,11 +1986,11 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     }
 
     .dialog {
-        width: 100%;
-        height: 100%;
+        width: 40%;
+        height: 45%;
         margin: 0;
         border-radius: 0;
-        max-height: 100%;
+        max-height: 45%;
     }
 
     .dialog-title {
@@ -2478,6 +2479,14 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
 .financial-sidebar .table {
     color: #333;
     background: #fff;
+    width: 340px;
+    min-width: 320px;
+    max-width: 360px;
+    margin: 0 auto 1.5rem auto;
+    box-shadow: 0 2px 8px #0001;
+    border-radius: 12px;
+    z-index: 1;
+    position: relative;
 }
 
 .financial-sidebar .table th {
@@ -3050,48 +3059,23 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     .login-container {
         flex-direction: column;
         min-height: unset;
-        margin: 1rem auto;
-        max-width: 98vw;
-        border-radius: 10px;
-        box-shadow: 0 0 8px rgba(0,0,0,0.08);
+        margin: 0.7rem auto;
+        max-width: 99vw;
+        border-radius: 8px;
+        box-shadow: 0 0 6px rgba(0,0,0,0.08);
     }
     .login-left, .login-right {
-        padding: 1.2rem 1rem;
+        padding: 0.7rem 0.5rem;
         border-radius: 0;
-    }
-    .login-title, .login-right-title {
-        font-size: 1.3rem;
-    }
-    .login-btn, .login-signup-btn {
-        font-size: 1rem;
-        padding: 0.7rem 0;
-    }
-    .login-input {
-        font-size: 0.95rem;
-        padding: 0.6rem 0.8rem;
-        border-radius: 16px;
     }
 }
 @media (max-width: 400px) {
     .login-container {
-        margin: 0.3rem auto;
+        margin: 0.1rem auto;
         border-radius: 0;
     }
     .login-left, .login-right {
-        padding: 0.7rem 0.3rem;
-    }
-    .login-title, .login-right-title {
-        font-size: 1.05rem;
-    }
-    .login-btn, .login-signup-btn {
-        font-size: 0.9rem;
-        padding: 0.5rem 0;
-        border-radius: 12px;
-    }
-    .login-input {
-        font-size: 0.85rem;
-        padding: 0.4rem 0.5rem;
-        border-radius: 10px;
+        padding: 0.3rem 0.1rem;
     }
 }
 
@@ -3260,5 +3244,495 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         padding: 1.2rem 0.5rem;
         border-radius: 10px;
     }
+}
+
+/* Main Section Selector (Home Page) */
+.main-section-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin: 0;
+    margin-left: 22rem;
+    width: 100vw;
+    height: 100vh;
+    padding: 0;
+    text-align: center;
+    background: #fcfcf7;
+}
+.main-section-btn {
+    width: 200px;
+    height: 220px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #8fd14f 0%, #4fcf70 100%);
+    box-shadow: 0 4px 16px 0 rgba(79,207,112,0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 24px;
+    padding: 0 0 18px 0;
+    position: relative;
+    overflow: visible;
+    border: none;
+    transition: box-shadow 0.22s, transform 0.18s;
+    cursor: pointer;
+}
+
+.main-section-btn .card-logo {
+    width: 70px;
+    height: 70px;
+    background: #fff;
+    border-radius: 50%;
+    margin-top: 24px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px #0001;
+    object-fit: contain;
+    padding: 12px;
+}
+
+.main-section-btn .card-title {
+    width: 100%;
+    background: #fff;
+    color: #4fcf70;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-align: center;
+    margin-top: auto;
+    padding: 12px 0 8px 0;
+    box-shadow: 0 2px 8px #0001;
+}
+
+.main-section-btn:hover {
+    box-shadow: 0 16px 40px 0 rgba(0,102,140,0.18), 0 0 0 4px var(--accent-100);
+    border: 2.5px solid var(--accent-100);
+    transform: translateY(-10px) scale(1.05);
+    z-index: 3;
+}
+.main-section-btn .card-logo {
+    box-shadow: 0 8px 32px 0 rgba(0,102,140,0.18);
+    transform: scale(1.09) rotate(-6deg);
+}
+.main-section-btn .card-title {
+    margin-top: 18px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--accent-200);
+    letter-spacing: 0.5px;
+    text-align: center;
+    text-shadow: 0 2px 8px #fff8;
+    background: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+}
+.card-electronic {
+    background: linear-gradient(135deg, #e3f0fa 0%, #b6ccd8 100%);
+}
+.card-internet {
+    background: linear-gradient(135deg, #e3fae8 0%, #b6f8c6 100%);
+}
+.card-balance {
+    background: linear-gradient(135deg, #e3f6fa 0%, #b6e6f8 100%);
+}
+@media (max-width: 900px) {
+    .main-section-selector {
+        flex-direction: column;
+        height: 100vh;
+        gap: 1.5rem;
+    }
+    .main-section-btn {
+        min-height: 120px;
+        font-size: 1.3rem;
+    }
+    .main-section-btn i {
+        font-size: 2.5rem !important;
+    }
+    .main-section-btn div {
+        font-size: 1.3rem;
+    }
+}
+
+/* Recharge Balance Page Modern Design - Enhanced */
+.recharge-card {
+    width: 100vw;
+    min-height: 100vh;
+    max-width: 100vw;
+    margin: 0;
+    background: var(--bg-100);
+    border-radius: 0;
+    box-shadow: none;
+    padding: 3rem 0 2rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+    justify-content: flex-start;
+    margin-left: 22rem;
+}
+@media (max-width: 600px) {
+    .recharge-card {
+        padding: 1.2rem 0.2rem 1rem 0.2rem;
+        margin-left: 0;
+    }
+}
+.recharge-title {
+    font-size: 2.1rem;
+    font-weight: bold;
+    color: var(--accent-200);
+    margin-bottom: 1.2rem;
+    text-align: center;
+}
+.recharge-section-title {
+    font-size: 1.1rem;
+    color: var(--primary-300);
+    margin-bottom: 0.7rem;
+    font-weight: 600;
+    text-align: center;
+}
+.recharge-operators {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+}
+.recharge-operator-btn {
+    background: #fff !important;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    color: var(--text-100);
+    box-shadow: 0 2px 8px #0001;
+    transition: border 0.2s, box-shadow 0.2s;
+    min-width: 90px;
+    padding: 1rem 0.7rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+.recharge-operator-btn.selected, .recharge-operator-btn:hover {
+    border-color: var(--accent-200);
+    box-shadow: 0 4px 16px #00668c11;
+    background: #fff !important;
+    color: var(--accent-200);
+}
+.recharge-operator-btn img {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.5rem;
+}
+.recharge-amounts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+.recharge-amount-btn {
+    background: #fff !important;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    color: var(--text-100);
+    box-shadow: 0 2px 8px #0001;
+    transition: border 0.2s, box-shadow 0.2s;
+    padding: 0.8rem 1.2rem;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+.recharge-amount-btn.selected, .recharge-amount-btn:hover {
+    border-color: var(--accent-200);
+    box-shadow: 0 4px 16px #00668c11;
+    background: #fff !important;
+    color: var(--accent-200);
+}
+.recharge-custom-amount {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    justify-content: center;
+}
+.recharge-custom-input {
+    background: #fff !important;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    color: var(--text-100);
+    box-shadow: 0 2px 8px #0001;
+    transition: border 0.2s, box-shadow 0.2s;
+    text-align: center;
+    padding: 0.8rem 1.2rem;
+    font-size: 1.1rem;
+}
+.recharge-custom-input.selected, .recharge-custom-input:focus {
+    border-color: var(--accent-200);
+    box-shadow: 0 4px 16px #00668c11;
+    background: #fff !important;
+    color: var(--accent-200);
+}
+.recharge-custom-label {
+    font-size: 1rem;
+    color: var(--primary-300);
+    font-weight: 600;
+    margin-right: 0.3rem;
+}
+.recharge-phone-input {
+    background: #fff !important;
+    color: var(--text-100);
+    border: 2px solid #eee;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px #00668c11;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    width: 100%;
+    padding: 1.2rem 1.5rem;
+    text-align: center;
+    transition: border 0.2s, box-shadow 0.2s;
+    outline: none;
+}
+.recharge-phone-input:focus {
+    border-color: var(--accent-200);
+    box-shadow: 0 4px 24px #00668c22;
+}
+.recharge-phone-input.invalid {
+    border-color: #dc3545;
+    box-shadow: 0 2px 12px #dc354522;
+}
+.phone-validation-message {
+    color: #dc3545;
+    font-size: 1rem;
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 600;
+}
+.recharge-submit-btn {
+    width: 100%;
+    padding: 1.1rem;
+    background: linear-gradient(90deg, var(--accent-200) 0%, var(--accent-100) 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 1rem;
+    box-shadow: 0 2px 8px #b6ccd822;
+}
+.recharge-submit-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.card-electronic {
+    background: #f8b6e0;
+}
+.card-internet {
+    background: #b6f8c6;
+}
+.card-balance {
+    background: #b6e6f8;
+}
+.main-section-btn {
+    border-radius: 16px;
+    box-shadow: 0 2px 8px #0002;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
+    min-height: 160px;
+    padding: 18px 8px 12px 8px;
+    margin: 8px;
+    transition: box-shadow 0.2s, transform 0.2s;
+    cursor: pointer;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+.main-section-btn:hover {
+    box-shadow: 0 6px 16px #0003;
+    transform: scale(1.04);
+}
+.card-logo {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    margin-top: 4px;
+}
+
+.phone-input-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 1rem;
+    flex-direction: row-reverse;
+}
+.phone-prefix {
+    background: #f5f4f1;
+    border: 2px solid #eee;
+    border-radius: 0 16px 16px 0;
+    padding: 1.2rem 1.1rem;
+    font-size: 1.2rem;
+    color: #313d44;
+    border-left: none;
+    font-weight: bold;
+    min-width: 60px;
+    text-align: center;
+}
+.recharge-phone-input {
+    border-radius: 16px 0 0 16px;
+    border-right: none;
+    flex: 1;
+    text-align: left;
+    direction: ltr;
+}
+
+.phone-input-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+.phone-prefix-inside {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 1.1rem;
+    font-weight: bold;
+    pointer-events: none;
+    letter-spacing: 1px;
+    display: none;
+}
+.phone-prefix {
+    background: #f5f4f1;
+    border: 2px solid #eee;
+    border-right: none;
+    border-radius: 16px 0 0 16px;
+    padding: 0 1.2rem;
+    font-size: 1.2rem;
+    color: #313d44;
+    font-weight: bold;
+    min-width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    line-height: 48px;
+    box-sizing: border-box;
+}
+.recharge-phone-input {
+    border-radius: 0 16px 16px 0;
+    border-left: none;
+    flex: 1;
+    text-align: left;
+    direction: ltr;
+    height: 48px;
+    line-height: 48px;
+    border: 2px solid #eee;
+    font-size: 1.2rem;
+    background: #fff;
+    color: var(--text-100);
+    box-shadow: 0 2px 12px #00668c11;
+    transition: border 0.2s, box-shadow 0.2s;
+    outline: none;
+    padding: 0 1.2rem;
+    margin: 0;
+    box-sizing: border-box;
+}
+.phone-input-wrapper .recharge-phone-input:focus {
+    border-color: var(--accent-200);
+    z-index: 2;
+}
+.phone-input-wrapper .phone-prefix {
+    border-color: #eee;
+    z-index: 1;
+}
+
+/* === Home Modern Cards === */
+.home-card {
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.10);
+    border-radius: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between; /* توزيع منطقي للصورة والنص */
+    width: 340px;
+    height: 260px; /* ارتفاع موحد ومنطقي */
+    min-height: 220px;
+    max-height: 320px;
+    margin: 1.5rem;
+    transition: box-shadow 0.22s, border 0.18s, transform 0.18s;
+    border: 2.5px solid transparent;
+    cursor: pointer;
+    padding: 1.5rem 1rem 1.2rem 1rem;
+}
+.home-card:hover {
+    box-shadow: 0 8px 32px 0 rgba(0,102,140,0.18), 0 0 0 4px var(--accent-100);
+    border: 2.5px solid var(--accent-100);
+    transform: translateY(-8px) scale(1.04);
+    z-index: 3;
+}
+.home-card.active {
+    box-shadow: 0 8px 32px 0 rgba(0,102,140,0.22), 0 0 0 4px var(--accent-200);
+    border: 2.5px solid var(--accent-200);
+    z-index: 4;
+    transform: scale(1.05);
+}
+.home-card-img-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: radial-gradient(circle, #eaf6fd 60%, #fff 100%);
+    width: 120px;
+    height: 120px;
+    margin-bottom: 1.5rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 24px 0 rgba(0,102,140,0.10);
+    border: 3px solid #eaf6fd;
+    transition: box-shadow 0.18s, border 0.18s;
+}
+.home-card-img-wrapper.active {
+    box-shadow: 0 0 0 8px var(--accent-100), 0 8px 32px 0 rgba(0,102,140,0.18);
+    border: 3px solid var(--accent-200);
+}
+.home-card-title {
+    font-family: 'Bahnschrift', Arial, Helvetica, sans-serif;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #222;
+    text-align: center;
+    letter-spacing: 1px;
+    margin-top: 0.5rem;
+}
+
+.order-review {
+    width: 340px;
+    min-width: 320px;
+    max-width: 360px;
+    margin: 0 auto 1.5rem auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px #0001;
+    z-index: 1;
+    position: relative;
+    padding: 1.5rem;
+}
+
+/* معالجة مشكلة ظهور البطاقة خلف الجدول */
+.financial-sidebar {
+    z-index: 10;
 }
 

@@ -4,6 +4,7 @@ using BlazingPizza;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazingPizza.Migrations
 {
     [DbContext(typeof(PizzaStoreContext))]
-    partial class PizzaStoreContextModelSnapshot : ModelSnapshot
+    [Migration("20250720190323_addRechargeandTransaction")]
+    partial class addRechargeandTransaction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -196,9 +199,6 @@ namespace BlazingPizza.Migrations
                     b.Property<int?>("RechargeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RefillCardOrderId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -212,8 +212,6 @@ namespace BlazingPizza.Migrations
                     b.HasIndex("OrderId");
 
                     b.HasIndex("RechargeId");
-
-                    b.HasIndex("RefillCardOrderId");
 
                     b.ToTable("Transactions");
                 });
@@ -255,10 +253,6 @@ namespace BlazingPizza.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("carrierName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("imageName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -457,16 +451,9 @@ namespace BlazingPizza.Migrations
                         .HasForeignKey("RechargeId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("BlazingPizza.Shared.RefillCardOrder", "RefillCardOrder")
-                        .WithMany()
-                        .HasForeignKey("RefillCardOrderId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("Order");
 
                     b.Navigation("Recharge");
-
-                    b.Navigation("RefillCardOrder");
                 });
 
             modelBuilder.Entity("RefillCard", b =>
