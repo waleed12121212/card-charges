@@ -92,31 +92,31 @@ form {
         padding-bottom: 55vh !important; /* Add padding to account for bottom sidebar */
         padding-top: 1rem !important;
     }
-    
+
     .pizza-cards {
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         grid-gap: 0.8rem;
         padding: 0.5rem;
     }
-    
-    .pizza-cards > li {
-        min-width: 120px;
-        min-height: 140px;
-        padding: 8px 4px 4px 4px;
-        margin: 4px;
-    }
-    
+
+        .pizza-cards > li {
+            min-width: 120px;
+            min-height: 140px;
+            padding: 8px 4px 4px 4px;
+            margin: 4px;
+        }
+
     .card-logo {
         width: 70px;
         height: 70px;
         margin-bottom: 6px;
     }
-    
+
     .pizza-info .title {
         font-size: 0.85rem;
         margin-bottom: 2px;
     }
-    
+
     .pizza-info .price {
         font-size: 0.8rem;
     }
@@ -311,9 +311,9 @@ form {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.order-total.hidden {
-    transform: translate3d(0, 4rem, 0);
-}
+    .order-total.hidden {
+        transform: translate3d(0, 4rem, 0);
+    }
 
     .order-total .total-price {
         font-weight: 700;
@@ -342,15 +342,15 @@ form {
         letter-spacing: 0.5px;
     }
 
-    .order-total .btn:hover {
-        transform: scale(1.02);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-        background: #45a049;
-    }
+        .order-total .btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            background: #45a049;
+        }
 
-    .order-total .btn:active {
-        transform: scale(0.98);
-    }
+        .order-total .btn:active {
+            transform: scale(0.98);
+        }
 
 /* Responsive sizing for order total */
 @media (max-width: 1200px) {
@@ -359,16 +359,16 @@ form {
         font-size: 1.1rem;
         padding: 0 1.2rem;
     }
-    
-    .order-total .total-price {
-        font-size: 1.3rem;
-    }
-    
-    .order-total .btn {
-        min-width: 110px;
-        padding: 0.35rem 1rem;
-        font-size: 0.95rem;
-    }
+
+        .order-total .total-price {
+            font-size: 1.3rem;
+        }
+
+        .order-total .btn {
+            min-width: 110px;
+            padding: 0.35rem 1rem;
+            font-size: 0.95rem;
+        }
 }
 
 @media (max-width: 992px) {
@@ -379,16 +379,16 @@ form {
         margin: 0 1rem 1rem 1rem;
         width: calc(100% - 2rem);
     }
-    
-    .order-total .total-price {
-        font-size: 1.2rem;
-    }
-    
-    .order-total .btn {
-        min-width: 100px;
-        padding: 0.3rem 0.8rem;
-        font-size: 0.9rem;
-    }
+
+        .order-total .total-price {
+            font-size: 1.2rem;
+        }
+
+        .order-total .btn {
+            min-width: 100px;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.9rem;
+        }
 }
 
 @media (max-width: 768px) {
@@ -399,16 +399,16 @@ form {
         margin: 0 0.8rem 0.8rem 0.8rem;
         width: calc(100% - 1.6rem);
     }
-    
-    .order-total .total-price {
-        font-size: 1.1rem;
-    }
-    
-    .order-total .btn {
-        min-width: 90px;
-        padding: 0.25rem 0.7rem;
-        font-size: 0.85rem;
-    }
+
+        .order-total .total-price {
+            font-size: 1.1rem;
+        }
+
+        .order-total .btn {
+            min-width: 90px;
+            padding: 0.25rem 0.7rem;
+            font-size: 0.85rem;
+        }
 }
 
 @media (max-width: 576px) {
@@ -419,16 +419,16 @@ form {
         margin: 0 0.6rem 0.6rem 0.6rem;
         width: calc(100% - 1.2rem);
     }
-    
-    .order-total .total-price {
-        font-size: 1rem;
-    }
-    
-    .order-total .btn {
-        min-width: 80px;
-        padding: 0.2rem 0.6rem;
-        font-size: 0.8rem;
-    }
+
+        .order-total .total-price {
+            font-size: 1rem;
+        }
+
+        .order-total .btn {
+            min-width: 80px;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.8rem;
+        }
 }
 
 @media (max-width: 400px) {
@@ -439,17 +439,17 @@ form {
         margin: 0 0.5rem 0.5rem 0.5rem;
         width: calc(100% - 1rem);
     }
-    
-    .order-total .total-price {
-        font-size: 0.9rem;
-    }
-    
-    .order-total .btn {
-        min-width: 70px;
-        padding: 0.15rem 0.5rem;
-        font-size: 0.75rem;
-    }
-    }
+
+        .order-total .total-price {
+            font-size: 0.9rem;
+        }
+
+        .order-total .btn {
+            min-width: 70px;
+            padding: 0.15rem 0.5rem;
+            font-size: 0.75rem;
+        }
+}
 
 .checkout-button {
     margin: auto;
@@ -467,24 +467,24 @@ form {
     transition: all 0.3s ease;
 }
 
-.checkout-button:hover {
-    background:ar(--accent-200);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-}
+    .checkout-button:hover {
+        background: ar(--accent-200);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    }
 
-.checkout-button:active {
-    transform: translateY(0);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-}
+    .checkout-button:active {
+        transform: translateY(0);
+        box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    }
 
-.checkout-button:disabled {
-    background: #cccccc;
-    color: #666666;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
+    .checkout-button:disabled {
+        background: #cccccc;
+        color: #666666;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
 
 /* Responsive sizing for checkout button */
 @media (max-width: 1200px) {
@@ -594,11 +594,11 @@ form {
         padding: 0.7rem 1rem;
         margin-top: 0.8rem;
     }
-    
-    .cart-item li {
-        font-size: 0.75rem;
-    }
-    
+
+        .cart-item li {
+            font-size: 0.75rem;
+        }
+
     .empty-cart {
         font-size: 1.3rem;
     }
@@ -609,15 +609,15 @@ form {
         padding: 0.6rem 0.8rem;
         margin-top: 0.7rem;
     }
-    
-    .cart-item li {
-        font-size: 0.7rem;
-    }
-    
+
+        .cart-item li {
+            font-size: 0.7rem;
+        }
+
     .empty-cart {
         font-size: 1.2rem;
     }
-    
+
     .delete-item {
         width: 1.8rem;
         height: 1.8rem;
@@ -629,15 +629,15 @@ form {
         padding: 0.5rem 0.7rem;
         margin-top: 0.6rem;
     }
-    
-    .cart-item li {
-        font-size: 0.65rem;
-    }
-    
+
+        .cart-item li {
+            font-size: 0.65rem;
+        }
+
     .empty-cart {
         font-size: 1.1rem;
     }
-    
+
     .delete-item {
         width: 1.6rem;
         height: 1.6rem;
@@ -649,15 +649,15 @@ form {
         padding: 0.4rem 0.6rem;
         margin-top: 0.5rem;
     }
-    
-    .cart-item li {
-        font-size: 0.6rem;
-    }
-    
+
+        .cart-item li {
+            font-size: 0.6rem;
+        }
+
     .empty-cart {
         font-size: 1rem;
     }
-    
+
     .delete-item {
         width: 1.4rem;
         height: 1.4rem;
@@ -669,20 +669,20 @@ form {
         padding: 0.3rem 0.5rem;
         margin-top: 0.4rem;
     }
-    
-    .cart-item li {
-        font-size: 0.55rem;
-    }
-    
+
+        .cart-item li {
+            font-size: 0.55rem;
+        }
+
     .empty-cart {
         font-size: 0.9rem;
     }
-    
+
     .delete-item {
         width: 1.2rem;
         height: 1.2rem;
     }
-    }
+}
 
 .configured-pizza-item {
     display: flex;
@@ -772,12 +772,12 @@ form {
     flex-shrink: 0;
 }
 
-.dialog-title h2 {
-    color: #212529;
-    font-size: 1.5rem;
-    margin: 0;
-    font-weight: 600;
-}
+    .dialog-title h2 {
+        color: #212529;
+        font-size: 1.5rem;
+        margin: 0;
+        font-weight: 600;
+    }
 
 .dialog-body {
     flex-grow: 1;
@@ -786,22 +786,22 @@ form {
     min-height: 0;
 }
 
-.dialog-body .form-group {
-    margin-bottom: 1.5rem;
-}
+    .dialog-body .form-group {
+        margin-bottom: 1.5rem;
+    }
 
-.dialog-body label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    color: #495057;
-}
+    .dialog-body label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
 
-.dialog-body .price {
-    font-size: 1.25rem;
-    color: var(--accent-200);
-    font-weight: 600;
-}
+    .dialog-body .price {
+        font-size: 1.25rem;
+        color: var(--accent-200);
+        font-weight: 600;
+    }
 
 .dialog-buttons {
     padding: 1rem 2rem;
@@ -815,30 +815,30 @@ form {
     flex-shrink: 0;
 }
 
-.dialog-buttons button {
-    padding: 0.5rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.2s;
-    min-width: 80px;
-}
+    .dialog-buttons button {
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+        min-width: 80px;
+    }
 
-.dialog-buttons .btn-secondary {
-    background-color: #e9ecef;
-    border: none;
-    color: #495057;
-}
+    .dialog-buttons .btn-secondary {
+        background-color: #e9ecef;
+        border: none;
+        color: #495057;
+    }
 
-.dialog-buttons .btn-success {
-    background-color: var(--accent-200);
-    border: none;
-    color: white;
-}
+    .dialog-buttons .btn-success {
+        background-color: var(--accent-200);
+        border: none;
+        color: white;
+    }
 
-.dialog-buttons button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
+    .dialog-buttons button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
 
 /* Responsive sizing for dialog */
 @media (max-width: 1200px) {
@@ -846,19 +846,19 @@ form {
         max-width: 550px;
         width: 85%;
     }
-    
+
     .dialog-title {
         padding: 1.3rem 1.8rem;
     }
-    
-    .dialog-title h2 {
-        font-size: 1.4rem;
-    }
-    
+
+        .dialog-title h2 {
+            font-size: 1.4rem;
+        }
+
     .dialog-body {
         padding: 1.3rem 1.8rem;
     }
-    
+
     .dialog-buttons {
         padding: 0.9rem 1.8rem;
     }
@@ -869,26 +869,26 @@ form {
         max-width: 500px;
         width: 90%;
     }
-    
+
     .dialog-title {
         padding: 1.2rem 1.5rem;
     }
-    
-    .dialog-title h2 {
-        font-size: 1.3rem;
-    }
-    
+
+        .dialog-title h2 {
+            font-size: 1.3rem;
+        }
+
     .dialog-body {
         padding: 1.2rem 1.5rem;
     }
-    
+
     .dialog-buttons {
         padding: 0.8rem 1.5rem;
     }
-    
-    .dialog-buttons button {
-        padding: 0.4rem 1.2rem;
-    }
+
+        .dialog-buttons button {
+            padding: 0.4rem 1.2rem;
+        }
 }
 
 @media (max-width: 768px) {
@@ -897,27 +897,27 @@ form {
         width: 95%;
         max-height: calc(100% - 2rem);
     }
-    
+
     .dialog-title {
         padding: 1rem 1.3rem;
     }
-    
-    .dialog-title h2 {
-        font-size: 1.2rem;
-    }
-    
+
+        .dialog-title h2 {
+            font-size: 1.2rem;
+        }
+
     .dialog-body {
         padding: 1rem 1.3rem;
     }
-    
+
     .dialog-buttons {
         padding: 0.7rem 1.3rem;
     }
-    
-    .dialog-buttons button {
-        padding: 0.35rem 1rem;
-        font-size: 0.9rem;
-    }
+
+        .dialog-buttons button {
+            padding: 0.35rem 1rem;
+            font-size: 0.9rem;
+        }
 }
 
 @media (max-width: 576px) {
@@ -927,31 +927,31 @@ form {
         max-height: calc(100% - 1rem);
         margin: 0.5rem auto;
     }
-    
+
     .dialog-title {
         padding: 0.8rem 1rem;
     }
-    
-    .dialog-title h2 {
-        font-size: 1.1rem;
-    }
-    
+
+        .dialog-title h2 {
+            font-size: 1.1rem;
+        }
+
     .dialog-body {
         padding: 0.8rem 1rem;
     }
-    
+
     .dialog-buttons {
         padding: 0.6rem 1rem;
         flex-direction: column;
         gap: 0.5rem;
     }
-    
-    .dialog-buttons button {
-        padding: 0.3rem 0.8rem;
-        font-size: 0.85rem;
-        width: 100%;
-        min-width: auto;
-    }
+
+        .dialog-buttons button {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.85rem;
+            width: 100%;
+            min-width: auto;
+        }
 }
 
 @media (max-width: 400px) {
@@ -961,29 +961,29 @@ form {
         margin: 0;
         max-height: 100%;
     }
-    
+
     .dialog-title {
         padding: 0.7rem 0.8rem;
         border-radius: 0;
     }
-    
-    .dialog-title h2 {
-        font-size: 1rem;
-    }
-    
+
+        .dialog-title h2 {
+            font-size: 1rem;
+        }
+
     .dialog-body {
         padding: 0.7rem 0.8rem;
     }
-    
+
     .dialog-buttons {
         padding: 0.5rem 0.8rem;
         border-radius: 0;
     }
-    
-    .dialog-buttons button {
-        padding: 0.25rem 0.7rem;
-        font-size: 0.8rem;
-    }
+
+        .dialog-buttons button {
+            padding: 0.25rem 0.7rem;
+            font-size: 0.8rem;
+        }
 }
 
 /* Improve dialog container for mobile */
@@ -992,12 +992,12 @@ form {
         padding: 0.5rem;
         align-items: flex-start;
     }
-    
+
     .dialog {
         max-height: calc(100vh - 2rem);
         overflow: hidden;
     }
-    
+
     .dialog-body {
         max-height: calc(100vh - 200px);
         overflow-y: auto;
@@ -1009,12 +1009,12 @@ form {
         padding: 0;
         align-items: stretch;
     }
-    
+
     .dialog {
         max-height: 100vh;
         border-radius: 0;
     }
-    
+
     .dialog-body {
         max-height: calc(100vh - 150px);
     }
@@ -1025,21 +1025,21 @@ form {
     .dialog-body .form-group {
         margin-bottom: 1rem;
     }
-    
+
     .dialog-body label {
         font-size: 0.9rem;
         margin-bottom: 0.3rem;
     }
-    
+
     .dialog-body .price {
         font-size: 1.1rem;
     }
-    
+
     .dialog .toppings {
         padding-left: 1rem;
         text-align: center;
     }
-    
+
     .dialog .topping {
         font-size: 0.8rem;
         padding: 0.15rem 0.8rem;
@@ -1051,20 +1051,20 @@ form {
     .dialog-body .form-group {
         margin-bottom: 0.8rem;
     }
-    
+
     .dialog-body label {
         font-size: 0.85rem;
         margin-bottom: 0.25rem;
     }
-    
+
     .dialog-body .price {
         font-size: 1rem;
     }
-    
+
     .dialog .toppings {
         padding-left: 0.5rem;
     }
-    
+
     .dialog .topping {
         font-size: 0.75rem;
         padding: 0.1rem 0.6rem;
@@ -1142,23 +1142,27 @@ form {
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     padding: 1.5rem;
 }
-.order-review table {
-    width: 100%;
-    border-collapse: collapse;
-}
-.order-review th, .order-review td {
-    padding: 0.7rem 1rem;
-    text-align: center;
-}
-.order-review th {
-    background: #f8f9fa;
-    color: #00668c;
-    font-weight: bold;
-}
-.order-review tfoot td {
-    background: #f8f9fa;
-    font-size: 1.1rem;
-}
+
+    .order-review table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .order-review th, .order-review td {
+        padding: 0.7rem 1rem;
+        text-align: center;
+    }
+
+    .order-review th {
+        background: #f8f9fa;
+        color: #00668c;
+        font-weight: bold;
+    }
+
+    .order-review tfoot td {
+        background: #f8f9fa;
+        font-size: 1.1rem;
+    }
 /* --- End Order Review Styling --- */
 
 /* --- Sidebar Order Table Styling --- */
@@ -1170,20 +1174,24 @@ form {
     font-size: 0.98rem;
     margin-bottom: 1rem;
 }
-.sidebar-order-table th, .sidebar-order-table td {
-    padding: 0.4rem 0.5rem;
-    text-align: center;
-    border-bottom: 1px solid #444;
-}
-.sidebar-order-table th {
-    background: none;
-    color: #333;
-    font-weight: bold;
-    font-size: 1rem;
-}
-.sidebar-order-table tr:last-child td {
-    border-bottom: none;
-}
+
+    .sidebar-order-table th, .sidebar-order-table td {
+        padding: 0.4rem 0.5rem;
+        text-align: center;
+        border-bottom: 1px solid #444;
+    }
+
+    .sidebar-order-table th {
+        background: none;
+        color: #333;
+        font-weight: bold;
+        font-size: 1rem;
+    }
+
+    .sidebar-order-table tr:last-child td {
+        border-bottom: none;
+    }
+
 .sidebar-remove-btn {
     padding: 0.2rem 0.7rem;
     font-size: 1rem;
@@ -1237,9 +1245,10 @@ form {
     margin-bottom: 1.2rem;
     transition: background 0.2s;
 }
-.login-btn:hover {
-    background: #005a7a;
-}
+
+    .login-btn:hover {
+        background: #005a7a;
+    }
 
 .login-right {
     flex: 1;
@@ -1275,10 +1284,12 @@ form {
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
 }
-.login-signup-btn:hover {
-    background: #f5f5f5;
-    color: #005a7a;
-}
+
+    .login-signup-btn:hover {
+        background: #f5f5f5;
+        color: #005a7a;
+    }
+
 .login-input {
     width: 100%;
     padding: 0.8rem 1.2rem;
@@ -1291,10 +1302,11 @@ form {
     outline: none;
     transition: box-shadow 0.2s, border 0.2s;
 }
-.login-input:focus {
-    background: var(--bg-200);
-    box-shadow: 0 0 0 2px var(--accent-100);
-}
+
+    .login-input:focus {
+        background: var(--bg-200);
+        box-shadow: 0 0 0 2px var(--accent-100);
+    }
 
 /* Custom Bootstrap button overrides for blue theme */
 .btn-danger {
@@ -1303,11 +1315,11 @@ form {
     color: #fff !important;
 }
 
-.btn-danger:hover {
-    background-color: var(--accent-200) !important;
-    border-color: var(--accent-200) !important;
-    color: #fff !important;
-}
+    .btn-danger:hover {
+        background-color: var(--accent-200) !important;
+        border-color: var(--accent-200) !important;
+        color: #fff !important;
+    }
 
 .btn-warning {
     background-color: var(--accent-100) !important;
@@ -1315,17 +1327,17 @@ form {
     color: var(--text-100) !important;
 }
 
-.btn-warning:hover {
-    background-color: var(--accent-200) !important;
-    border-color: var(--accent-200) !important;
-    color: #fff !important;
-}
+    .btn-warning:hover {
+        background-color: var(--accent-200) !important;
+        border-color: var(--accent-200) !important;
+        color: #fff !important;
+    }
 
-.btn-warning.disabled {
-    background-color: #cccccc !important;
-    border-color: #cccccc !important;
-    color: #666666 !important;
-}
+    .btn-warning.disabled {
+        background-color: #cccccc !important;
+        border-color: #cccccc !important;
+        color: #666666 !important;
+    }
 
 .text-danger {
     color: var(--accent-200) !important;
@@ -1345,10 +1357,10 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     padding-bottom: 2rem;
 }
 
-.carrier-view.show, .refill-cards-view.show {
-    opacity: 1;
-    transform: translateX(0);
-}
+    .carrier-view.show, .refill-cards-view.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
 
 .back-button-container {
     margin-bottom: 2rem;
@@ -1369,10 +1381,10 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     font-weight: 500;
 }
 
-.back-btn:hover {
-    background-color: var(--bg-300);
-    transform: translateX(-2px);
-}
+    .back-btn:hover {
+        background-color: var(--bg-300);
+        transform: translateX(-2px);
+    }
 
 .carrier-title {
     color: var(--text-100);
@@ -1388,20 +1400,20 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     transition: all 0.2s ease-in-out;
 }
 
-.pizza-cards > li:hover {
-    transform: scale(1.03) translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-}
+    .pizza-cards > li:hover {
+        transform: scale(1.03) translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    }
 
-/* Loading animation for refill cards */
-.pizza-cards > li p {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--text-200);
-    font-size: 1.1rem;
-}
+    /* Loading animation for refill cards */
+    .pizza-cards > li p {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--text-200);
+        font-size: 1.1rem;
+    }
 
 /* Responsive design for mobile */
 @media (max-width: 768px) {
@@ -1409,11 +1421,11 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         font-size: 1.5rem;
         margin-bottom: 1.5rem;
     }
-    
+
     .back-button-container {
         margin-bottom: 1.5rem;
     }
-    
+
     .pizza-cards {
         grid-template-columns: repeat(auto-fill, 16rem);
         grid-gap: 1.5rem;
@@ -1431,6 +1443,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         margin: 0;
         z-index: 100;
     }
+
     .main {
         padding-bottom: 5rem !important;
     }
@@ -1454,16 +1467,19 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     position: relative;
     height: auto;
 }
-.pizza-cards > li:hover {
-    box-shadow: 0 4px 16px #0002;
-    transform: scale(1.03);
-}
+
+    .pizza-cards > li:hover {
+        box-shadow: 0 4px 16px #0002;
+        transform: scale(1.03);
+    }
+
 .card-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
 }
+
 .card-logo {
     width: 120px;
     height: 120px;
@@ -1471,6 +1487,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     margin-bottom: 12px;
     margin-top: 8px;
 }
+
 .pizza-info {
     text-align: center;
     position: static;
@@ -1480,17 +1497,19 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     padding: 0;
     margin: 0;
 }
-.pizza-info .title {
-    display: block;
-    font-weight: bold;
-    font-size: 1.1em;
-    margin-bottom: 4px;
-    color: #222;
-}
-.pizza-info .price {
-    color: #888;
-    font-size: 0.95em;
-}
+
+    .pizza-info .title {
+        display: block;
+        font-weight: bold;
+        font-size: 1.1em;
+        margin-bottom: 4px;
+        color: #222;
+    }
+
+    .pizza-info .price {
+        color: #888;
+        font-size: 0.95em;
+    }
 
 .nav-links {
     display: flex;
@@ -1507,36 +1526,36 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     margin-top: 0.5rem;
 }
 
-.quantity-controls button {
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    border-radius: 8px;
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    color: #495057;
-}
+    .quantity-controls button {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        color: #495057;
+    }
 
-.quantity-controls button:not(:disabled):hover {
-    background-color: #e9ecef;
-}
+        .quantity-controls button:not(:disabled):hover {
+            background-color: #e9ecef;
+        }
 
-.quantity-controls button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
+        .quantity-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
-.quantity-controls .quantity {
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: #212529;
-    min-width: 2rem;
-    text-align: center;
-}
+    .quantity-controls .quantity {
+        font-size: 1.25rem;
+        font-weight: 500;
+        color: #212529;
+        min-width: 2rem;
+        text-align: center;
+    }
 
 /* Profile Page Styles */
 .profile-container {
@@ -1560,15 +1579,15 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     overflow: hidden;
 }
 
-.profile-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100%;
-    height: 8px;
-    background: var(--accent-200);
-}
+    .profile-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 8px;
+        background: var(--accent-200);
+    }
 
 .profile-title {
     font-size: 2rem;
@@ -1604,17 +1623,17 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     color: var(--text-100);
 }
 
-.profile-input:focus {
-    border-color: var(--accent-200);
-    box-shadow: 0 0 0 4px rgba(0,102,140,0.1);
-    outline: none;
-}
+    .profile-input:focus {
+        border-color: var(--accent-200);
+        box-shadow: 0 0 0 4px rgba(0,102,140,0.1);
+        outline: none;
+    }
 
-.profile-input:disabled {
-    background: var(--bg-200);
-    cursor: not-allowed;
-    opacity: 0.8;
-}
+    .profile-input:disabled {
+        background: var(--bg-200);
+        cursor: not-allowed;
+        opacity: 0.8;
+    }
 
 .profile-btn {
     width: 100%;
@@ -1634,15 +1653,15 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     gap: 0.5rem;
 }
 
-.profile-btn:hover:not(:disabled) {
-    background: var(--accent-100);
-    transform: translateY(-2px);
-}
+    .profile-btn:hover:not(:disabled) {
+        background: var(--accent-100);
+        transform: translateY(-2px);
+    }
 
-.profile-btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
+    .profile-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
 
 .profile-actions {
     margin-top: 3rem;
@@ -1654,13 +1673,13 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     margin-bottom: 2.5rem;
 }
 
-.action-group h3 {
-    font-size: 1.25rem;
-    color: var(--text-200);
-    margin-bottom: 1.2rem;
-    text-align: right;
-    font-weight: 600;
-}
+    .action-group h3 {
+        font-size: 1.25rem;
+        color: var(--text-200);
+        margin-bottom: 1.2rem;
+        text-align: right;
+        font-weight: 600;
+    }
 
 .action-link {
     display: flex;
@@ -1675,23 +1694,23 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     margin-bottom: 0.5rem;
 }
 
-.action-link:hover {
-    background-color: rgba(0,102,140,0.1);
-    transform: translateX(-4px);
-}
+    .action-link:hover {
+        background-color: rgba(0,102,140,0.1);
+        transform: translateX(-4px);
+    }
 
-.action-link.danger {
-    color: #dc3545;
-}
+    .action-link.danger {
+        color: #dc3545;
+    }
 
-.action-link.danger:hover {
-    background-color: rgba(220,53,69,0.1);
-}
+        .action-link.danger:hover {
+            background-color: rgba(220,53,69,0.1);
+        }
 
-.action-link i {
-    margin-left: 0.8rem;
-    font-size: 1.2rem;
-}
+    .action-link i {
+        margin-left: 0.8rem;
+        font-size: 1.2rem;
+    }
 
 .profile-activity {
     margin-top: 3rem;
@@ -1699,13 +1718,13 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     border-top: 2px solid var(--bg-200);
 }
 
-.profile-activity h3 {
-    font-size: 1.25rem;
-    color: var(--text-200);
-    margin-bottom: 1.5rem;
-    text-align: right;
-    font-weight: 600;
-}
+    .profile-activity h3 {
+        font-size: 1.25rem;
+        color: var(--text-200);
+        margin-bottom: 1.5rem;
+        text-align: right;
+        font-weight: 600;
+    }
 
 .recent-orders {
     display: flex;
@@ -1724,11 +1743,11 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     border: 2px solid var(--bg-200);
 }
 
-.order-item:hover {
-    transform: translateY(-2px);
-    border-color: var(--accent-100);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
+    .order-item:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent-100);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
 
 .order-info {
     display: flex;
@@ -1772,10 +1791,10 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     font-weight: 600;
 }
 
-.view-all-link:hover {
-    background-color: rgba(0,102,140,0.1);
-    transform: translateY(-2px);
-}
+    .view-all-link:hover {
+        background-color: rgba(0,102,140,0.1);
+        transform: translateY(-2px);
+    }
 
 .alert {
     padding: 1.2rem;
@@ -1810,9 +1829,9 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     transition: opacity 0.3s ease;
 }
 
-.btn-close:hover {
-    opacity: 1;
-}
+    .btn-close:hover {
+        opacity: 1;
+    }
 
 /* Responsive Design */
 @media (max-width: 1400px) {
@@ -1919,19 +1938,19 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         gap: 1rem;
     }
 
-    .checkout-cols > div {
-        margin: 0;
-    }
+        .checkout-cols > div {
+            margin: 0;
+        }
 
     .order-review {
         padding: 1rem;
         margin: 1rem 0;
     }
 
-    .order-review th, .order-review td {
-        padding: 0.5rem;
-        font-size: 0.9rem;
-    }
+        .order-review th, .order-review td {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
 }
 
 @media (max-width: 576px) {
@@ -1949,19 +1968,19 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         justify-content: center;
     }
 
-    .logo > img {
-        margin: 0;
-        width: 5.5rem;
-    }
+        .logo > img {
+            margin: 0;
+            width: 5.5rem;
+        }
 
     .nav-tab {
         padding: 0.2rem 0.6rem;
         font-size: 0.75rem;
     }
 
-    .nav-tab img {
-        height: 1.2rem;
-    }
+        .nav-tab img {
+            height: 1.2rem;
+        }
 
     .user-info {
         order: 2;
@@ -1972,10 +1991,10 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         grid-template-columns: 1fr;
     }
 
-    .pizza-cards > li {
-        height: auto;
-        min-height: 10rem;
-    }
+        .pizza-cards > li {
+            height: auto;
+            min-height: 10rem;
+        }
 
     .pizza-info .title {
         font-size: 1.2rem;
@@ -2019,14 +2038,14 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         padding: 0 1rem;
     }
 
-    .order-total .total-price {
-        font-size: 1.3rem;
-    }
+        .order-total .total-price {
+            font-size: 1.3rem;
+        }
 
-    .order-total .btn {
-        min-width: 100px;
-        font-size: 0.9rem;
-    }
+        .order-total .btn {
+            min-width: 100px;
+            font-size: 0.9rem;
+        }
 
     .cart-item {
         padding: 0.6rem 1rem;
@@ -2038,10 +2057,10 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         margin: 0.4rem 0;
     }
 
-    .form-field > label {
-        width: 100%;
-        margin-bottom: 0.3rem;
-    }
+        .form-field > label {
+            width: 100%;
+            margin-bottom: 0.3rem;
+        }
 }
 
 @media (max-width: 400px) {
@@ -2058,18 +2077,18 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         font-size: 0.7rem;
     }
 
-    .nav-tab img {
-        height: 1rem;
-        margin-bottom: 0.15rem;
-    }
+        .nav-tab img {
+            height: 1rem;
+            margin-bottom: 0.15rem;
+        }
 
     .user-info {
         font-size: 0.8rem;
     }
 
-    .user-info img {
-        width: 2rem;
-    }
+        .user-info img {
+            width: 2rem;
+        }
 
     .pizza-info .title {
         font-size: 1.1rem;
@@ -2099,7 +2118,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
 
 /* Improve touch interactions */
 @media (hover: none) and (pointer: coarse) {
-    .nav-tab, 
+    .nav-tab,
     .btn,
     .pizza-cards > li,
     .cart-item,
@@ -2107,22 +2126,22 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         cursor: default;
     }
 
-    .nav-tab:active,
-    .btn:active,
-    .pizza-cards > li:active,
-    .cart-item:active,
-    .dialog-buttons button:active {
-        transform: scale(0.98);
-    }
+        .nav-tab:active,
+        .btn:active,
+        .pizza-cards > li:active,
+        .cart-item:active,
+        .dialog-buttons button:active {
+            transform: scale(0.98);
+        }
 
-    .pizza-cards > li:hover {
-        transform: none;
-        box-shadow: 0 3px 4px rgba(0,0,0,0.4);
-    }
+        .pizza-cards > li:hover {
+            transform: none;
+            box-shadow: 0 3px 4px rgba(0,0,0,0.4);
+        }
 
-    .nav-tab:hover {
-        background-color: rgba(0,0,0,0.1);
-    }
+        .nav-tab:hover {
+            background-color: rgba(0,0,0,0.1);
+        }
 
     /* Increase touch targets */
     .delete-item,
@@ -2133,8 +2152,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
 }
 
 /* Improve font rendering */
-@media screen and (-webkit-min-device-pixel-ratio: 2),
-       screen and (min-resolution: 192dpi) {
+@media screen and (-webkit-min-device-pixel-ratio: 2), screen and (min-resolution: 192dpi) {
     body {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
@@ -2175,7 +2193,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         min-height: 170px;
         padding: 14px 7px 10px 7px;
     }
-    
+
     .card-logo {
         width: 110px;
         height: 110px;
@@ -2188,7 +2206,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         min-height: 160px;
         padding: 12px 6px 8px 6px;
     }
-    
+
     .card-logo {
         width: 100px;
         height: 100px;
@@ -2202,13 +2220,13 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         padding: 10px 5px 6px 5px;
         margin: 6px;
     }
-    
+
     .card-logo {
         width: 90px;
         height: 90px;
         margin-bottom: 8px;
     }
-    
+
     .pizza-info .title {
         font-size: 1rem;
     }
@@ -2220,25 +2238,25 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         gap: 8px;
         padding: 4px;
     }
-    
-    .pizza-cards > li {
-        min-width: 110px;
-        min-height: 140px;
-        padding: 8px 4px 4px 4px;
-        margin: 4px;
-    }
-    
+
+        .pizza-cards > li {
+            min-width: 110px;
+            min-height: 140px;
+            padding: 8px 4px 4px 4px;
+            margin: 4px;
+        }
+
     .card-logo {
         width: 80px;
         height: 80px;
         margin-bottom: 6px;
     }
-    
+
     .pizza-info .title {
         font-size: 0.9rem;
         margin-bottom: 2px;
     }
-    
+
     .pizza-info .price {
         font-size: 0.85rem;
     }
@@ -2249,25 +2267,25 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
         gap: 6px;
     }
-    
-    .pizza-cards > li {
-        min-width: 100px;
-        min-height: 130px;
-        padding: 6px 3px 3px 3px;
-        margin: 3px;
-    }
-    
+
+        .pizza-cards > li {
+            min-width: 100px;
+            min-height: 130px;
+            padding: 6px 3px 3px 3px;
+            margin: 3px;
+        }
+
     .card-logo {
         width: 70px;
         height: 70px;
         margin-bottom: 4px;
     }
-    
+
     .pizza-info .title {
         font-size: 0.8rem;
         margin-bottom: 1px;
     }
-    
+
     .pizza-info .price {
         font-size: 0.8rem;
     }
@@ -2300,18 +2318,18 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     margin: 0.5rem 0;
 }
 
-.sidebar-order-table th, 
-.sidebar-order-table td {
-    padding: 0.4rem;
-    font-size: 0.9rem;
-    text-align: center;
-    vertical-align: middle;
-}
+    .sidebar-order-table th,
+    .sidebar-order-table td {
+        padding: 0.4rem;
+        font-size: 0.9rem;
+        text-align: center;
+        vertical-align: middle;
+    }
 
-.sidebar-order-table th {
-    font-size: 0.85rem;
-    font-weight: 600;
-}
+    .sidebar-order-table th {
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
 
 /* تحسين التجاوب مع الشاشات الصغيرة */
 @media (max-width: 768px) {
@@ -2319,7 +2337,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         font-size: 0.85rem;
     }
 
-    .order-review th, 
+    .order-review th,
     .order-review td {
         padding: 0.4rem;
     }
@@ -2328,7 +2346,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         font-size: 0.8rem;
     }
 
-    .sidebar-order-table th, 
+    .sidebar-order-table th,
     .sidebar-order-table td {
         padding: 0.3rem;
         font-size: 0.85rem;
@@ -2345,32 +2363,32 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         padding: 0.5rem;
     }
 
-    .order-review table {
-        font-size: 0.8rem;
-    }
+        .order-review table {
+            font-size: 0.8rem;
+        }
 
-    .order-review th, 
-    .order-review td {
-        padding: 0.3rem;
-    }
+        .order-review th,
+        .order-review td {
+            padding: 0.3rem;
+        }
 
-    .order-review th {
-        font-size: 0.75rem;
-    }
+        .order-review th {
+            font-size: 0.75rem;
+        }
 
     .sidebar-order-table {
         margin: 0.3rem 0;
     }
 
-    .sidebar-order-table th, 
-    .sidebar-order-table td {
-        padding: 0.25rem;
-        font-size: 0.8rem;
-    }
+        .sidebar-order-table th,
+        .sidebar-order-table td {
+            padding: 0.25rem;
+            font-size: 0.8rem;
+        }
 
-    .sidebar-order-table th {
-        font-size: 0.75rem;
-    }
+        .sidebar-order-table th {
+            font-size: 0.75rem;
+        }
 
     /* تحسين أزرار الطلب */
     .order-total {
@@ -2379,15 +2397,15 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         min-height: 3rem;
     }
 
-    .order-total .total-price {
-        font-size: 1rem;
-    }
+        .order-total .total-price {
+            font-size: 1rem;
+        }
 
-    .order-total .btn {
-        padding: 0.3rem 0.8rem;
-        font-size: 0.85rem;
-        min-width: auto;
-    }
+        .order-total .btn {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.85rem;
+            min-width: auto;
+        }
 }
 
 @media (max-width: 400px) {
@@ -2395,7 +2413,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         font-size: 0.75rem;
     }
 
-    .order-review th, 
+    .order-review th,
     .order-review td {
         padding: 0.25rem;
     }
@@ -2404,7 +2422,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         font-size: 0.7rem;
     }
 
-    .sidebar-order-table th, 
+    .sidebar-order-table th,
     .sidebar-order-table td {
         padding: 0.2rem;
         font-size: 0.75rem;
@@ -2431,12 +2449,12 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     gap: 0.5rem;
 }
 
-.quantity-controls button {
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    font-size: 1rem;
-}
+    .quantity-controls button {
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        font-size: 1rem;
+    }
 
 @media (max-width: 576px) {
     .quantity-controls button {
@@ -2470,52 +2488,52 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     transition: none;
 }
 
-.financial-sidebar h3 {
-    color: var(--accent-200);
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
+    .financial-sidebar h3 {
+        color: var(--accent-200);
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
 
-.financial-sidebar .table {
-    color: #333;
-    background: #fff;
-    width: 340px;
-    min-width: 320px;
-    max-width: 360px;
-    margin: 0 auto 1.5rem auto;
-    box-shadow: 0 2px 8px #0001;
-    border-radius: 12px;
-    z-index: 1;
-    position: relative;
-}
+    .financial-sidebar .table {
+        color: #333;
+        background: #fff;
+        width: 340px;
+        min-width: 320px;
+        max-width: 360px;
+        margin: 0 auto 1.5rem auto;
+        box-shadow: 0 2px 8px #0001;
+        border-radius: 12px;
+        z-index: 1;
+        position: relative;
+    }
 
-.financial-sidebar .table th {
-    background: var(--bg-200);
-    color: var(--accent-200);
-    font-weight: 600;
-    border-bottom: 2px solid var(--bg-300);
-}
+        .financial-sidebar .table th {
+            background: var(--bg-200);
+            color: var(--accent-200);
+            font-weight: 600;
+            border-bottom: 2px solid var(--bg-300);
+        }
 
-.financial-sidebar .table td {
-    color: #333;
-    border-bottom: 1px solid var(--bg-300);
-}
+        .financial-sidebar .table td {
+            color: #333;
+            border-bottom: 1px solid var(--bg-300);
+        }
 
-.financial-sidebar .btn {
-    color: #fff;
-    font-weight: 500;
-}
+    .financial-sidebar .btn {
+        color: #fff;
+        font-weight: 500;
+    }
 
-.financial-sidebar .btn-outline-secondary {
-    color: var(--accent-200);
-    border-color: var(--accent-200);
-    background: transparent;
-}
+    .financial-sidebar .btn-outline-secondary {
+        color: var(--accent-200);
+        border-color: var(--accent-200);
+        background: transparent;
+    }
 
-.financial-sidebar .btn-outline-secondary:hover {
-    background: var(--accent-200);
-    color: #fff;
-}
+        .financial-sidebar .btn-outline-secondary:hover {
+            background: var(--accent-200);
+            color: #fff;
+        }
 
 @media (max-width: 600px) {
     .financial-sidebar {
@@ -2544,65 +2562,65 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         overflow-y: auto;
         padding: 1rem;
     }
-    
-    .financial-sidebar .table {
-        font-size: 0.8rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .financial-sidebar .table th,
-    .financial-sidebar .table td {
-        padding: 0.25rem 0.3rem;
-        font-size: 0.75rem;
-    }
-    
-    .financial-sidebar h3 {
-        font-size: 1rem;
-        margin-bottom: 0.5rem;
-        text-align: center;
-    }
-    
-    .financial-sidebar .btn {
-        font-size: 0.8rem;
-        padding: 0.3rem 0.5rem;
-        margin: 0.2rem;
-    }
-    
-    .financial-sidebar .btn-outline-secondary {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.4rem;
-    }
-    
-    .financial-sidebar .order-total {
-        padding: 0.5rem;
-        margin: 0.5rem 0;
-        font-size: 0.9rem;
-    }
-    
-    .financial-sidebar .total-price {
-        font-size: 1rem;
-    }
-    
-    .financial-sidebar .sidebar-order-table {
-        font-size: 0.75rem;
-    }
-    
-    .financial-sidebar .sidebar-order-table th,
-    .financial-sidebar .sidebar-order-table td {
-        padding: 0.2rem 0.3rem;
-        font-size: 0.7rem;
-    }
-    
-    .financial-sidebar .sidebar-remove-btn {
-        padding: 0.1rem 0.4rem;
-        font-size: 0.8rem;
-    }
-    
-    .financial-sidebar .empty-cart {
-        font-size: 1rem;
-        text-align: center;
-        padding: 1rem;
-    }
+
+        .financial-sidebar .table {
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+            .financial-sidebar .table th,
+            .financial-sidebar .table td {
+                padding: 0.25rem 0.3rem;
+                font-size: 0.75rem;
+            }
+
+        .financial-sidebar h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .financial-sidebar .btn {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.5rem;
+            margin: 0.2rem;
+        }
+
+        .financial-sidebar .btn-outline-secondary {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.4rem;
+        }
+
+        .financial-sidebar .order-total {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .financial-sidebar .total-price {
+            font-size: 1rem;
+        }
+
+        .financial-sidebar .sidebar-order-table {
+            font-size: 0.75rem;
+        }
+
+            .financial-sidebar .sidebar-order-table th,
+            .financial-sidebar .sidebar-order-table td {
+                padding: 0.2rem 0.3rem;
+                font-size: 0.7rem;
+            }
+
+        .financial-sidebar .sidebar-remove-btn {
+            padding: 0.1rem 0.4rem;
+            font-size: 0.8rem;
+        }
+
+        .financial-sidebar .empty-cart {
+            font-size: 1rem;
+            text-align: center;
+            padding: 1rem;
+        }
 }
 
 @media (min-width: 992px) {
@@ -2625,92 +2643,92 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         max-height: 45vh;
         padding: 0.8rem;
     }
-    
-    .financial-sidebar .table {
-        font-size: 0.75rem;
-        margin-bottom: 0.3rem;
-    }
-    
-    .financial-sidebar .table th,
-    .financial-sidebar .table td {
-        padding: 0.2rem 0.25rem;
-        font-size: 0.7rem;
-    }
-    
-    .financial-sidebar h3 {
-        font-size: 0.9rem;
-        margin-bottom: 0.4rem;
-    }
-    
-    .financial-sidebar .btn {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.4rem;
-        margin: 0.15rem;
-    }
-    
-    .financial-sidebar .btn-outline-secondary {
-        font-size: 0.7rem;
-        padding: 0.2rem 0.3rem;
-    }
-    
-    .financial-sidebar .order-total {
-        padding: 0.4rem;
-        margin: 0.4rem 0;
-        font-size: 0.8rem;
-    }
-    
-    .financial-sidebar .total-price {
-        font-size: 0.9rem;
-    }
-    
-    .financial-sidebar .sidebar-order-table {
-        font-size: 0.7rem;
-    }
-    
-    .financial-sidebar .sidebar-order-table th,
-    .financial-sidebar .sidebar-order-table td {
-        padding: 0.15rem 0.25rem;
-        font-size: 0.65rem;
-    }
-    
-    .financial-sidebar .sidebar-remove-btn {
-        padding: 0.1rem 0.3rem;
-        font-size: 0.75rem;
-    }
-    
-    .financial-sidebar .empty-cart {
-        font-size: 0.9rem;
-        padding: 0.8rem;
-    }
-    
+
+        .financial-sidebar .table {
+            font-size: 0.75rem;
+            margin-bottom: 0.3rem;
+        }
+
+            .financial-sidebar .table th,
+            .financial-sidebar .table td {
+                padding: 0.2rem 0.25rem;
+                font-size: 0.7rem;
+            }
+
+        .financial-sidebar h3 {
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .financial-sidebar .btn {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.4rem;
+            margin: 0.15rem;
+        }
+
+        .financial-sidebar .btn-outline-secondary {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.3rem;
+        }
+
+        .financial-sidebar .order-total {
+            padding: 0.4rem;
+            margin: 0.4rem 0;
+            font-size: 0.8rem;
+        }
+
+        .financial-sidebar .total-price {
+            font-size: 0.9rem;
+        }
+
+        .financial-sidebar .sidebar-order-table {
+            font-size: 0.7rem;
+        }
+
+            .financial-sidebar .sidebar-order-table th,
+            .financial-sidebar .sidebar-order-table td {
+                padding: 0.15rem 0.25rem;
+                font-size: 0.65rem;
+            }
+
+        .financial-sidebar .sidebar-remove-btn {
+            padding: 0.1rem 0.3rem;
+            font-size: 0.75rem;
+        }
+
+        .financial-sidebar .empty-cart {
+            font-size: 0.9rem;
+            padding: 0.8rem;
+        }
+
     .main {
         padding-bottom: 50vh !important;
     }
-    
+
     .pizza-cards {
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
         grid-gap: 0.5rem;
         padding: 0.3rem;
     }
-    
-    .pizza-cards > li {
-        min-width: 90px;
-        min-height: 120px;
-        padding: 6px 3px 3px 3px;
-        margin: 2px;
-    }
-    
+
+        .pizza-cards > li {
+            min-width: 90px;
+            min-height: 120px;
+            padding: 6px 3px 3px 3px;
+            margin: 2px;
+        }
+
     .card-logo {
         width: 60px;
         height: 60px;
         margin-bottom: 4px;
     }
-    
+
     .pizza-info .title {
         font-size: 0.75rem;
         margin-bottom: 1px;
     }
-    
+
     .pizza-info .price {
         font-size: 0.7rem;
     }
@@ -2721,96 +2739,97 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         max-height: 40vh;
         padding: 0.6rem;
     }
-    
-    .financial-sidebar .table {
-        font-size: 0.7rem;
-        margin-bottom: 0.2rem;
-    }
-    
-    .financial-sidebar .table th,
-    .financial-sidebar .table td {
-        padding: 0.15rem 0.2rem;
-        font-size: 0.65rem;
-    }
-    
-    .financial-sidebar h3 {
-        font-size: 0.85rem;
-        margin-bottom: 0.3rem;
-    }
-    
-    .financial-sidebar .btn {
-        font-size: 0.7rem;
-        padding: 0.2rem 0.3rem;
-        margin: 0.1rem;
-    }
-    
-    .financial-sidebar .btn-outline-secondary {
-        font-size: 0.65rem;
-        padding: 0.15rem 0.25rem;
-    }
-    
-    .financial-sidebar .order-total {
-        padding: 0.3rem;
-        margin: 0.3rem 0;
-        font-size: 0.75rem;
-    }
-    
-    .financial-sidebar .total-price {
-        font-size: 0.85rem;
-    }
-    
-    .financial-sidebar .sidebar-order-table {
-        font-size: 0.65rem;
-    }
-    
-    .financial-sidebar .sidebar-order-table th,
-    .financial-sidebar .sidebar-order-table td {
-        padding: 0.1rem 0.2rem;
-        font-size: 0.6rem;
-    }
-    
-    .financial-sidebar .sidebar-remove-btn {
-        padding: 0.05rem 0.25rem;
-        font-size: 0.7rem;
-    }
-    
-    .financial-sidebar .empty-cart {
-        font-size: 0.85rem;
-        padding: 0.6rem;
-    }
-    
+
+        .financial-sidebar .table {
+            font-size: 0.7rem;
+            margin-bottom: 0.2rem;
+        }
+
+            .financial-sidebar .table th,
+            .financial-sidebar .table td {
+                padding: 0.15rem 0.2rem;
+                font-size: 0.65rem;
+            }
+
+        .financial-sidebar h3 {
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .financial-sidebar .btn {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.3rem;
+            margin: 0.1rem;
+        }
+
+        .financial-sidebar .btn-outline-secondary {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.25rem;
+        }
+
+        .financial-sidebar .order-total {
+            padding: 0.3rem;
+            margin: 0.3rem 0;
+            font-size: 0.75rem;
+        }
+
+        .financial-sidebar .total-price {
+            font-size: 0.85rem;
+        }
+
+        .financial-sidebar .sidebar-order-table {
+            font-size: 0.65rem;
+        }
+
+            .financial-sidebar .sidebar-order-table th,
+            .financial-sidebar .sidebar-order-table td {
+                padding: 0.1rem 0.2rem;
+                font-size: 0.6rem;
+            }
+
+        .financial-sidebar .sidebar-remove-btn {
+            padding: 0.05rem 0.25rem;
+            font-size: 0.7rem;
+        }
+
+        .financial-sidebar .empty-cart {
+            font-size: 0.85rem;
+            padding: 0.6rem;
+        }
+
     .main {
         padding-bottom: 45vh !important;
     }
-    
+
     .pizza-cards {
         grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
         grid-gap: 0.3rem;
         padding: 0.2rem;
     }
-    
-    .pizza-cards > li {
-        min-width: 75px;
-        min-height: 100px;
-        padding: 4px 2px 2px 2px;
-        margin: 1px;
-    }
-    
+
+        .pizza-cards > li {
+            min-width: 75px;
+            min-height: 100px;
+            padding: 4px 2px 2px 2px;
+            margin: 1px;
+        }
+
     .card-logo {
         width: 50px;
         height: 50px;
         margin-bottom: 3px;
     }
-    
+
     .pizza-info .title {
         font-size: 0.7rem;
         margin-bottom: 1px;
     }
-    
+
     .pizza-info .price {
         font-size: 0.65rem;
     }
 }
+
 .dialog-buttons button:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -2822,19 +2841,19 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         max-width: 550px;
         width: 85%;
     }
-    
+
     .dialog-title {
         padding: 1.3rem 1.8rem;
     }
-    
-    .dialog-title h2 {
-        font-size: 1.4rem;
-    }
-    
+
+        .dialog-title h2 {
+            font-size: 1.4rem;
+        }
+
     .dialog-body {
         padding: 1.3rem 1.8rem;
     }
-    
+
     .dialog-buttons {
         padding: 0.9rem 1.8rem;
     }
@@ -2845,26 +2864,26 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         max-width: 500px;
         width: 90%;
     }
-    
+
     .dialog-title {
         padding: 1.2rem 1.5rem;
     }
-    
-    .dialog-title h2 {
-        font-size: 1.3rem;
-    }
-    
+
+        .dialog-title h2 {
+            font-size: 1.3rem;
+        }
+
     .dialog-body {
         padding: 1.2rem 1.5rem;
     }
-    
+
     .dialog-buttons {
         padding: 0.8rem 1.5rem;
     }
-    
-    .dialog-buttons button {
-        padding: 0.4rem 1.2rem;
-    }
+
+        .dialog-buttons button {
+            padding: 0.4rem 1.2rem;
+        }
 }
 
 @media (max-width: 768px) {
@@ -2873,27 +2892,27 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         width: 95%;
         max-height: calc(100% - 2rem);
     }
-    
+
     .dialog-title {
         padding: 1rem 1.3rem;
     }
-    
-    .dialog-title h2 {
-        font-size: 1.2rem;
-    }
-    
+
+        .dialog-title h2 {
+            font-size: 1.2rem;
+        }
+
     .dialog-body {
         padding: 1rem 1.3rem;
     }
-    
+
     .dialog-buttons {
         padding: 0.7rem 1.3rem;
     }
-    
-    .dialog-buttons button {
-        padding: 0.35rem 1rem;
-        font-size: 0.9rem;
-    }
+
+        .dialog-buttons button {
+            padding: 0.35rem 1rem;
+            font-size: 0.9rem;
+        }
 }
 
 @media (max-width: 576px) {
@@ -2903,31 +2922,31 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         max-height: calc(100% - 1rem);
         margin: 0.5rem auto;
     }
-    
+
     .dialog-title {
         padding: 0.8rem 1rem;
     }
-    
-    .dialog-title h2 {
-        font-size: 1.1rem;
-    }
-    
+
+        .dialog-title h2 {
+            font-size: 1.1rem;
+        }
+
     .dialog-body {
         padding: 0.8rem 1rem;
     }
-    
+
     .dialog-buttons {
         padding: 0.6rem 1rem;
         flex-direction: column;
         gap: 0.5rem;
     }
-    
-    .dialog-buttons button {
-        padding: 0.3rem 0.8rem;
-        font-size: 0.85rem;
-        width: 100%;
-        min-width: auto;
-    }
+
+        .dialog-buttons button {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.85rem;
+            width: 100%;
+            min-width: auto;
+        }
 }
 
 @media (max-width: 400px) {
@@ -2937,29 +2956,29 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         margin: 0;
         max-height: 100%;
     }
-    
+
     .dialog-title {
         padding: 0.7rem 0.8rem;
         border-radius: 0;
     }
-    
-    .dialog-title h2 {
-        font-size: 1rem;
-    }
-    
+
+        .dialog-title h2 {
+            font-size: 1rem;
+        }
+
     .dialog-body {
         padding: 0.7rem 0.8rem;
     }
-    
+
     .dialog-buttons {
         padding: 0.5rem 0.8rem;
         border-radius: 0;
     }
-    
-    .dialog-buttons button {
-        padding: 0.25rem 0.7rem;
-        font-size: 0.8rem;
-    }
+
+        .dialog-buttons button {
+            padding: 0.25rem 0.7rem;
+            font-size: 0.8rem;
+        }
 }
 
 /* Improve dialog container for mobile */
@@ -2968,12 +2987,12 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         padding: 0.5rem;
         align-items: flex-start;
     }
-    
+
     .dialog {
         max-height: calc(100vh - 2rem);
         overflow: hidden;
     }
-    
+
     .dialog-body {
         max-height: calc(100vh - 200px);
         overflow-y: auto;
@@ -2985,12 +3004,12 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         padding: 0;
         align-items: stretch;
     }
-    
+
     .dialog {
         max-height: 100vh;
         border-radius: 0;
     }
-    
+
     .dialog-body {
         max-height: calc(100vh - 150px);
     }
@@ -3001,21 +3020,21 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     .dialog-body .form-group {
         margin-bottom: 1rem;
     }
-    
+
     .dialog-body label {
         font-size: 0.9rem;
         margin-bottom: 0.3rem;
     }
-    
+
     .dialog-body .price {
         font-size: 1.1rem;
     }
-    
+
     .dialog .toppings {
         padding-left: 1rem;
         text-align: center;
     }
-    
+
     .dialog .topping {
         font-size: 0.8rem;
         padding: 0.15rem 0.8rem;
@@ -3027,20 +3046,20 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     .dialog-body .form-group {
         margin-bottom: 0.8rem;
     }
-    
+
     .dialog-body label {
         font-size: 0.85rem;
         margin-bottom: 0.25rem;
     }
-    
+
     .dialog-body .price {
         font-size: 1rem;
     }
-    
+
     .dialog .toppings {
         padding-left: 0.5rem;
     }
-    
+
     .dialog .topping {
         font-size: 0.75rem;
         padding: 0.1rem 0.6rem;
@@ -3064,16 +3083,19 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         border-radius: 8px;
         box-shadow: 0 0 6px rgba(0,0,0,0.08);
     }
+
     .login-left, .login-right {
         padding: 0.7rem 0.5rem;
         border-radius: 0;
     }
 }
+
 @media (max-width: 400px) {
     .login-container {
         margin: 0.1rem auto;
         border-radius: 0;
     }
+
     .login-left, .login-right {
         padding: 0.3rem 0.1rem;
     }
@@ -3092,6 +3114,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     align-items: center;
     gap: 1.2rem;
 }
+
 .profile-avatar-new {
     width: 90px;
     height: 90px;
@@ -3105,23 +3128,27 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     box-shadow: 0 2px 8px #0001;
     margin-bottom: 1.2rem;
 }
+
 .profile-info-new {
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0.7rem;
 }
+
 .profile-row-new {
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-size: 1.1rem;
 }
+
 .profile-label-new {
     color: #00668c;
     font-weight: 600;
     font-size: 1rem;
 }
+
 .profile-actions-new {
     display: flex;
     gap: 1rem;
@@ -3129,6 +3156,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     width: 100%;
     flex-direction: column;
 }
+
 .profile-btn-new {
     width: 100%;
     background: linear-gradient(90deg, #0099cc 0%, #00668c 100%);
@@ -3142,10 +3170,12 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     box-shadow: 0 2px 8px rgba(0,102,140,0.08);
     margin-bottom: 0.5rem;
 }
-.profile-btn-new:hover {
-    background: linear-gradient(90deg, #00668c 0%, #0099cc 100%);
-    box-shadow: 0 4px 16px rgba(0,102,140,0.12);
-}
+
+    .profile-btn-new:hover {
+        background: linear-gradient(90deg, #00668c 0%, #0099cc 100%);
+        box-shadow: 0 4px 16px rgba(0,102,140,0.12);
+    }
+
 .profile-btn-outline-new {
     width: 100%;
     background: #fff;
@@ -3157,15 +3187,19 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     font-weight: bold;
     transition: background 0.2s, color 0.2s;
 }
-.profile-btn-outline-new:hover {
-    background: #e6f3f8;
-    color: #005a7a;
-}
+
+    .profile-btn-outline-new:hover {
+        background: #e6f3f8;
+        color: #005a7a;
+    }
 
 /* نافذة التعديل المنبثقة */
 .profile-edit-overlay {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: rgba(0,0,0,0.25);
     z-index: 2000;
     display: flex;
@@ -3173,6 +3207,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     justify-content: center;
     animation: fadeIn 0.2s;
 }
+
 .profile-edit-dialog {
     background: #fff;
     border-radius: 18px;
@@ -3184,6 +3219,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     max-width: 400px;
     animation: slideUp 0.3s;
 }
+
 .profile-edit-title {
     font-size: 1.3rem;
     color: #00668c;
@@ -3191,12 +3227,14 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     margin-bottom: 1.2rem;
     text-align: center;
 }
+
 .profile-edit-field {
     margin-bottom: 1.1rem;
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
 }
+
 .profile-edit-input {
     padding: 0.7rem 1rem;
     border-radius: 12px;
@@ -3205,41 +3243,64 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     background: #f5f4f1;
     transition: border 0.2s;
 }
-.profile-edit-input:focus {
-    border: 2px solid #71c4ef;
-    outline: none;
-    background: #fff;
-}
+
+    .profile-edit-input:focus {
+        border: 2px solid #71c4ef;
+        outline: none;
+        background: #fff;
+    }
+
 .profile-edit-actions {
     display: flex;
     gap: 0.7rem;
     margin-top: 1.2rem;
     justify-content: center;
 }
+
 @keyframes fadeIn {
-    from { opacity: 0; } to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
+
 @keyframes slideUp {
-    from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(40px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
+
 @media (max-width: 600px) {
     .profile-card-new {
         padding: 1.2rem 0.5rem;
         border-radius: 12px;
     }
+
     .profile-avatar-new {
         width: 70px;
         height: 70px;
         font-size: 2rem;
     }
+
     .profile-row-new {
         font-size: 1rem;
     }
+
     .profile-btn-new, .profile-btn-outline-new {
         font-size: 1rem;
         border-radius: 12px;
         padding: 0.7rem 0;
     }
+
     .profile-edit-dialog {
         padding: 1.2rem 0.5rem;
         border-radius: 10px;
@@ -3260,6 +3321,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     text-align: center;
     background: #fcfcf7;
 }
+
 .main-section-btn {
     width: 200px;
     height: 220px;
@@ -3279,83 +3341,92 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     cursor: pointer;
 }
 
-.main-section-btn .card-logo {
-    width: 70px;
-    height: 70px;
-    background: #fff;
-    border-radius: 50%;
-    margin-top: 24px;
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px #0001;
-    object-fit: contain;
-    padding: 12px;
-}
+    .main-section-btn .card-logo {
+        width: 70px;
+        height: 70px;
+        background: #fff;
+        border-radius: 50%;
+        margin-top: 24px;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px #0001;
+        object-fit: contain;
+        padding: 12px;
+    }
 
-.main-section-btn .card-title {
-    width: 100%;
-    background: #fff;
-    color: #4fcf70;
-    border-bottom-left-radius: 16px;
-    border-bottom-right-radius: 16px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    text-align: center;
-    margin-top: auto;
-    padding: 12px 0 8px 0;
-    box-shadow: 0 2px 8px #0001;
-}
+    .main-section-btn .card-title {
+        width: 100%;
+        background: #fff;
+        color: #4fcf70;
+        border-bottom-left-radius: 16px;
+        border-bottom-right-radius: 16px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        text-align: center;
+        margin-top: auto;
+        padding: 12px 0 8px 0;
+        box-shadow: 0 2px 8px #0001;
+    }
 
-.main-section-btn:hover {
-    box-shadow: 0 16px 40px 0 rgba(0,102,140,0.18), 0 0 0 4px var(--accent-100);
-    border: 2.5px solid var(--accent-100);
-    transform: translateY(-10px) scale(1.05);
-    z-index: 3;
-}
-.main-section-btn .card-logo {
-    box-shadow: 0 8px 32px 0 rgba(0,102,140,0.18);
-    transform: scale(1.09) rotate(-6deg);
-}
-.main-section-btn .card-title {
-    margin-top: 18px;
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--accent-200);
-    letter-spacing: 0.5px;
-    text-align: center;
-    text-shadow: 0 2px 8px #fff8;
-    background: none;
-    border-radius: 0;
-    padding: 0;
-    box-shadow: none;
-}
+    .main-section-btn:hover {
+        box-shadow: 0 16px 40px 0 rgba(0,102,140,0.18), 0 0 0 4px var(--accent-100);
+        border: 2.5px solid var(--accent-100);
+        transform: translateY(-10px) scale(1.05);
+        z-index: 3;
+    }
+
+    .main-section-btn .card-logo {
+        box-shadow: 0 8px 32px 0 rgba(0,102,140,0.18);
+        transform: scale(1.09) rotate(-6deg);
+    }
+
+    .main-section-btn .card-title {
+        margin-top: 18px;
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--accent-200);
+        letter-spacing: 0.5px;
+        text-align: center;
+        text-shadow: 0 2px 8px #fff8;
+        background: none;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+
 .card-electronic {
     background: linear-gradient(135deg, #e3f0fa 0%, #b6ccd8 100%);
 }
+
 .card-internet {
     background: linear-gradient(135deg, #e3fae8 0%, #b6f8c6 100%);
 }
+
 .card-balance {
     background: linear-gradient(135deg, #e3f6fa 0%, #b6e6f8 100%);
 }
+
 @media (max-width: 900px) {
     .main-section-selector {
         flex-direction: column;
         height: 100vh;
         gap: 1.5rem;
     }
+
     .main-section-btn {
         min-height: 120px;
         font-size: 1.3rem;
     }
-    .main-section-btn i {
-        font-size: 2.5rem !important;
-    }
-    .main-section-btn div {
-        font-size: 1.3rem;
-    }
+
+        .main-section-btn i {
+            font-size: 2.5rem !important;
+        }
+
+        .main-section-btn div {
+            font-size: 1.3rem;
+        }
 }
 
 /* Recharge Balance Page Modern Design - Enhanced */
@@ -3375,12 +3446,14 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     justify-content: flex-start;
     margin-left: 22rem;
 }
+
 @media (max-width: 600px) {
     .recharge-card {
         padding: 1.2rem 0.2rem 1rem 0.2rem;
         margin-left: 0;
     }
 }
+
 .recharge-title {
     font-size: 2.1rem;
     font-weight: bold;
@@ -3388,6 +3461,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     margin-bottom: 1.2rem;
     text-align: center;
 }
+
 .recharge-section-title {
     font-size: 1.1rem;
     color: var(--primary-300);
@@ -3395,11 +3469,13 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     font-weight: 600;
     text-align: center;
 }
+
 .recharge-operators {
     display: flex;
     gap: 1.5rem;
     justify-content: center;
 }
+
 .recharge-operator-btn {
     background: #fff !important;
     border: 2px solid #eee;
@@ -3414,17 +3490,20 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     align-items: center;
     cursor: pointer;
 }
-.recharge-operator-btn.selected, .recharge-operator-btn:hover {
-    border-color: var(--accent-200);
-    box-shadow: 0 4px 16px #00668c11;
-    background: #fff !important;
-    color: var(--accent-200);
-}
-.recharge-operator-btn img {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 0.5rem;
-}
+
+    .recharge-operator-btn.selected, .recharge-operator-btn:hover {
+        border-color: var(--accent-200);
+        box-shadow: 0 4px 16px #00668c11;
+        background: #fff !important;
+        color: var(--accent-200);
+    }
+
+    .recharge-operator-btn img {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 0.5rem;
+    }
+
 .recharge-amounts {
     display: flex;
     flex-wrap: wrap;
@@ -3432,6 +3511,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     justify-content: center;
     margin-bottom: 1rem;
 }
+
 .recharge-amount-btn {
     background: #fff !important;
     border: 2px solid #eee;
@@ -3443,12 +3523,14 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     font-size: 1.1rem;
     cursor: pointer;
 }
-.recharge-amount-btn.selected, .recharge-amount-btn:hover {
-    border-color: var(--accent-200);
-    box-shadow: 0 4px 16px #00668c11;
-    background: #fff !important;
-    color: var(--accent-200);
-}
+
+    .recharge-amount-btn.selected, .recharge-amount-btn:hover {
+        border-color: var(--accent-200);
+        box-shadow: 0 4px 16px #00668c11;
+        background: #fff !important;
+        color: var(--accent-200);
+    }
+
 .recharge-custom-amount {
     display: flex;
     align-items: center;
@@ -3456,6 +3538,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     margin-top: 0.5rem;
     justify-content: center;
 }
+
 .recharge-custom-input {
     background: #fff !important;
     border: 2px solid #eee;
@@ -3467,18 +3550,21 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     padding: 0.8rem 1.2rem;
     font-size: 1.1rem;
 }
-.recharge-custom-input.selected, .recharge-custom-input:focus {
-    border-color: var(--accent-200);
-    box-shadow: 0 4px 16px #00668c11;
-    background: #fff !important;
-    color: var(--accent-200);
-}
+
+    .recharge-custom-input.selected, .recharge-custom-input:focus {
+        border-color: var(--accent-200);
+        box-shadow: 0 4px 16px #00668c11;
+        background: #fff !important;
+        color: var(--accent-200);
+    }
+
 .recharge-custom-label {
     font-size: 1rem;
     color: var(--primary-300);
     font-weight: 600;
     margin-right: 0.3rem;
 }
+
 .recharge-phone-input {
     background: #fff !important;
     color: var(--text-100);
@@ -3493,14 +3579,17 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     transition: border 0.2s, box-shadow 0.2s;
     outline: none;
 }
-.recharge-phone-input:focus {
-    border-color: var(--accent-200);
-    box-shadow: 0 4px 24px #00668c22;
-}
-.recharge-phone-input.invalid {
-    border-color: #dc3545;
-    box-shadow: 0 2px 12px #dc354522;
-}
+
+    .recharge-phone-input:focus {
+        border-color: var(--accent-200);
+        box-shadow: 0 4px 24px #00668c22;
+    }
+
+    .recharge-phone-input.invalid {
+        border-color: #dc3545;
+        box-shadow: 0 2px 12px #dc354522;
+    }
+
 .phone-validation-message {
     color: #dc3545;
     font-size: 1rem;
@@ -3509,6 +3598,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     text-align: center;
     font-weight: 600;
 }
+
 .recharge-submit-btn {
     width: 100%;
     padding: 1.1rem;
@@ -3523,20 +3613,24 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     margin-top: 1rem;
     box-shadow: 0 2px 8px #b6ccd822;
 }
-.recharge-submit-btn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
+
+    .recharge-submit-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
 
 .card-electronic {
     background: #f8b6e0;
 }
+
 .card-internet {
     background: #b6f8c6;
 }
+
 .card-balance {
     background: #b6e6f8;
 }
+
 .main-section-btn {
     border-radius: 16px;
     box-shadow: 0 2px 8px #0002;
@@ -3554,10 +3648,12 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     font-size: 1.2rem;
     font-weight: bold;
 }
-.main-section-btn:hover {
-    box-shadow: 0 6px 16px #0003;
-    transform: scale(1.04);
-}
+
+    .main-section-btn:hover {
+        box-shadow: 0 6px 16px #0003;
+        transform: scale(1.04);
+    }
+
 .card-logo {
     width: 70px;
     height: 70px;
@@ -3574,6 +3670,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     margin-bottom: 1rem;
     flex-direction: row-reverse;
 }
+
 .phone-prefix {
     background: #f5f4f1;
     border: 2px solid #eee;
@@ -3586,6 +3683,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     min-width: 60px;
     text-align: center;
 }
+
 .recharge-phone-input {
     border-radius: 16px 0 0 16px;
     border-right: none;
@@ -3602,6 +3700,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     flex-direction: row;
     align-items: stretch;
 }
+
 .phone-prefix-inside {
     position: absolute;
     right: 18px;
@@ -3614,6 +3713,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     letter-spacing: 1px;
     display: none;
 }
+
 .phone-prefix {
     background: #f5f4f1;
     border: 2px solid #eee;
@@ -3631,6 +3731,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     line-height: 48px;
     box-sizing: border-box;
 }
+
 .recharge-phone-input {
     border-radius: 0 16px 16px 0;
     border-left: none;
@@ -3650,10 +3751,12 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     margin: 0;
     box-sizing: border-box;
 }
+
 .phone-input-wrapper .recharge-phone-input:focus {
     border-color: var(--accent-200);
     z-index: 2;
 }
+
 .phone-input-wrapper .phone-prefix {
     border-color: #eee;
     z-index: 1;
@@ -3678,18 +3781,21 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     cursor: pointer;
     padding: 1.5rem 1rem 1.2rem 1rem;
 }
-.home-card:hover {
-    box-shadow: 0 8px 32px 0 rgba(0,102,140,0.18), 0 0 0 4px var(--accent-100);
-    border: 2.5px solid var(--accent-100);
-    transform: translateY(-8px) scale(1.04);
-    z-index: 3;
-}
-.home-card.active {
-    box-shadow: 0 8px 32px 0 rgba(0,102,140,0.22), 0 0 0 4px var(--accent-200);
-    border: 2.5px solid var(--accent-200);
-    z-index: 4;
-    transform: scale(1.05);
-}
+
+    .home-card:hover {
+        box-shadow: 0 8px 32px 0 rgba(0,102,140,0.18), 0 0 0 4px var(--accent-100);
+        border: 2.5px solid var(--accent-100);
+        transform: translateY(-8px) scale(1.04);
+        z-index: 3;
+    }
+
+    .home-card.active {
+        box-shadow: 0 8px 32px 0 rgba(0,102,140,0.22), 0 0 0 4px var(--accent-200);
+        border: 2.5px solid var(--accent-200);
+        z-index: 4;
+        transform: scale(1.05);
+    }
+
 .home-card-img-wrapper {
     display: flex;
     align-items: center;
@@ -3704,10 +3810,12 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     border: 3px solid #eaf6fd;
     transition: box-shadow 0.18s, border 0.18s;
 }
-.home-card-img-wrapper.active {
-    box-shadow: 0 0 0 8px var(--accent-100), 0 8px 32px 0 rgba(0,102,140,0.18);
-    border: 3px solid var(--accent-200);
-}
+
+    .home-card-img-wrapper.active {
+        box-shadow: 0 0 0 8px var(--accent-100), 0 8px 32px 0 rgba(0,102,140,0.18);
+        border: 3px solid var(--accent-200);
+    }
+
 .home-card-title {
     font-family: 'Bahnschrift', Arial, Helvetica, sans-serif;
     font-size: 2rem;
@@ -3757,10 +3865,10 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     align-items: center;
 }
 
-.dialog-header h2 {
-    margin: 0;
-    font-size: 1.5rem;
-}
+    .dialog-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
 
 .close-button {
     background: none;
@@ -3772,9 +3880,9 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     transition: transform 0.2s;
 }
 
-.close-button:hover {
-    transform: scale(1.1);
-}
+    .close-button:hover {
+        transform: scale(1.1);
+    }
 
 .dialog-content {
     padding: 1.5rem;
@@ -3803,11 +3911,11 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     flex: 1;
 }
 
-.product-details h3 {
-    margin: 0 0 0.5rem 0;
-    color: #333;
-    font-size: 1.2rem;
-}
+    .product-details h3 {
+        margin: 0 0 0.5rem 0;
+        color: #333;
+        font-size: 1.2rem;
+    }
 
 .price {
     font-size: 1.25rem;
@@ -3825,28 +3933,28 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     border-top: 1px solid #eee;
 }
 
-.dialog-footer .btn {
-    min-width: 120px;
-    font-size: 1rem;
-    padding: 0.5rem 1rem;
-    transition: all 0.3s ease;
-}
+    .dialog-footer .btn {
+        min-width: 120px;
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+    }
 
-.dialog-footer .btn-success {
-    background: #00668c;
-    border-color: #00668c;
-}
+    .dialog-footer .btn-success {
+        background: #00668c;
+        border-color: #00668c;
+    }
 
-.dialog-footer .btn-success:hover {
-    background: #005070;
-    border-color: #005070;
-    transform: translateY(-2px);
-}
+        .dialog-footer .btn-success:hover {
+            background: #005070;
+            border-color: #005070;
+            transform: translateY(-2px);
+        }
 
-.dialog-footer .btn-secondary:hover {
-    background: #e2e6ea;
-    transform: translateY(-2px);
-}
+    .dialog-footer .btn-secondary:hover {
+        background: #e2e6ea;
+        transform: translateY(-2px);
+    }
 
 /* Dialog Container Animation */
 .dialog-container {
@@ -3868,8 +3976,13 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideIn {
@@ -3877,9 +3990,32 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
         transform: translateY(-20px);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
     }
 }
 
+/* اجعل الشريط العلوي والجانبي يبدأان من الأعلى */
+.main-header {
+    top: 0 !important;
+    position: fixed;
+    width: 100%;
+    z-index: 1030;
+}
+
+.main-sidebar {
+    top: 0 !important;
+    position: fixed;
+    height: 100%;
+    right: 0;
+    z-index: 1020;
+}
+
+.content-wrapper {
+    margin-top: 56px; /* عدل الرقم حسب ارتفاع الشريط العلوي */
+    margin-right: 250px; /* عدل الرقم حسب عرض الشريط الجانبي */
+}
+
+/* يمكنك تعديل الأرقام حسب التصميم الفعلي */
