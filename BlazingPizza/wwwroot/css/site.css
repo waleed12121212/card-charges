@@ -3736,3 +3736,150 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     z-index: 10;
 }
 
+/* Dialog Styles */
+.dialog {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 500px;
+    padding: 0;
+    overflow: hidden;
+    direction: rtl;
+}
+
+.dialog-header {
+    background: #00668c;
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dialog-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0 0.5rem;
+    transition: transform 0.2s;
+}
+
+.close-button:hover {
+    transform: scale(1.1);
+}
+
+.dialog-content {
+    padding: 1.5rem;
+}
+
+.product-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.product-image {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    padding: 0.5rem;
+    background: white;
+}
+
+.product-details {
+    flex: 1;
+}
+
+.product-details h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.price {
+    font-size: 1.25rem;
+    color: #00668c;
+    font-weight: bold;
+    margin: 0;
+}
+
+.dialog-footer {
+    padding: 1rem;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.dialog-footer .btn {
+    min-width: 120px;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.dialog-footer .btn-success {
+    background: #00668c;
+    border-color: #00668c;
+}
+
+.dialog-footer .btn-success:hover {
+    background: #005070;
+    border-color: #005070;
+    transform: translateY(-2px);
+}
+
+.dialog-footer .btn-secondary:hover {
+    background: #e2e6ea;
+    transform: translateY(-2px);
+}
+
+/* Dialog Container Animation */
+.dialog-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.dialog {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+

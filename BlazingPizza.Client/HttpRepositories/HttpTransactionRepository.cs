@@ -12,20 +12,29 @@ public class HttpTransactionRepository : ITransactionRepository
     {
         _httpClient = httpClient;
     }
+
     public async Task<List<Transaction>> GetAllAsync()
     {
         return await _httpClient.GetFromJsonAsync<List<Transaction>>("api/transaction") ?? new();
     }
+
     public async Task<List<Transaction>> GetByUserIdAsync(string userId)
     {
         return await _httpClient.GetFromJsonAsync<List<Transaction>>($"api/transaction/user/{userId}") ?? new();
     }
+
     public async Task<Transaction?> GetByIdAsync(int id)
     {
         return await _httpClient.GetFromJsonAsync<Transaction>($"api/transaction/{id}");
     }
+
     public async Task AddAsync(Transaction transaction)
     {
-        await _httpClient.PostAsJsonAsync("api/transaction", transaction);
+        var response = await _httpClient.PostAsJsonAsync("api/transaction", transaction);
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Failed to add transaction: {error}");
+        }
     }
 } 

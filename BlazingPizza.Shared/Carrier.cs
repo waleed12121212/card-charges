@@ -14,4 +14,8 @@ public class Carrier
     public bool AdsSendWP { get; set; }
     public int? InvoiceCategory { get; set; }
     public string imageName { get; set; }
+
+    // Properties for UI display
+    public string Name => carrierName;
+    public string ImageUrl => $"img/carrier/{imageName}";
 }

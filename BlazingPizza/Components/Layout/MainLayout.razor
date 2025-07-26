@@ -16,10 +16,13 @@
             </NavLink>
             @if (HttpContextAccessor.HttpContext.User?.Identity?.IsAuthenticated == true)
             {
-                <NavLink href="myorders" class="nav-tab">
-                    <img src="img/bike.svg" />
-                    <div>طلباتي</div>
-                </NavLink>
+                @if (HttpContextAccessor.HttpContext.User.IsInRole("Admin"))
+                {
+                    <NavLink href="/admin/dashboard" class="nav-tab">
+                        <img src="img/admin.png" />
+                        <div>الإدارة</div>
+                    </NavLink>
+                }
             }
         </div>
     </div>

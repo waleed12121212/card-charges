@@ -1,0 +1,67 @@
+@page "/admin/user/edit/{id}"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@using System.ComponentModel.DataAnnotations
+@attribute [Authorize(Roles = "Admin")]
+@inject BlazingPizza.PizzaStoreContext Db
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject Microsoft.AspNetCore.Components.NavigationManager Nav
+@layout BlazingPizza.Components.Layout.AdminLayout
+
+<h3>تعديل بيانات المستخدم</h3>
+@if (user == null)
+{
+    <p>جاري التحميل...</p>
+}
+else
+{
+    <EditForm Model="user" OnValidSubmit="UpdateUser">
+        <DataAnnotationsValidator />
+        <div class="mb-3">
+            <label>اسم المستخدم</label>
+            <InputText class="form-control" @bind-Value="user.UserName" />
+        </div>
+        <div class="mb-3">
+            <label>البريد الإلكتروني</label>
+            <InputText class="form-control" @bind-Value="user.Email" />
+        </div>
+        <div class="mb-3">
+            <label>رقم الجوال</label>
+            <InputText class="form-control" @bind-Value="user.PhoneNumber" />
+        </div>
+        <div class="mb-3">
+            <label>الدور</label>
+            <InputSelect class="form-control" @bind-Value="user.Role">
+                <option value="User">User</option>
+                <option value="Admin">Admin</option>
+            </InputSelect>
+        </div>
+        <button class="btn btn-primary" type="submit">حفظ التعديلات</button>
+        @if (!string.IsNullOrEmpty(Message))
+        {
+            <div class="text-danger">@Message</div>
+        }
+    </EditForm>
+}
+
+@code {
+    [Parameter] public string id { get; set; }
+    CarrierStoreUser? user;
+    string? Message;
+    protected override async Task OnInitializedAsync( )
+    {
+        user = await Db.Users.FindAsync(id);
+        if (user == null)
+        {
+            Message = "المستخدم غير موجود";
+        }
+    }
+    private async Task UpdateUser( )
+    {
+        if (user == null) return;
+        Db.Users.Update(user);
+        await Db.SaveChangesAsync();
+        NavigationManager.NavigateTo("/admin/user/index");
+    }
+} 

@@ -1,16 +1,15 @@
-@page "/Account/Register"
-
-@using System.ComponentModel.DataAnnotations
-@using Microsoft.EntityFrameworkCore
-@using BCrypt.Net
+﻿@page "/admin/user/create"
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations
 @inject BlazingPizza.PizzaStoreContext Db
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor HttpContextAccessor
-
-<PageTitle>Register</PageTitle>
-
 @attribute [Authorize]
+@layout BlazingPizza.Components.Layout.AdminLayout
+
+<PageTitle>إضافة مستخدم جديد</PageTitle>
+
 @if (!IsAdmin)
 {
     <div class="alert alert-danger" style="margin:2rem; text-align:center;">@Message</div>
@@ -19,8 +18,9 @@ else
 {
     <div class="login-container">
         <div class="login-left">
-            <div class="login-title">إنشاء حساب</div>
-            <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register">
+            <div class="login-title">إضافة مستخدم جديد</div>
+            <EditForm Model="Input" OnValidSubmit="CreateUser" FormName="create-user" method="post">
+                <AntiforgeryToken />
                 <DataAnnotationsValidator />
                 <label class="login-form-label" for="username">اسم المستخدم</label>
                 <InputText @bind-Value="Input.UserName" class="login-input" autocomplete="username" aria-required="true" placeholder="اسم المستخدم" />
@@ -28,15 +28,19 @@ else
                 <label class="login-form-label" for="password">كلمة المرور</label>
                 <InputText type="password" @bind-Value="Input.Password" class="login-input" autocomplete="new-password" aria-required="true" placeholder="كلمة المرور" />
                 <ValidationMessage For="() => Input.Password" class="text-danger" />
-                <!-- حقل الإيميل (اختياري) -->
                 <label class="login-form-label" for="email">البريد الإلكتروني (اختياري)</label>
                 <InputText @bind-Value="Input.Email" class="login-input" autocomplete="email" placeholder="البريد الإلكتروني" />
                 <ValidationMessage For="() => Input.Email" class="text-danger" />
-                <!-- حقل رقم الهاتف (اختياري) -->
                 <label class="login-form-label" for="phone">رقم الجوال (اختياري)</label>
                 <InputText @bind-Value="Input.PhoneNumber" class="login-input" autocomplete="tel" placeholder="رقم الجوال" />
                 <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
-                <button type="submit" class="login-btn">تسجيل</button>
+                <label class="login-form-label" for="role">الدور</label>
+                <InputSelect @bind-Value="Input.Role" class="login-input">
+                    <option value="User">User</option>
+                    <option value="Admin">Admin</option>
+                </InputSelect>
+                <ValidationMessage For="() => Input.Role" class="text-danger" />
+                <button type="submit" class="login-btn">إضافة</button>
                 @if (!string.IsNullOrEmpty(Message))
                 {
                     <div class="text-danger">@Message</div>
@@ -47,13 +51,8 @@ else
 }
 
 @code {
-    [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
-
-    [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
-
-    private string? Message { get; set; }
+    private string? Message;
     private bool IsAdmin { get; set; } = false;
 
     protected override void OnInitialized()
@@ -66,9 +65,8 @@ else
         }
     }
 
-    public async Task RegisterUser(EditContext editContext)
+    private async Task CreateUser()
     {
-        // تحقق من أن المستخدم الحالي هو Admin فقط
         var user = HttpContextAccessor.HttpContext?.User;
         if (user == null || !user.Identity.IsAuthenticated || !user.IsInRole("Admin"))
         {
@@ -81,32 +79,30 @@ else
             return;
         }
         var newUser = new CarrierStoreUser
-            {
-                UserName = Input.UserName ,
-                PasswordHash = BCrypt.HashPassword(Input.Password) ,
-                Email = Input.Email ,
-                PhoneNumber = Input.PhoneNumber
-            };
+        {
+            UserName = Input.UserName,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(Input.Password),
+            Email = Input.Email,
+            PhoneNumber = Input.PhoneNumber,
+            Role = Input.Role
+        };
         Db.Users.Add(newUser);
         await Db.SaveChangesAsync();
-        NavigationManager.NavigateTo(ReturnUrl ?? "/");
+        NavigationManager.NavigateTo("/admin/user/index");
     }
 
-    private sealed class InputModel
+    public class InputModel
     {
         [Required]
-        public string UserName { get; set; } = "";
-
+        public string UserName { get; set; } = string.Empty;
         [Required]
-        [StringLength(100 , ErrorMessage = "كلمة المرور يجب أن تكون بين 6 و100 حرف." , MinimumLength = 6)]
-        [DataType(DataType.Password)]
-        [Display(Name = "Password")]
-        public string Password { get; set; } = "";
-
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "كلمة المرور يجب أن تكون بين 6 و100 حرف.")]
+        public string Password { get; set; } = string.Empty;
         [EmailAddress]
         public string? Email { get; set; }
-
         [Phone]
         public string? PhoneNumber { get; set; }
+        [Required]
+        public string Role { get; set; } = "User";
     }
 }

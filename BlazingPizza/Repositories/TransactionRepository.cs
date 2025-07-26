@@ -1,3 +1,4 @@
+using BlazingPizza;
 using BlazingPizza.Shared;
 using BlazingPizza.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -11,26 +12,19 @@ public class TransactionRepository : ITransactionRepository
     {
         _context = context;
     }
-    public async Task<List<Transaction>> GetAllAsync()
+    public async Task<List<Transaction>> GetAllAsync( )
     {
-        return await _context.Transactions
-            .Include(t => t.Recharge)
-            .Include(t => t.RefillCardOrder)
-            .ToListAsync();
+        return await _context.Transactions.ToListAsync();
     }
     public async Task<List<Transaction>> GetByUserIdAsync(string userId)
     {
         return await _context.Transactions
             .Where(t => t.UserId == userId)
-            .Include(t => t.Recharge)
-            .Include(t => t.RefillCardOrder)
             .ToListAsync();
     }
     public async Task<Transaction?> GetByIdAsync(int id)
     {
         return await _context.Transactions
-            .Include(t => t.Recharge)
-            .Include(t => t.RefillCardOrder)
             .FirstOrDefaultAsync(t => t.Id == id);
     }
     public async Task AddAsync(Transaction transaction)
@@ -38,4 +32,4 @@ public class TransactionRepository : ITransactionRepository
         _context.Transactions.Add(transaction);
         await _context.SaveChangesAsync();
     }
-} 
+}

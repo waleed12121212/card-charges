@@ -1,3 +1,4 @@
+using BlazingPizza;
 using BlazingPizza.Shared;
 using BlazingPizza.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ public class RechargeRepository : IRechargeRepository
     {
         _context = context;
     }
-    public async Task<List<Recharge>> GetAllAsync()
+    public async Task<List<Recharge>> GetAllAsync( )
     {
         return await _context.Recharges.ToListAsync();
     }
@@ -28,4 +29,4 @@ public class RechargeRepository : IRechargeRepository
         _context.Recharges.Add(recharge);
         await _context.SaveChangesAsync();
     }
-} 
+}

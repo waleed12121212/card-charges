@@ -45,9 +45,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddDbContext<PizzaStoreContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<OrderState>();
 builder.Services.AddScoped<ICarrierRepository , CarrierRepository>();
-builder.Services.AddScoped<IOrderRepository , OrderRepository>();
 builder.Services.AddScoped<INotificationRepository , NotificationRepository>();
 builder.Services.AddScoped<IRefillCardRepository , RefillCardRepository>();
 builder.Services.AddScoped<IRechargeRepository , RechargeRepository>();

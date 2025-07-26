@@ -1,3 +1,5 @@
+using BlazingPizza;
+using BlazingPizza.Shared;
 using System.Threading.Tasks;
 
 public class NotificationRepository : INotificationRepository
@@ -20,4 +22,5 @@ public class NotificationRepository : INotificationRepository
         }
         await _context.SaveChangesAsync();
     }
+
 }

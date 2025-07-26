@@ -1,0 +1,70 @@
+﻿@page "/admin/user/index"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@inject BlazingPizza.PizzaStoreContext Db
+@inject IJSRuntime JS
+@attribute [Authorize(Roles = "Admin")]
+@layout BlazingPizza.Components.Layout.AdminLayout
+
+<h3>قائمة المستخدمين</h3>
+@if (users == null)
+{
+    <p>جاري التحميل...</p>
+}
+else if (!users.Any())
+{
+    <p>لا يوجد مستخدمون.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>اسم المستخدم</th>
+                <th>البريد الإلكتروني</th>
+                <th>رقم الجوال</th>
+                <th>الدور</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>@user.PhoneNumber</td>
+                    <td>@user.Role</td>
+                    <td>
+                        <a class="btn btn-sm btn-warning" href="/admin/user/edit/@user.Id">تعديل</a>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteUser(user.Id)">حذف</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    List<CarrierStoreUser>? users;
+    protected override async Task OnInitializedAsync( )
+    {
+        users = await Db.Users.ToListAsync();
+    }
+
+    private async Task DeleteUser(string id)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm" , "هل أنت متأكد من حذف هذا المستخدم؟"))
+            return;
+        var user = await Db.Users.FindAsync(id);
+        if (user != null)
+        {
+            Db.Users.Remove(user);
+            await Db.SaveChangesAsync();
+            users = await Db.Users.ToListAsync();
+            StateHasChanged();
+        }
+    }
+}

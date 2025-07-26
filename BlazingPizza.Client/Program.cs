@@ -17,9 +17,7 @@ builder.Services.AddScoped<HttpClient>(sp =>
         BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
     });
 
-builder.Services.AddScoped<OrderState>();
 builder.Services.AddScoped<IRefillCardRepository , HttpRefillCardRepository>();
-builder.Services.AddScoped<IOrderRepository , HttpOrderRepository>();
 builder.Services.AddScoped<ICarrierRepository , HttpCarrierRepository>();
 builder.Services.AddScoped<INotificationRepository , HttpNotificationRepository>();
 builder.Services.AddScoped<ITransactionRepository , HttpTransactionRepository>();
