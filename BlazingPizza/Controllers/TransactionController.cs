@@ -7,6 +7,7 @@ namespace BlazingPizza.Controllers;
 
 [Route("api/transaction")]
 [ApiController]
+[IgnoreAntiforgeryToken]
 public class TransactionController : ControllerBase
 {
     private readonly ITransactionRepository _transactionRepo;

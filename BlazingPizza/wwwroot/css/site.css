@@ -4005,17 +4005,34 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     z-index: 1030;
 }
 
-.main-sidebar {
-    top: 0 !important;
-    position: fixed;
-    height: 100%;
-    right: 0;
-    z-index: 1020;
+/* Sidebar Toggle Styles */
+.sidebar-collapse .app-sidebar {
+    margin-left: -250px;
 }
 
-.content-wrapper {
-    margin-top: 56px; /* عدل الرقم حسب ارتفاع الشريط العلوي */
-    margin-right: 250px; /* عدل الرقم حسب عرض الشريط الجانبي */
+.sidebar-collapse .app-main {
+    margin-left: 0;
 }
 
-/* يمكنك تعديل الأرقام حسب التصميم الفعلي */
+.sidebar-open .app-sidebar {
+    margin-left: 0;
+}
+
+.sidebar-open .app-main {
+    margin-left: 250px;
+}
+
+@media (max-width: 991.98px) {
+    .sidebar-collapse .app-sidebar {
+        margin-left: -250px;
+    }
+    
+    .sidebar-open .app-sidebar {
+        margin-left: 0;
+    }
+    
+    .sidebar-open .app-main {
+        margin-left: 0;
+    }
+}
+

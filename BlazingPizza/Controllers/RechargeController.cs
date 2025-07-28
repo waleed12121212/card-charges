@@ -5,6 +5,7 @@ using BlazingPizza.Shared.Interfaces;
 
 [Route("api/recharge")]
 [ApiController]
+[IgnoreAntiforgeryToken]
 public class RechargeController : ControllerBase
 {
     private readonly IRechargeRepository _rechargeRepo;

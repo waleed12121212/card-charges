@@ -1,0 +1,161 @@
+@namespace BlazingPizza.Components.Pages.Admin.Carrier
+@page "/admin/carrier/index"
+@using BlazingPizza.Shared
+@using BlazingPizza
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@layout BlazingPizza.Components.Layout.AdminLayout
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">الشركات</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-left">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard">الرئيسية</a></li>
+                    <li class="breadcrumb-item active">الشركات</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">قائمة الشركات</h3>
+                        <div class="card-tools">
+                            <a href="/admin/carrier/create" class="btn btn-primary">
+                                <i class="bi bi-plus"></i> اضافة شركة جديدة
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if (carriers == null)
+                        {
+                            <div class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">جاري التحميل...</span>
+                                </div>
+                            </div>
+                        }
+                        else if (!carriers.Any())
+                        {
+                            <div class="alert alert-info text-center">
+                                لا توجد شركات مسجلة
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>اسم الشركة</th>
+                                            <th>الحالة</th>
+                                            <th>نسبة البيع بالجملة</th>
+                                            <th>البريد الإلكتروني</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var carrier in carriers)
+                                        {
+                                            <tr>
+                                                <td>@carrier.id</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        @if (!string.IsNullOrEmpty(carrier.imageName))
+                                                        {
+                                                            <img src="@carrier.ImageUrl" alt="@carrier.carrierName" 
+                                                                 class="img-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                                        }
+                                                        <span>@carrier.carrierName</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    @if (carrier.isActive)
+                                                    {
+                                                        <span class="badge badge-success">نشط</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge badge-danger">غير نشط</span>
+                                                    }
+                                                    @if (carrier.UnderMaintenance == true)
+                                                    {
+                                                        <span class="badge badge-warning">تحت الصيانة</span>
+                                                    }
+                                                </td>
+                                                <td>@carrier.wholeSalePercent%</td>
+                                                <td>@carrier.internetSubscribEmail</td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <a href="/admin/carrier/edit/@carrier.id" class="btn btn-sm btn-info">
+                                                            <i class="bi bi-pencil"></i> تعديل
+                                                        </a>
+                                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => DeleteCarrier(carrier.id)">
+                                                            <i class="bi bi-trash"></i> حذف
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<BlazingPizza.Shared.Carrier> carriers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCarriers();
+    }
+
+    private async Task LoadCarriers()
+    {
+        try
+        {
+            carriers = await Http.GetFromJsonAsync<List<BlazingPizza.Shared.Carrier>>("api/carriers");
+        }
+        catch (Exception ex)
+        {
+            // Handle error - you might want to show a toast notification
+            Console.WriteLine($"Error loading carriers: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteCarrier(int id)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", "هل أنت متأكد من حذف هذه الشركة؟"))
+        {
+            try
+            {
+                var response = await Http.DeleteAsync($"api/carriers/{id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    await LoadCarriers();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting carrier: {ex.Message}");
+            }
+        }
+    }
+} 

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 
 [Route("api/refillcard")]
 [ApiController]
+[IgnoreAntiforgeryToken]
 public class RefillCardController : ControllerBase
 {
     private readonly IRefillCardRepository _refillCardRepo;

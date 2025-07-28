@@ -5,8 +5,10 @@
 @inject BlazingPizza.PizzaStoreContext Db
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor HttpContextAccessor
-@attribute [Authorize]
+@inject IJSRuntime JSRuntime
+@attribute [Authorize(Roles = "Admin")]
 @layout BlazingPizza.Components.Layout.AdminLayout
+@rendermode InteractiveServer
 
 <PageTitle>إضافة مستخدم جديد</PageTitle>
 
@@ -19,31 +21,64 @@ else
     <div class="login-container">
         <div class="login-left">
             <div class="login-title">إضافة مستخدم جديد</div>
-            <EditForm Model="Input" OnValidSubmit="CreateUser" FormName="create-user" method="post">
-                <AntiforgeryToken />
+            
+            @* إزالة method="post" و FormName و AntiforgeryToken - استخدام Interactive Server فقط *@
+            <EditForm Model="Input" OnValidSubmit="CreateUser">
                 <DataAnnotationsValidator />
-                <label class="login-form-label" for="username">اسم المستخدم</label>
-                <InputText @bind-Value="Input.UserName" class="login-input" autocomplete="username" aria-required="true" placeholder="اسم المستخدم" />
-                <ValidationMessage For="() => Input.UserName" class="text-danger" />
-                <label class="login-form-label" for="password">كلمة المرور</label>
-                <InputText type="password" @bind-Value="Input.Password" class="login-input" autocomplete="new-password" aria-required="true" placeholder="كلمة المرور" />
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
-                <label class="login-form-label" for="email">البريد الإلكتروني (اختياري)</label>
-                <InputText @bind-Value="Input.Email" class="login-input" autocomplete="email" placeholder="البريد الإلكتروني" />
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
-                <label class="login-form-label" for="phone">رقم الجوال (اختياري)</label>
-                <InputText @bind-Value="Input.PhoneNumber" class="login-input" autocomplete="tel" placeholder="رقم الجوال" />
-                <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
-                <label class="login-form-label" for="role">الدور</label>
-                <InputSelect @bind-Value="Input.Role" class="login-input">
-                    <option value="User">User</option>
-                    <option value="Admin">Admin</option>
-                </InputSelect>
-                <ValidationMessage For="() => Input.Role" class="text-danger" />
-                <button type="submit" class="login-btn">إضافة</button>
+                
+                <div class="mb-3">
+                    <label class="login-form-label" for="username">اسم المستخدم</label>
+                    <InputText @bind-Value="Input.UserName" class="login-input" 
+                              autocomplete="username" aria-required="true" placeholder="اسم المستخدم" />
+                    <ValidationMessage For="() => Input.UserName" class="text-danger" />
+                </div>
+                
+                <div class="mb-3">
+                    <label class="login-form-label" for="password">كلمة المرور</label>
+                    <InputText type="password" @bind-Value="Input.Password" class="login-input" 
+                              autocomplete="new-password" aria-required="true" placeholder="كلمة المرور" />
+                    <ValidationMessage For="() => Input.Password" class="text-danger" />
+                </div>
+                
+                <div class="mb-3">
+                    <label class="login-form-label" for="email">البريد الإلكتروني (اختياري)</label>
+                    <InputText @bind-Value="Input.Email" class="login-input" 
+                              autocomplete="email" placeholder="البريد الإلكتروني" />
+                    <ValidationMessage For="() => Input.Email" class="text-danger" />
+                </div>
+                
+                <div class="mb-3">
+                    <label class="login-form-label" for="phone">رقم الجوال (اختياري)</label>
+                    <InputText @bind-Value="Input.PhoneNumber" class="login-input" 
+                              autocomplete="tel" placeholder="رقم الجوال" />
+                    <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
+                </div>
+                
+                <div class="mb-3">
+                    <label class="login-form-label" for="role">الدور</label>
+                    <InputSelect @bind-Value="Input.Role" class="login-input">
+                        <option value="User">User</option>
+                        <option value="Admin">Admin</option>
+                    </InputSelect>
+                    <ValidationMessage For="() => Input.Role" class="text-danger" />
+                </div>
+                
+                <button type="submit" class="login-btn" disabled="@isSubmitting">
+                    @if (isSubmitting)
+                    {
+                        <span>جaري الإضافة...</span>
+                    }
+                    else
+                    {
+                        <span>إضافة</span>
+                    }
+                </button>
+                
                 @if (!string.IsNullOrEmpty(Message))
                 {
-                    <div class="text-danger">@Message</div>
+                    <div class="alert @(IsSuccess ? "alert-success" : "alert-danger") mt-3">
+                        @Message
+                    </div>
                 }
             </EditForm>
         </div>
@@ -54,6 +89,8 @@ else
     private InputModel Input { get; set; } = new();
     private string? Message;
     private bool IsAdmin { get; set; } = false;
+    private bool isSubmitting = false;
+    private bool IsSuccess = false;
 
     protected override void OnInitialized()
     {
@@ -67,42 +104,87 @@ else
 
     private async Task CreateUser()
     {
-        var user = HttpContextAccessor.HttpContext?.User;
-        if (user == null || !user.Identity.IsAuthenticated || !user.IsInRole("Admin"))
+        isSubmitting = true;
+        Message = string.Empty;
+        IsSuccess = false;
+        StateHasChanged();
+
+        try
         {
-            Message = "فقط المستخدم الذي لديه صلاحية Admin يمكنه إنشاء حساب جديد.";
-            return;
+            var user = HttpContextAccessor.HttpContext?.User;
+            if (user == null || !user.Identity.IsAuthenticated || !user.IsInRole("Admin"))
+            {
+                Message = "فقط المستخدم الذي لديه صلاحية Admin يمكنه إنشاء حساب جديد.";
+                return;
+            }
+
+            // التحقق من وجود اسم المستخدم
+            if (await Db.Users.AnyAsync(u => u.UserName == Input.UserName))
+            {
+                Message = "اسم المستخدم مستخدم بالفعل.";
+                return;
+            }
+
+            // التحقق من البريد الإلكتروني إذا تم إدخاله
+            if (!string.IsNullOrEmpty(Input.Email) && await Db.Users.AnyAsync(u => u.Email == Input.Email))
+            {
+                Message = "البريد الإلكتروني مستخدم بالفعل.";
+                return;
+            }
+
+            // إنشاء المستخدم الجديد
+            var newUser = new CarrierStoreUser
+            {
+                UserName = Input.UserName,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(Input.Password),
+                Email = Input.Email,
+                PhoneNumber = Input.PhoneNumber,
+                Role = Input.Role
+            };
+
+            Db.Users.Add(newUser);
+            await Db.SaveChangesAsync();
+            
+            Message = "تم إنشاء المستخدم بنجاح!";
+            IsSuccess = true;
+            
+            // إعادة تعيين النموذج
+            Input = new InputModel();
+            StateHasChanged();
+            
+            // التوجه إلى صفحة المستخدمين بعد ثانيتين
+            await Task.Delay(2000);
+            NavigationManager.NavigateTo("/admin/user/index");
         }
-        if (await Db.Users.AnyAsync(u => u.UserName == Input.UserName))
+        catch (Exception ex)
         {
-            Message = "اسم المستخدم مستخدم بالفعل.";
-            return;
+            Message = $"خطأ في إنشاء المستخدم: {ex.Message}";
+            IsSuccess = false;
         }
-        var newUser = new CarrierStoreUser
+        finally
         {
-            UserName = Input.UserName,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(Input.Password),
-            Email = Input.Email,
-            PhoneNumber = Input.PhoneNumber,
-            Role = Input.Role
-        };
-        Db.Users.Add(newUser);
-        await Db.SaveChangesAsync();
-        NavigationManager.NavigateTo("/admin/user/index");
+            isSubmitting = false;
+            StateHasChanged();
+        }
     }
 
     public class InputModel
     {
-        [Required]
+        [Required(ErrorMessage = "اسم المستخدم مطلوب")]
+        [StringLength(50, MinimumLength = 3, ErrorMessage = "اسم المستخدم يجب أن يكون بين 3 و50 حرف")]
         public string UserName { get; set; } = string.Empty;
-        [Required]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "كلمة المرور يجب أن تكون بين 6 و100 حرف.")]
+        
+        [Required(ErrorMessage = "كلمة المرور مطلوبة")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "كلمة المرور يجب أن تكون بين 6 و100 حرف")]
         public string Password { get; set; } = string.Empty;
-        [EmailAddress]
+        
+        [EmailAddress(ErrorMessage = "البريد الإلكتروني غير صحيح")]
         public string? Email { get; set; }
-        [Phone]
+        
+        [Phone(ErrorMessage = "رقم الجوال غير صحيح")]
         public string? PhoneNumber { get; set; }
-        [Required]
+        
+        [Required(ErrorMessage = "الدور مطلوب")]
         public string Role { get; set; } = "User";
     }
 }

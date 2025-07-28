@@ -1,0 +1,330 @@
+@namespace BlazingPizza.Components.Pages.Admin.Carrier
+@page "/admin/carrier/edit/{Id:int}"
+@using BlazingPizza.Shared
+@using BlazingPizza
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@layout BlazingPizza.Components.Layout.AdminLayout
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">تعديل الشركة</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-left">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/carrier/index">الشركات</a></li>
+                    <li class="breadcrumb-item active">تعديل الشركة</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">معلومات الشركة</h3>
+                    </div>
+                    @if (carrier != null)
+                    {
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="carrierName">اسم الشركة *</label>
+                                        <input type="text" id="carrierName" class="form-control" value="@carrier.carrierName" @oninput="@((e) => carrier.carrierName = e.Value?.ToString() ?? "")" />
+                                        @if (showValidationError && string.IsNullOrWhiteSpace(carrier.carrierName))
+                                        {
+                                            <small class="text-danger">اسم الشركة مطلوب</small>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="internetSubscribEmail">البريد الإلكتروني</label>
+                                        <input type="email" id="internetSubscribEmail" class="form-control" value="@carrier.internetSubscribEmail" @oninput="@((e) => carrier.internetSubscribEmail = e.Value?.ToString() ?? "")" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="wholeSalePercent">نسبة البيع بالجملة (%)</label>
+                                        <input type="number" id="wholeSalePercent" class="form-control" value="@carrier.wholeSalePercent" @oninput="@((e) => { if (double.TryParse(e.Value?.ToString(), out var val)) carrier.wholeSalePercent = val; })" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="InvoiceCategory">فئة الفاتورة</label>
+                                        <input type="number" id="InvoiceCategory" class="form-control" value="@carrier.InvoiceCategory" @oninput="@((e) => { if (int.TryParse(e.Value?.ToString(), out var val)) carrier.InvoiceCategory = val; })" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="ImeiUserName">اسم مستخدم IMEI</label>
+                                        <input type="text" id="ImeiUserName" class="form-control" value="@carrier.ImeiUserName" @oninput="@((e) => carrier.ImeiUserName = e.Value?.ToString() ?? "")" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="ImeiAPIKey">مفتاح API لـ IMEI</label>
+                                        <input type="text" id="ImeiAPIKey" class="form-control" value="@carrier.ImeiAPIKey" @oninput="@((e) => carrier.ImeiAPIKey = e.Value?.ToString() ?? "")" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="ImeiAPIURL">رابط API لـ IMEI</label>
+                                        <input type="text" id="ImeiAPIURL" class="form-control" value="@carrier.ImeiAPIURL" @oninput="@((e) => carrier.ImeiAPIURL = e.Value?.ToString() ?? "")" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="APIPassword">كلمة مرور API</label>
+                                        <input type="text" id="APIPassword" class="form-control" value="@carrier.APIPassword" @oninput="@((e) => carrier.APIPassword = e.Value?.ToString() ?? "")" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="imageFile">صورة الشركة</label>
+                                        <InputFile id="imageFile" class="form-control" OnChange="OnImageFileChanged" accept=".jpg,.jpeg,.png,.gif" />
+                                        <small class="form-text text-muted">يُسمح بالصور بصيغ: JPG, JPEG, PNG, GIF</small>
+                                        @if (!string.IsNullOrEmpty(carrier.imageName))
+                                        {
+                                            <div class="mt-2">
+                                                <img src="@carrier.ImageUrl" alt="@carrier.carrierName" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+                                                <small class="d-block text-muted">الصورة الحالية: @carrier.imageName</small>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(uploadedFileName))
+                                        {
+                                            <div class="mt-2">
+                                                <small class="text-success">سيتم استبدال الصورة بـ: @uploadedFileName</small>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" id="isActive" class="custom-control-input" checked="@carrier.isActive" @onchange="@((e) => carrier.isActive = (bool)(e.Value ?? false))" />
+                                            <label class="custom-control-label" for="isActive">نشط</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" id="UnderMaintenance" class="custom-control-input" checked="@underMaintenanceValue" @onchange="@((e) => underMaintenanceValue = (bool)(e.Value ?? false))" />
+                                            <label class="custom-control-label" for="UnderMaintenance">تحت الصيانة</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" id="AdsSendSMS" class="custom-control-input" checked="@carrier.AdsSendSMS" @onchange="@((e) => carrier.AdsSendSMS = (bool)(e.Value ?? false))" />
+                                            <label class="custom-control-label" for="AdsSendSMS">إرسال إعلانات عبر SMS</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" id="AdsSendWP" class="custom-control-input" checked="@carrier.AdsSendWP" @onchange="@((e) => carrier.AdsSendWP = (bool)(e.Value ?? false))" />
+                                            <label class="custom-control-label" for="AdsSendWP">إرسال إعلانات عبر WhatsApp</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="#" class="btn btn-primary" @onclick="HandleValidSubmit" @onclick:preventDefault="true" style="@(isSubmitting ? "pointer-events: none; opacity: 0.6;" : "")">
+                                @if (isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span>جاري الحفظ...</span>
+                                }
+                                else
+                                {
+                                    <span>حفظ التغييرات</span>
+                                }
+                            </a>
+                            <a href="/admin/carrier/index" class="btn btn-secondary">إلغاء</a>
+                        </div>
+                    }
+                    else if (isLoading)
+                    {
+                        <div class="card-body text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">جاري التحميل...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card-body">
+                            <div class="alert alert-danger">
+                                لم يتم العثور على الشركة المطلوبة
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private BlazingPizza.Shared.Carrier? carrier;
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private bool underMaintenanceValue = false;
+    private IBrowserFile? selectedImageFile;
+    private string uploadedFileName = string.Empty;
+    private bool showValidationError = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCarrier();
+    }
+
+    private async Task LoadCarrier()
+    {
+        try
+        {
+            carrier = await Http.GetFromJsonAsync<BlazingPizza.Shared.Carrier>($"api/carriers/{Id}");
+            if (carrier != null)
+            {
+                underMaintenanceValue = carrier.UnderMaintenance ?? false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading carrier: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void OnImageFileChanged(InputFileChangeEventArgs e)
+    {
+        selectedImageFile = e.File;
+        uploadedFileName = e.File.Name;
+        StateHasChanged();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (carrier == null) return;
+
+        Console.WriteLine("HandleValidSubmit called in Edit");
+        await JSRuntime.InvokeVoidAsync("console.log", "HandleValidSubmit called in Edit");
+        await JSRuntime.InvokeVoidAsync("alert", "تم الضغط على الزر في صفحة التعديل!");
+
+        showValidationError = true;
+        StateHasChanged();
+
+        if (string.IsNullOrWhiteSpace(carrier.carrierName))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "اسم الشركة مطلوب");
+            return;
+        }
+
+        carrier.UnderMaintenance = underMaintenanceValue;
+
+        isSubmitting = true;
+        StateHasChanged();
+        
+        try
+        {
+            Console.WriteLine($"Updating carrier: {carrier.carrierName}");
+            await JSRuntime.InvokeVoidAsync("console.log", $"Updating carrier: {carrier.carrierName}");
+            
+            // Upload new image if selected
+            if (selectedImageFile != null)
+            {
+                var imageFileName = await UploadImage(selectedImageFile);
+                carrier.imageName = imageFileName;
+                Console.WriteLine($"Image uploaded: {imageFileName}");
+            }
+
+            var response = await Http.PutAsJsonAsync($"api/carriers/{Id}", carrier);
+            Console.WriteLine($"Response status: {response.StatusCode}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "تم حفظ التغييرات بنجاح");
+                Navigation.NavigateTo("/admin/carrier/index");
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error: {errorMessage}");
+                await JSRuntime.InvokeVoidAsync("alert", $"خطأ في حفظ التغييرات: {errorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"خطأ في حفظ التغييرات: {ex.Message}");
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task<string> UploadImage(IBrowserFile file)
+    {
+        var fileName = $"{Guid.NewGuid()}_{file.Name}";
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "carrier", fileName);
+        
+        // Ensure directory exists
+        var directory = Path.GetDirectoryName(path);
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory!);
+        }
+
+        using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024); // 5MB max
+        using var fileStream = File.Create(path);
+        await stream.CopyToAsync(fileStream);
+        
+        return fileName;
+    }
+} 
