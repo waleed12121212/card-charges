@@ -2,66 +2,185 @@
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Authorization
 @using System.ComponentModel.DataAnnotations
-@attribute [Authorize(Roles = "Admin")]
 @inject BlazingPizza.PizzaStoreContext Db
-@inject IJSRuntime JS
 @inject NavigationManager NavigationManager
-@inject Microsoft.AspNetCore.Components.NavigationManager Nav
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IJSRuntime JSRuntime
+@attribute [Authorize(Roles = "Admin")]
 @layout BlazingPizza.Components.Layout.AdminLayout
 
-<h3>تعديل بيانات المستخدم</h3>
-@if (user == null)
+<PageTitle>تعديل بيانات المستخدم</PageTitle>
+
+@if (!IsAdmin)
+{
+    <div class="alert alert-danger" style="margin:2rem; text-align:center;">@Message</div>
+}
+else if (isLoading)
 {
     <p>جاري التحميل...</p>
 }
+else if (Input == null)
+{
+    <div class="alert alert-danger">المستخدم غير موجود</div>
+}
 else
 {
-    <EditForm Model="user" OnValidSubmit="UpdateUser">
-        <DataAnnotationsValidator />
-        <div class="mb-3">
-            <label>اسم المستخدم</label>
-            <InputText class="form-control" @bind-Value="user.UserName" />
+    <div class="login-container">
+        <div class="login-left">
+            <div class="login-title">تعديل بيانات المستخدم</div>
+            <EditForm Model="Input" OnValidSubmit="UpdateUser">
+                <DataAnnotationsValidator />
+                <div class="mb-3">
+                    <label class="login-form-label" for="username">اسم المستخدم</label>
+                    <InputText @bind-Value="Input.UserName" class="login-input" disabled />
+                    <ValidationMessage For="() => Input.UserName" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label class="login-form-label" for="password">كلمة المرور الجديدة (اتركها فارغة إذا لا تريد التغيير)</label>
+                    <InputText type="password" @bind-Value="Input.Password" class="login-input" autocomplete="new-password" placeholder="كلمة المرور الجديدة" />
+                    <ValidationMessage For="() => Input.Password" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label class="login-form-label" for="email">البريد الإلكتروني</label>
+                    <InputText @bind-Value="Input.Email" class="login-input" autocomplete="email" placeholder="البريد الإلكتروني" />
+                    <ValidationMessage For="() => Input.Email" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label class="login-form-label" for="phone">رقم الجوال</label>
+                    <InputText @bind-Value="Input.PhoneNumber" class="login-input" autocomplete="tel" placeholder="رقم الجوال" />
+                    <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label class="login-form-label" for="role">الدور</label>
+                    <InputSelect @bind-Value="Input.Role" class="login-input">
+                        <option value="User">User</option>
+                        <option value="Admin">Admin</option>
+                    </InputSelect>
+                    <ValidationMessage For="() => Input.Role" class="text-danger" />
+                </div>
+                <button type="submit" class="login-btn" disabled="@isSubmitting">
+                    @if (isSubmitting)
+                    {
+                        <span>جاري الحفظ...</span>
+                    }
+                    else
+                    {
+                        <span>حفظ التعديلات</span>
+                    }
+                </button>
+                @if (!string.IsNullOrEmpty(Message))
+                {
+                    <div class="alert @(IsSuccess ? "alert-success" : "alert-danger") mt-3">
+                        @Message
+                    </div>
+                }
+            </EditForm>
         </div>
-        <div class="mb-3">
-            <label>البريد الإلكتروني</label>
-            <InputText class="form-control" @bind-Value="user.Email" />
-        </div>
-        <div class="mb-3">
-            <label>رقم الجوال</label>
-            <InputText class="form-control" @bind-Value="user.PhoneNumber" />
-        </div>
-        <div class="mb-3">
-            <label>الدور</label>
-            <InputSelect class="form-control" @bind-Value="user.Role">
-                <option value="User">User</option>
-                <option value="Admin">Admin</option>
-            </InputSelect>
-        </div>
-        <button class="btn btn-primary" type="submit">حفظ التعديلات</button>
-        @if (!string.IsNullOrEmpty(Message))
-        {
-            <div class="text-danger">@Message</div>
-        }
-    </EditForm>
+    </div>
 }
 
 @code {
     [Parameter] public string id { get; set; }
-    CarrierStoreUser? user;
-    string? Message;
-    protected override async Task OnInitializedAsync( )
+    private InputModel? Input;
+    private CarrierStoreUser? userEntity;
+    private string? Message;
+    private bool IsAdmin { get; set; } = false;
+    private bool isSubmitting = false;
+    private bool IsSuccess = false;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
     {
-        user = await Db.Users.FindAsync(id);
-        if (user == null)
+        var user = HttpContextAccessor.HttpContext?.User;
+        IsAdmin = user != null && user.Identity.IsAuthenticated && user.IsInRole("Admin");
+        if (!IsAdmin)
+        {
+            Message = "هذه الصفحة متاحة فقط للمسؤولين (Admin).";
+            isLoading = false;
+            return;
+        }
+        userEntity = await Db.Users.FindAsync(id);
+        if (userEntity == null)
         {
             Message = "المستخدم غير موجود";
+            isLoading = false;
+            return;
+        }
+        Input = new InputModel
+        {
+            UserName = userEntity.UserName,
+            Email = userEntity.Email,
+            PhoneNumber = userEntity.PhoneNumber,
+            Role = userEntity.Role
+        };
+        isLoading = false;
+    }
+
+    private async Task UpdateUser()
+    {
+        if (Input == null || userEntity == null) return;
+        isSubmitting = true;
+        Message = string.Empty;
+        IsSuccess = false;
+        StateHasChanged();
+        try
+        {
+            // تحقق من البريد الإلكتروني إذا تم تعديله ولمستخدم آخر
+            if (!string.IsNullOrEmpty(Input.Email) && await Db.Users.AnyAsync(u => u.Email == Input.Email && u.Id != userEntity.Id))
+            {
+                Message = "البريد الإلكتروني مستخدم بالفعل.";
+                return;
+            }
+            // تحقق من رقم الجوال إذا تم تعديله ولمستخدم آخر
+            if (!string.IsNullOrEmpty(Input.PhoneNumber) && await Db.Users.AnyAsync(u => u.PhoneNumber == Input.PhoneNumber && u.Id != userEntity.Id))
+            {
+                Message = "رقم الجوال مستخدم بالفعل.";
+                return;
+            }
+            // تحديث البيانات
+            userEntity.Email = Input.Email;
+            userEntity.PhoneNumber = Input.PhoneNumber;
+            userEntity.Role = Input.Role;
+            // تغيير كلمة المرور إذا تم إدخالها
+            if (!string.IsNullOrWhiteSpace(Input.Password))
+            {
+                userEntity.PasswordHash = BCrypt.Net.BCrypt.HashPassword(Input.Password);
+            }
+            Db.Users.Update(userEntity);
+            await Db.SaveChangesAsync();
+            Message = "تم حفظ التعديلات بنجاح!";
+            IsSuccess = true;
+            await Task.Delay(1500);
+            NavigationManager.NavigateTo("/admin/user/index");
+        }
+        catch (Exception ex)
+        {
+            Message = $"خطأ أثناء حفظ التعديلات: {ex.Message}";
+            IsSuccess = false;
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
         }
     }
-    private async Task UpdateUser( )
+
+    public class InputModel
     {
-        if (user == null) return;
-        Db.Users.Update(user);
-        await Db.SaveChangesAsync();
-        NavigationManager.NavigateTo("/admin/user/index");
+        [Required(ErrorMessage = "اسم المستخدم مطلوب")]
+        [StringLength(50, MinimumLength = 3, ErrorMessage = "اسم المستخدم يجب أن يكون بين 3 و50 حرف")]
+        public string UserName { get; set; } = string.Empty;
+
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "كلمة المرور يجب أن تكون بين 6 و100 حرف")]
+        public string? Password { get; set; } = string.Empty;
+
+        [EmailAddress(ErrorMessage = "البريد الإلكتروني غير صحيح")]
+        public string? Email { get; set; }
+
+        [Phone(ErrorMessage = "رقم الجوال غير صحيح")]
+        public string? PhoneNumber { get; set; }
+
+        [Required(ErrorMessage = "الدور مطلوب")]
+        public string Role { get; set; } = "User";
     }
 } 
