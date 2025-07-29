@@ -23,6 +23,12 @@ public class RefillCardController : ControllerBase
         _httpContextAccessor = httpContextAccessor;
     }
 
+    [HttpGet]
+    public async Task<ActionResult<List<RefillCard>>> GetAll()
+    {
+        return await _refillCardRepo.GetAllAsync();
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<RefillCard>> GetById(int id)
     {
@@ -36,6 +42,62 @@ public class RefillCardController : ControllerBase
     public async Task<ActionResult<List<RefillCard>>> GetByCarrierId(int carrierId)
     {
         return await _refillCardRepo.GetByCarrierId(carrierId);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<RefillCard>> Create(RefillCard refillCard)
+    {
+        if (refillCard == null)
+        {
+            return BadRequest("RefillCard data is required");
+        }
+
+        if (string.IsNullOrWhiteSpace(refillCard.ProductName))
+        {
+            return BadRequest("Product name is required");
+        }
+
+        var createdCard = await _refillCardRepo.CreateAsync(refillCard);
+        return CreatedAtAction(nameof(GetById), new { id = createdCard.id }, createdCard);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, RefillCard refillCard)
+    {
+        if (refillCard == null)
+        {
+            return BadRequest("RefillCard data is required");
+        }
+
+        if (id != refillCard.id)
+        {
+            return BadRequest("ID mismatch");
+        }
+
+        if (string.IsNullOrWhiteSpace(refillCard.ProductName))
+        {
+            return BadRequest("Product name is required");
+        }
+
+        var updatedCard = await _refillCardRepo.UpdateAsync(refillCard);
+        if (updatedCard == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(updatedCard);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var success = await _refillCardRepo.DeleteAsync(id);
+        if (!success)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
     }
 
     [HttpPost("purchase")]

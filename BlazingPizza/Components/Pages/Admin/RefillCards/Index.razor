@@ -1,10 +1,11 @@
-@namespace BlazingPizza.Components.Pages.Admin.Carrier
-@page "/admin/carrier/index"
+@page "/admin/refillcards/index"
 @using BlazingPizza.Shared
 @using BlazingPizza
+@using Microsoft.AspNetCore.Authorization
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
+@attribute [Authorize(Roles = "Admin")]
 @layout BlazingPizza.Components.Layout.AdminLayout
 @rendermode InteractiveServer
 
@@ -12,12 +13,12 @@
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0">الشركات</h1>
+                <h1 class="m-0">بطاقات الشحن</h1>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-left">
                     <li class="breadcrumb-item"><a href="/admin/dashboard">الرئيسية</a></li>
-                    <li class="breadcrumb-item active">الشركات</li>
+                    <li class="breadcrumb-item active">بطاقات الشحن</li>
                 </ol>
             </div>
         </div>
@@ -30,15 +31,15 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">قائمة الشركات</h3>
+                        <h3 class="card-title">قائمة بطاقات الشحن</h3>
                         <div class="card-tools">
-                            <a href="/admin/carrier/create" class="btn btn-primary">
-                                <i class="bi bi-plus"></i> اضافة شركة جديدة
+                            <a href="/admin/refillcards/create" class="btn btn-primary">
+                                <i class="bi bi-plus"></i> اضافة بطاقة شحن جديدة
                             </a>
                         </div>
                     </div>
                     <div class="card-body">
-                        @if (carriers == null)
+                        @if (refillCards == null)
                         {
                             <div class="text-center">
                                 <div class="spinner-border" role="status">
@@ -46,10 +47,10 @@
                                 </div>
                             </div>
                         }
-                        else if (!carriers.Any())
+                        else if (!refillCards.Any())
                         {
                             <div class="alert alert-info text-center">
-                                لا توجد شركات مسجلة
+                                لا توجد بطاقات شحن مسجلة
                             </div>
                         }
                         else
@@ -59,30 +60,34 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>اسم الشركة</th>
+                                            <th>اسم المنتج</th>
+                                            <th>قيمة البطاقة</th>
+                                            <th>الشركة</th>
+                                            <th>السعر</th>
                                             <th>الحالة</th>
-                                            <th>نسبة البيع بالجملة</th>
-                                            <th>البريد الإلكتروني</th>
                                             <th>الإجراءات</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach (var carrier in carriers)
+                                        @foreach (var card in refillCards)
                                         {
                                             <tr>
-                                                <td>@carrier.id</td>
+                                                <td>@card.id</td>
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        @if (!string.IsNullOrEmpty(carrier.imageName))
+                                                        @if (!string.IsNullOrEmpty(card.imageName))
                                                         {
-                                                            <img src="@carrier.ImageUrl" alt="@carrier.carrierName" 
+                                                            <img src="/img/refillcard/@card.imageName" alt="@card.ProductName" 
                                                                  class="img-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
                                                         }
-                                                        <span>@carrier.carrierName</span>
+                                                        <span>@card.ProductName</span>
                                                     </div>
                                                 </td>
+                                                <td>@card.CardAmount ₪</td>
+                                                <td>@GetCarrierName(card.CarrierID)</td>
+                                                <td>@card.price ₪</td>
                                                 <td>
-                                                    @if (carrier.isActive)
+                                                    @if (card.isActive)
                                                     {
                                                         <span class="badge badge-success">نشط</span>
                                                     }
@@ -90,19 +95,17 @@
                                                     {
                                                         <span class="badge badge-danger">غير نشط</span>
                                                     }
-                                                    @if (carrier.UnderMaintenance == true)
+                                                    @if (card.isTemp)
                                                     {
-                                                        <span class="badge badge-warning">تحت الصيانة</span>
+                                                        <span class="badge badge-warning">مؤقت</span>
                                                     }
                                                 </td>
-                                                <td>@carrier.wholeSalePercent%</td>
-                                                <td>@carrier.internetSubscribEmail</td>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                        <a href="/admin/carrier/edit/@carrier.id" class="btn btn-sm btn-info">
+                                                        <a href="/admin/refillcards/edit/@card.id" class="btn btn-sm btn-info">
                                                             <i class="bi bi-pencil"></i> تعديل
                                                         </a>
-                                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => DeleteCarrier(carrier.id)">
+                                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => DeleteRefillCard(card.id)">
                                                             <i class="bi bi-trash"></i> حذف
                                                         </button>
                                                     </div>
@@ -121,41 +124,66 @@
 </div>
 
 @code {
-    private List<BlazingPizza.Shared.Carrier> carriers = new();
+    private List<RefillCard> refillCards = new();
+    private List<Carrier> carriers = new();
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadRefillCards();
         await LoadCarriers();
+    }
+
+    private async Task LoadRefillCards()
+    {
+        try
+        {
+            refillCards = await Http.GetFromJsonAsync<List<RefillCard>>("api/refillcard") ?? new();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading refill cards: {ex.Message}");
+        }
     }
 
     private async Task LoadCarriers()
     {
         try
         {
-            carriers = await Http.GetFromJsonAsync<List<BlazingPizza.Shared.Carrier>>("api/carriers");
+            carriers = await Http.GetFromJsonAsync<List<Carrier>>("api/carriers") ?? new();
         }
         catch (Exception ex)
         {
-            // Handle error - you might want to show a toast notification
             Console.WriteLine($"Error loading carriers: {ex.Message}");
         }
     }
 
-    private async Task DeleteCarrier(int id)
+    private string GetCarrierName(int carrierId)
     {
-        if (await JSRuntime.InvokeAsync<bool>("confirm", "هل أنت متأكد من حذف هذه الشركة؟"))
+        var carrier = carriers.FirstOrDefault(c => c.id == carrierId);
+        return carrier?.carrierName ?? "غير معروف";
+    }
+
+    private async Task DeleteRefillCard(int id)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", "هل أنت متأكد من حذف بطاقة الشحن هذه؟"))
         {
             try
             {
-                var response = await Http.DeleteAsync($"api/carriers/{id}");
+                var response = await Http.DeleteAsync($"api/refillcard/{id}");
                 if (response.IsSuccessStatusCode)
                 {
-                    await LoadCarriers();
+                    await LoadRefillCards();
+                    await JSRuntime.InvokeVoidAsync("alert", "تم حذف بطاقة الشحن بنجاح");
+                }
+                else
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", "حدث خطأ أثناء حذف بطاقة الشحن");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error deleting carrier: {ex.Message}");
+                Console.WriteLine($"Error deleting refill card: {ex.Message}");
+                await JSRuntime.InvokeVoidAsync("alert", "حدث خطأ أثناء حذف بطاقة الشحن");
             }
         }
     }

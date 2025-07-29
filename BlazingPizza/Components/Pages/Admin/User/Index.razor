@@ -5,6 +5,7 @@
 @inject IJSRuntime JS
 @attribute [Authorize(Roles = "Admin")]
 @layout BlazingPizza.Components.Layout.AdminLayout
+@rendermode InteractiveServer
 
 <h3>قائمة المستخدمين</h3>
 @if (users == null)

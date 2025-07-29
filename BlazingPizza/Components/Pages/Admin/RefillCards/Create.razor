@@ -1,0 +1,397 @@
+@page "/admin/refillcards/create"
+@using BlazingPizza.Shared
+@using BlazingPizza
+@using Microsoft.AspNetCore.Authorization
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@attribute [Authorize(Roles = "Admin")]
+@layout BlazingPizza.Components.Layout.AdminLayout
+@rendermode InteractiveServer
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">اضافة بطاقة شحن جديدة</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-left">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/refillcards/index">بطاقات الشحن</a></li>
+                    <li class="breadcrumb-item active">اضافة بطاقة شحن جديدة</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <EditForm Model="refillCard" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="productName">اسم المنتج *</label>
+                        <input type="text" id="productName" class="form-control" @bind-value="refillCard.ProductName" @bind-value:event="oninput" />
+                        @if (showValidationError && string.IsNullOrWhiteSpace(refillCard.ProductName))
+                        {
+                            <small class="text-danger">اسم المنتج مطلوب</small>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="cardAmount">قيمة البطاقة (بالشيكل) *</label>
+                        <input type="number" id="cardAmount" class="form-control" @bind-value="refillCard.CardAmount" @bind-value:event="oninput" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="carrierId">الشركة *</label>
+                        <select id="carrierId" class="form-control" @bind="refillCard.CarrierID">
+                            <option value="0">اختر الشركة</option>
+                            @foreach (var carrier in carriers)
+                            {
+                                <option value="@carrier.id">@carrier.carrierName</option>
+                            }
+                        </select>
+                        @if (showValidationError && refillCard.CarrierID == 0)
+                        {
+                            <small class="text-danger">يجب اختيار الشركة</small>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="price">السعر (بالشيكل) *</label>
+                        <input type="number" step="0.01" id="price" class="form-control" @bind-value="refillCard.price" @bind-value:event="oninput" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="cost">التكلفة (بالشيكل)</label>
+                        <input type="number" step="0.01" id="cost" class="form-control" @bind-value="refillCard.Cost" @bind-value:event="oninput" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="wholeSalePercent">نسبة البيع بالجملة (%)</label>
+                        <input type="number" step="0.01" id="wholeSalePercent" class="form-control" @bind-value="refillCard.wholeSalePercent" @bind-value:event="oninput" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="description">الوصف</label>
+                        <textarea id="description" class="form-control" rows="3" @bind-value="refillCard.description" @bind-value:event="oninput"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="productNameEn">اسم المنتج (إنجليزي)</label>
+                        <input type="text" id="productNameEn" class="form-control" @bind-value="refillCard.ProductNameEn" @bind-value:event="oninput" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="productNameHe">اسم المنتج (عبري)</label>
+                        <input type="text" id="productNameHe" class="form-control" @bind-value="refillCard.ProductNameHe" @bind-value:event="oninput" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="descriptionEn">الوصف (إنجليزي)</label>
+                        <textarea id="descriptionEn" class="form-control" rows="2" @bind-value="refillCard.DescriptionEn" @bind-value:event="oninput"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="descriptionHe">الوصف (عبري)</label>
+                        <textarea id="descriptionHe" class="form-control" rows="2" @bind-value="refillCard.DescriptionHe" @bind-value:event="oninput"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="emailCode">كود البريد الإلكتروني</label>
+                        <input type="text" id="emailCode" class="form-control" @bind-value="refillCard.EmailCode" @bind-value:event="oninput" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="sendMsgBy">إرسال الرسالة عبر</label>
+                        <select id="sendMsgBy" class="form-control" @bind="refillCard.SendMsgBy">
+                            <option value="SMS">SMS</option>
+                            <option value="Email">Email</option>
+                            <option value="WhatsApp">WhatsApp</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="adsCardSms">إعلان البطاقة SMS</label>
+                        <textarea id="adsCardSms" class="form-control" rows="2" @bind-value="refillCard.AdsCardSms" @bind-value:event="oninput"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="adsCardWhatsapp">إعلان البطاقة WhatsApp</label>
+                        <textarea id="adsCardWhatsapp" class="form-control" rows="2" @bind-value="refillCard.AdsCardWhatsapp" @bind-value:event="oninput"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="detailsUrl">رابط التفاصيل</label>
+                        <input type="url" id="detailsUrl" class="form-control" @bind-value="refillCard.DetailsUrl" @bind-value:event="oninput" placeholder="https://example.com" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="productIdentity">معرف المنتج</label>
+                        <input type="text" id="productIdentity" class="form-control" @bind-value="refillCard.ProductIdenfity" @bind-value:event="oninput" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="apiProductId">معرف API</label>
+                        <input type="number" id="apiProductId" class="form-control" @bind-value="refillCard.apiProductId" @bind-value:event="oninput" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="apiProductIdStr">معرف API (نص)</label>
+                        <input type="text" id="apiProductIdStr" class="form-control" @bind-value="refillCard.ApiProductIdStr" @bind-value:event="oninput" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="sortOrder">ترتيب العرض</label>
+                        <input type="number" id="sortOrder" class="form-control" @bind-value="refillCard.SortOrder" @bind-value:event="oninput" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="imageFile">صورة البطاقة</label>
+                        <InputFile id="imageFile" class="form-control" OnChange="OnImageFileChanged" accept=".jpg,.jpeg,.png,.gif" />
+                        <small class="form-text text-muted">يُسمح بالصور بصيغ: JPG, JPEG, PNG, GIF</small>
+                        @if (!string.IsNullOrEmpty(uploadedFileName))
+                        {
+                            <div class="mt-2">
+                                <small class="text-success">تم اختيار: @uploadedFileName</small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" id="isActive" class="custom-control-input" @bind="refillCard.isActive" />
+                            <label class="custom-control-label" for="isActive">نشط</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" id="isTemp" class="custom-control-input" @bind="refillCard.isTemp" />
+                            <label class="custom-control-label" for="isTemp">مؤقت</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" id="sendByEmail" class="custom-control-input" @bind="refillCard.SendByEmail" />
+                            <label class="custom-control-label" for="sendByEmail">إرسال بالبريد الإلكتروني</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" id="isFav" class="custom-control-input" @bind="refillCard.IsFav" />
+                            <label class="custom-control-label" for="isFav">مفضل</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                    @if (isSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span>جاري الحفظ...</span>
+                    }
+                    else
+                    {
+                        <span>حفظ بطاقة الشحن</span>
+                    }
+                </button>
+                <a href="/admin/refillcards/index" class="btn btn-secondary">إلغاء</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private RefillCard refillCard = new();
+    private List<Carrier> carriers = new();
+    private bool isSubmitting = false;
+    private IBrowserFile? selectedImageFile;
+    private string uploadedFileName = string.Empty;
+    private bool showValidationError = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        refillCard.isActive = true;
+        refillCard.SortOrder = 0;
+        
+        // Set default values for required string fields
+        refillCard.ProductNameEn = string.Empty;
+        refillCard.ProductNameHe = string.Empty;
+        refillCard.DescriptionEn = string.Empty;
+        refillCard.DescriptionHe = string.Empty;
+        refillCard.EmailCode = string.Empty;
+        refillCard.SendMsgBy = "SMS";
+        refillCard.AdsCardSms = string.Empty;
+        refillCard.AdsCardWhatsapp = string.Empty;
+        refillCard.DetailsUrl = string.Empty;
+        refillCard.ApiProductIdStr = string.Empty;
+        
+        await LoadCarriers();
+    }
+
+    private async Task LoadCarriers()
+    {
+        try
+        {
+            carriers = await Http.GetFromJsonAsync<List<Carrier>>("api/carriers") ?? new();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading carriers: {ex.Message}");
+        }
+    }
+
+    private void OnImageFileChanged(InputFileChangeEventArgs e)
+    {
+        selectedImageFile = e.File;
+        uploadedFileName = e.File.Name;
+        StateHasChanged();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        showValidationError = true;
+        StateHasChanged();
+
+        if (string.IsNullOrWhiteSpace(refillCard.ProductName))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "اسم المنتج مطلوب");
+            return;
+        }
+
+        if (refillCard.CarrierID == 0)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "يجب اختيار الشركة");
+            return;
+        }
+
+        isSubmitting = true;
+        StateHasChanged();
+
+        try
+        {
+            // Upload image if selected
+            if (selectedImageFile != null)
+            {
+                var imageFileName = await UploadImage(selectedImageFile);
+                refillCard.imageName = imageFileName;
+            }
+
+            var response = await Http.PostAsJsonAsync("api/refillcard", refillCard);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "تم حفظ بطاقة الشحن بنجاح");
+                Navigation.NavigateTo("/admin/refillcards/index");
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                await JSRuntime.InvokeVoidAsync("alert", $"خطأ في حفظ بطاقة الشحن: {errorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"خطأ في حفظ بطاقة الشحن: {ex.Message}");
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task<string> UploadImage(IBrowserFile file)
+    {
+        var fileName = $"{Guid.NewGuid()}_{file.Name}";
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "refillcard", fileName);
+
+        // Ensure directory exists
+        var directory = Path.GetDirectoryName(path);
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory!);
+        }
+
+        using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024); // 5MB max
+        using var fileStream = File.Create(path);
+        await stream.CopyToAsync(fileStream);
+
+        return fileName;
+    }
+} 

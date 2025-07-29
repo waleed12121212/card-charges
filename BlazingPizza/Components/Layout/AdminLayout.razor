@@ -120,6 +120,29 @@
                                 </li>
                             </ul>
                         </li>
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link" onclick="event.preventDefault();">
+                                <i class="nav-icon bi bi-building"></i>
+                                <p>
+                                    ادارة بطاقات الشحن
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="/admin/refillcards/index" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>بطاقات الشحن</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="/admin/refillcards/create" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>اضافة بطاقة شحن</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                     </ul>
                 </nav>
             </div>
@@ -182,19 +205,19 @@
             cardHeader.style.cursor = 'move';
         });
     </script>
-    
+
     <!-- Custom Sidebar Toggle Script -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const sidebarToggle = document.querySelector('[data-lte-toggle="sidebar"]');
             const sidebar = document.querySelector('.app-sidebar');
             const body = document.body;
-            
+
             if (sidebarToggle && sidebar) {
-                sidebarToggle.addEventListener('click', function(e) {
+                sidebarToggle.addEventListener('click', function (e) {
                     e.preventDefault();
                     console.log('Sidebar toggle clicked');
-                    
+
                     // Direct approach: toggle sidebar visibility
                     if (sidebar.style.display === 'none' || sidebar.style.marginLeft === '-250px') {
                         // Show sidebar
@@ -212,13 +235,13 @@
                     }
                 });
             }
-            
+
             // Debug: Log initial state
             console.log('Initial body classes:', body.className);
             console.log('Sidebar element:', sidebar);
         });
     </script>
-    
+
     <!-- apexcharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js" integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8=" crossorigin="anonymous"></script>
     <!-- ChartJS -->

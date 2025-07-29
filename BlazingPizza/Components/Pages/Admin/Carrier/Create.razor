@@ -6,6 +6,7 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 @layout BlazingPizza.Components.Layout.AdminLayout
+@rendermode InteractiveServer
 
 <div class="content-header">
     <div class="container-fluid">
@@ -160,7 +161,6 @@
                         <span>حفظ الشركة</span>
                     }
                 </button>
-                <button type="button" class="btn btn-success" @onclick="TestButton">اختبار الزر</button>
                 <a href="/admin/carrier/index" class="btn btn-secondary">إلغاء</a>
             </div>
         </EditForm>

@@ -25,4 +25,32 @@ public class HttpRefillCardRepository : IRefillCardRepository
     {
         return await _httpClient.GetFromJsonAsync<RefillCard>($"api/refillcard/{id}");
     }
+
+    public async Task<List<RefillCard>> GetAllAsync()
+    {
+        return await _httpClient.GetFromJsonAsync<List<RefillCard>>("api/refillcard") ?? new();
+    }
+
+    public async Task<RefillCard> CreateAsync(RefillCard refillCard)
+    {
+        var response = await _httpClient.PostAsJsonAsync("api/refillcard", refillCard);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<RefillCard>() ?? refillCard;
+    }
+
+    public async Task<RefillCard?> UpdateAsync(RefillCard refillCard)
+    {
+        var response = await _httpClient.PutAsJsonAsync($"api/refillcard/{refillCard.id}", refillCard);
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<RefillCard>();
+        }
+        return null;
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var response = await _httpClient.DeleteAsync($"api/refillcard/{id}");
+        return response.IsSuccessStatusCode;
+    }
 } 

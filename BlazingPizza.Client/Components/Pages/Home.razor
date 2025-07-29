@@ -27,7 +27,7 @@
     private string selectedOperator = "";
     private decimal selectedAmount = 0;
     private string phoneNumber = "";
-    private decimal[] rechargeAmounts = new[] { 5m, 10m, 20m, 50m, 100m, 200m };
+    private decimal[] rechargeAmounts = new[] { 5m , 10m , 20m , 50m , 100m , 200m };
     private decimal customAmount = 0;
     private bool isCustomAmount = false;
     private string rechargeMessage = string.Empty;
@@ -48,14 +48,14 @@
             // جلب معرف المستخدم الحالي من AuthenticationStateProvider
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
-            
+
             // Add detailed debugging
             Console.WriteLine("Authentication State Details:");
             Console.WriteLine($"Is Authenticated: {user.Identity?.IsAuthenticated}");
             Console.WriteLine($"Authentication Type: {user.Identity?.AuthenticationType}");
-            
+
             var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            
+
             // Log all claims for debugging
             Console.WriteLine("User Claims:");
             foreach (var claim in user.Claims)
