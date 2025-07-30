@@ -5,6 +5,8 @@
 @inject NavigationManager NavigationManager
 @inject IRefillCardRepository RefillCardRepository
 @inject ITransactionRepository TransactionRepository
+@inject IInternetPackageRepository InternetPackageRepository
+@inject IInternetPackagePurchaseRepository InternetPackagePurchaseRepository
 @using System.Security.Claims
 @using BlazingPizza.Shared.Interfaces
 @using Microsoft.AspNetCore.Authorization
@@ -40,6 +42,19 @@
     private RefillCard? configuringRefillCard;
     private int quantity = 1;
 
+    // Internet packages variables
+    private List<InternetPackage>? internetPackages;
+    private CarrierType? selectedInternetCarrier;
+    private bool showInternetCarriers = true;
+    private bool showInternetPackages = false;
+    private string internetPhoneNumber = "";
+    private bool isInternetPhoneInvalid = false;
+    private string internetPhonePrefix = "059";
+    private InternetPackage? selectedInternetPackage;
+    private bool isInternetLoading = false;
+    private string internetMessage = string.Empty;
+    private bool internetSuccess = false;
+
     protected override async Task OnInitializedAsync( )
     {
         try
@@ -54,33 +69,42 @@
             Console.WriteLine($"Is Authenticated: {user.Identity?.IsAuthenticated}");
             Console.WriteLine($"Authentication Type: {user.Identity?.AuthenticationType}");
 
-            var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-            // Log all claims for debugging
-            Console.WriteLine("User Claims:");
-            foreach (var claim in user.Claims)
+            // Only load transactions if user is authenticated
+            if (user.Identity?.IsAuthenticated == true)
             {
-                Console.WriteLine($"Claim Type: {claim.Type}, Value: {claim.Value}");
-            }
+                var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-            Console.WriteLine($"Current User ID: {userId}"); // Debug log
-
-            if (!string.IsNullOrEmpty(userId))
-            {
-                try
+                // Log all claims for debugging
+                Console.WriteLine("User Claims:");
+                foreach (var claim in user.Claims)
                 {
-                    transactions = await TransactionRepository.GetByUserIdAsync(userId);
-                    Console.WriteLine($"Loaded {transactions?.Count ?? 0} transactions"); // Debug log
+                    Console.WriteLine($"Claim Type: {claim.Type}, Value: {claim.Value}");
                 }
-                catch (Exception ex)
+
+                Console.WriteLine($"Current User ID: {userId}"); // Debug log
+
+                if (!string.IsNullOrEmpty(userId))
                 {
-                    Console.WriteLine($"Error loading transactions: {ex.Message}"); // Debug log
+                    try
+                    {
+                        transactions = await TransactionRepository.GetByUserIdAsync(userId);
+                        Console.WriteLine($"Loaded {transactions?.Count ?? 0} transactions"); // Debug log
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error loading transactions: {ex.Message}"); // Debug log
+                        transactions = new List<Transaction>();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No user ID found"); // Debug log
                     transactions = new List<Transaction>();
                 }
             }
             else
             {
-                Console.WriteLine("No user ID found"); // Debug log
+                Console.WriteLine("User not authenticated - skipping transaction loading");
                 transactions = new List<Transaction>();
             }
         }
@@ -323,6 +347,123 @@
         };
         isPhoneInvalid = !System.Text.RegularExpressions.Regex.IsMatch(phonePrefix + phoneNumber , pattern);
     }
+
+    // Internet packages methods
+    private async Task SelectInternetCarrier(CarrierType carrierType)
+    {
+        selectedInternetCarrier = carrierType;
+        showInternetCarriers = false;
+        showInternetPackages = true;
+        
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("console.log", $"Requesting packages for carrier: {carrierType} (ID: {(int)carrierType})");
+            internetPackages = await InternetPackageRepository.GetActivePackagesByCarrierAsync(carrierType);
+            await JSRuntime.InvokeVoidAsync("console.log", $"Received {internetPackages?.Count ?? 0} packages");
+            
+            if (internetPackages != null && internetPackages.Any())
+            {
+                foreach (var package in internetPackages)
+                {
+                    await JSRuntime.InvokeVoidAsync("console.log", $"Package: {package.Name}, Active: {package.IsActive}, Carrier: {package.CarrierType}");
+                }
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("console.log", "No packages found or packages list is null");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", $"Error loading packages: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("console.error", ex.ToString());
+            internetPackages = new List<InternetPackage>();
+        }
+    }
+
+    private void BackToInternetCarriers()
+    {
+        showInternetCarriers = true;
+        showInternetPackages = false;
+        selectedInternetCarrier = null;
+        internetPackages = null;
+    }
+
+    private void ValidateInternetPhone(ChangeEventArgs e = null)
+    {
+        if (e != null)
+            internetPhoneNumber = e.Value?.ToString() ?? "";
+        string pattern = internetPhonePrefix switch
+        {
+            "059" => @"^059\d{7}$",
+            "056" => @"^056\d{7}$", 
+            "052" => @"^052\d{7}$",
+            _ => @"^05\d{8}$"
+        };
+        isInternetPhoneInvalid = !System.Text.RegularExpressions.Regex.IsMatch(internetPhonePrefix + internetPhoneNumber, pattern);
+    }
+
+    private async Task PurchaseInternetPackage(InternetPackage package)
+    {
+        if (string.IsNullOrEmpty(internetPhoneNumber) || isInternetPhoneInvalid)
+        {
+            internetMessage = "يرجى إدخال رقم هاتف صحيح";
+            internetSuccess = false;
+            return;
+        }
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (!authState.User.Identity?.IsAuthenticated == true)
+        {
+            NavigationManager.NavigateTo("/Account/Login");
+            return;
+        }
+
+        isInternetLoading = true;
+        internetMessage = "";
+
+        try
+        {
+            var request = new 
+            {
+                InternetPackageId = package.Id,
+                PhoneNumber = internetPhonePrefix + internetPhoneNumber,
+                Notes = $"Internet package purchase for {package.Name}"
+            };
+
+            var response = await Http.PostAsJsonAsync("api/internetpackagepurchase", request);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                internetMessage = $"تم شراء حزمة {package.Name} بنجاح للرقم {internetPhonePrefix + internetPhoneNumber}";
+                internetSuccess = true;
+                internetPhoneNumber = "";
+                
+                // Refresh transactions
+                var user = authState.User;
+                var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    transactions = await TransactionRepository.GetByUserIdAsync(userId);
+                }
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                internetMessage = $"فشل في شراء الحزمة: {errorContent}";
+                internetSuccess = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            internetMessage = $"حدث خطأ: {ex.Message}";
+            internetSuccess = false;
+        }
+        finally
+        {
+            isInternetLoading = false;
+        }
+    }
 }
 
 <!-- Main Section Selector -->
@@ -486,52 +627,209 @@ else if (selectedSection == "internet")
 {
     <div class="main">
         <button class="btn btn-outline-secondary mb-4" @onclick="BackToMainMenu">&larr; رجوع للقائمة الرئيسية</button>
-        <h1>حزم الانترنت</h1>
-        <p>قريباً...</p>
+        
+        @if (showInternetCarriers)
+        {
+            <!-- Internet Carrier Selection View -->
+            <div class="carrier-view show">
+                <h2>اختر الشريحة</h2>
+                <ul class="pizza-cards">
+                    <li @onclick="@(() => SelectInternetCarrier(CarrierType.جوال))" style="cursor: pointer;">
+                        <div class="card-content">
+                            <img src="img/recharge-balance/Jawwal.png" alt="جوال" class="card-logo" />
+                            <div class="pizza-info">
+                                <span class="title">جوال</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li @onclick="@(() => SelectInternetCarrier(CarrierType.أوريدو))" style="cursor: pointer;">
+                        <div class="card-content">
+                            <img src="img/recharge-balance/ooredoo.png" alt="أوريدو" class="card-logo" />
+                            <div class="pizza-info">
+                                <span class="title">أوريدو</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li @onclick="@(() => SelectInternetCarrier(CarrierType.سيليكوم))" style="cursor: pointer;">
+                        <div class="card-content">
+                            <img src="img/recharge-balance/celecom.png" alt="سيليكوم" class="card-logo" />
+                            <div class="pizza-info">
+                                <span class="title">سيليكوم</span>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        }
+        else if (showInternetPackages && selectedInternetCarrier != null)
+        {
+            <!-- Internet Packages View -->
+            <div class="internet-packages-view">
+                <button class="btn btn-outline-secondary mb-3" @onclick="BackToInternetCarriers">&larr; رجوع لاختيار الشريحة</button>
+                
+                <h2>حزم الإنترنت - @selectedInternetCarrier?.GetDisplayName()</h2>
+                
+                @if (!string.IsNullOrEmpty(internetMessage))
+                {
+                    <div class="alert @(internetSuccess ? "alert-success" : "alert-danger")" role="alert">
+                        @internetMessage
+                    </div>
+                }
+
+                <!-- Phone Number Input -->
+                <div class="mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">رقم الهاتف</h5>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <select class="form-select" @bind="internetPhonePrefix" @bind:after="() => ValidateInternetPhone()">
+                                        <option value="059">059</option>
+                                        <option value="056">056</option>
+                                        <option value="052">052</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control @(isInternetPhoneInvalid ? "is-invalid" : "")" 
+                                           @bind="internetPhoneNumber" @oninput="ValidateInternetPhone" 
+                                           placeholder="XXXXXXX" maxlength="7" />
+                                    @if (isInternetPhoneInvalid)
+                                    {
+                                        <div class="invalid-feedback">
+                                            رقم الهاتف غير صحيح. يجب أن يكون بالصيغة (@internetPhonePrefix-XXXXXXX)
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Internet Packages -->
+                @if (internetPackages == null)
+                {
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">جاري التحميل...</span>
+                        </div>
+                    </div>
+                }
+                else if (!internetPackages.Any())
+                {
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle"></i> لا توجد حزم إنترنت متاحة لهذه الشريحة حالياً.
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        @foreach (var package in internetPackages)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@package.Name</h5>
+                                        <p class="card-text">@package.Description</p>
+                                        <div class="package-details">
+                                            <div class="detail-item">
+                                                <i class="fas fa-database"></i>
+                                                <span>@package.DataAmountDisplay</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <i class="fas fa-clock"></i>
+                                                <span>@package.ValidityDisplay</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <i class="fas fa-tag"></i>
+                                                <span>@package.PackageType</span>
+                                            </div>
+                                        </div>
+                                        <div class="price-section">
+                                            <span class="price">@package.Price.ToString("C")</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button class="btn btn-primary btn-block" 
+                                                @onclick="@(() => PurchaseInternetPackage(package))"
+                                                disabled="@(isInternetLoading || string.IsNullOrEmpty(internetPhoneNumber) || isInternetPhoneInvalid)">
+                                            @if (isInternetLoading)
+                                            {
+                                                <span class="spinner-border spinner-border-sm" role="status"></span>
+                                                <span>جاري الشراء...</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-shopping-cart"></i>
+                                                <span>شراء الحزمة</span>
+                                            }
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
     </div>
 }
 
 <div class="sidebar financial-sidebar">
-    <div style="display:flex; gap:1rem; margin-bottom:1rem;">
-        <button class="btn btn-outline-secondary" @onclick='@(() => SetSidebarTab("financial"))' style="flex:1;@(sidebarTab=="financial" ? "background:#00668c;color:#fff;" : "")">
-            الحركات المالية
-        </button>
-        <button class="btn btn-outline-secondary" @onclick='@(() => SetSidebarTab("checkout"))' style="flex:1;@(sidebarTab=="checkout" ? "background:#00668c;color:#fff;" : "")">
-            الإشعارات
-        </button>
-    </div>
-    @if (sidebarTab == "financial")
-    {
-        <h3 style="margin-top:0">سجل الحركات المالية</h3>
-        @if (transactions == null)
-        {
-            <p>جاري تحميل الحركات المالية...</p>
-        }
-        else if (transactions.Any())
-        {
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>رقم الحركة</th>
-                        <th>الوصف</th>
-                        <th>تاريخ الحركة</th>
-                        <th>المبلغ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var t in transactions.OrderByDescending(x => x.Date))
-                    {
-                        <tr>
-                            <td>@t.Id</td>
-                            <td>@t.Description</td>
-                            <td>@t.Date.ToString("yyyy/MM/dd HH:mm")</td>
-                            <td>@($"{t.Amount:0.00} ₪")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-    }
+    <AuthorizeView>
+        <Authorized>
+            <div style="display:flex; gap:1rem; margin-bottom:1rem;">
+                <button class="btn btn-outline-secondary" @onclick='@(() => SetSidebarTab("financial"))' style="flex:1;@(sidebarTab=="financial" ? "background:#00668c;color:#fff;" : "")">
+                    الحركات المالية
+                </button>
+                <button class="btn btn-outline-secondary" @onclick='@(() => SetSidebarTab("checkout"))' style="flex:1;@(sidebarTab=="checkout" ? "background:#00668c;color:#fff;" : "")">
+                    الإشعارات
+                </button>
+            </div>
+            @if (sidebarTab == "financial")
+            {
+                <h3 style="margin-top:0">سجل الحركات المالية</h3>
+                @if (transactions == null)
+                {
+                    <p>جاري تحميل الحركات المالية...</p>
+                }
+                else if (transactions.Any())
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>رقم الحركة</th>
+                                <th>الوصف</th>
+                                <th>تاريخ الحركة</th>
+                                <th>المبلغ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in transactions.OrderByDescending(x => x.Date))
+                            {
+                                <tr>
+                                    <td>@t.Id</td>
+                                    <td>@t.Description</td>
+                                    <td>@t.Date.ToString("yyyy/MM/dd HH:mm")</td>
+                                    <td>@($"{t.Amount:0.00} ₪")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p>لا توجد حركات مالية</p>
+                }
+            }
+        </Authorized>
+        <NotAuthorized>
+            <div style="text-align: center; padding: 2rem;">
+                <h4>يرجى تسجيل الدخول</h4>
+                <p>لعرض الحركات المالية والإشعارات</p>
+                <a href="/Account/Login" class="btn btn-primary">تسجيل الدخول</a>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
 </div>
 
 @if (showingConfigureDialog)

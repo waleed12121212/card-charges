@@ -1,0 +1,141 @@
+@page "/admin/internetpackages/index"
+@using BlazingPizza.Shared
+@using BlazingPizza.Shared.Interfaces
+@using Microsoft.AspNetCore.Authorization
+@inject IInternetPackageRepository InternetPackageRepository
+@inject ICarrierRepository CarrierRepository
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@attribute [Authorize(Roles = "Admin")]
+@layout BlazingPizza.Components.Layout.AdminLayout
+@rendermode InteractiveServer
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">حزم الإنترنت</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-left">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard">الرئيسية</a></li>
+                    <li class="breadcrumb-item active">حزم الإنترنت</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">قائمة حزم الإنترنت</h3>
+                <div class="card-tools">
+                    <a href="/admin/internetpackages/create" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> إضافة حزمة جديدة
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (packages == null)
+                {
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">جاري التحميل...</span>
+                        </div>
+                    </div>
+                }
+                else if (!packages.Any())
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> لا توجد حزم إنترنت مسجلة.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>الرقم</th>
+                                    <th>اسم الحزمة</th>
+                                    <th>الشركة</th>
+                                    <th>حجم البيانات</th>
+                                    <th>فترة الصلاحية</th>
+                                    <th>السعر</th>
+                                    <th>نوع الحزمة</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var package in packages)
+                                {
+                                    <tr>
+                                        <td>@package.Id</td>
+                                        <td>@package.Name</td>
+                                        <td>@package.CarrierDisplayName</td>
+                                        <td>@package.DataAmountDisplay</td>
+                                        <td>@package.ValidityDisplay</td>
+                                        <td>@package.Price.ToString("C")</td>
+                                        <td>@package.PackageType</td>
+                                        <td>
+                                            @if (package.IsActive)
+                                            {
+                                                <span class="badge badge-success">نشط</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-secondary">غير نشط</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a href="/admin/internetpackages/edit/@package.Id" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-edit"></i> تعديل
+                                            </a>
+                                            <button class="btn btn-sm btn-danger" @onclick="() => DeletePackage(package.Id)">
+                                                <i class="fas fa-trash"></i> حذف
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<InternetPackage>? packages;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPackages();
+    }
+
+    private async Task LoadPackages()
+    {
+        packages = await InternetPackageRepository.GetAllAsync();
+    }
+
+    private async Task DeletePackage(int id)
+    {
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", "هل أنت متأكد من حذف هذه الحزمة؟"))
+            return;
+
+        var success = await InternetPackageRepository.DeleteAsync(id);
+        if (success)
+        {
+            await LoadPackages();
+            StateHasChanged();
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "حدث خطأ أثناء حذف الحزمة");
+        }
+    }
+} 

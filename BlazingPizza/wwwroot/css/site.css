@@ -4019,7 +4019,7 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
 }
 
 .sidebar-open .app-main {
-    margin-left: 250px;
+    margin-left: 0;
 }
 
 @media (max-width: 991.98px) {
@@ -4033,6 +4033,123 @@ hr, .sidebar-order-table th, .sidebar-order-table td {
     
     .sidebar-open .app-main {
         margin-left: 0;
+    }
+}
+
+/* Internet Packages Styling */
+.internet-packages-view {
+    padding: 1rem;
+}
+
+.internet-packages-view h2 {
+    color: var(--accent-200);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.package-details {
+    margin: 1rem 0;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    color: var(--text-200);
+}
+
+.detail-item i {
+    margin-left: 0.5rem;
+    color: var(--accent-200);
+    width: 20px;
+}
+
+.price-section {
+    text-align: center;
+    margin: 1rem 0;
+    padding: 1rem 0;
+    border-top: 1px solid var(--bg-300);
+}
+
+.price-section .price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--accent-200);
+}
+
+.internet-packages-view .card {
+    border: 1px solid var(--bg-300);
+    border-radius: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.internet-packages-view .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.internet-packages-view .card-title {
+    color: var(--accent-200);
+    font-weight: bold;
+}
+
+.internet-packages-view .btn-primary {
+    background-color: var(--accent-200);
+    border-color: var(--accent-200);
+    width: 100%;
+    border-radius: 5px;
+}
+
+.internet-packages-view .btn-primary:hover {
+    background-color: var(--accent-100);
+    border-color: var(--accent-100);
+}
+
+.internet-packages-view .btn-primary:disabled {
+    background-color: var(--bg-300);
+    border-color: var(--bg-300);
+    color: var(--text-200);
+}
+
+.internet-packages-view .alert {
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.internet-packages-view .form-select,
+.internet-packages-view .form-control {
+    border-radius: 5px;
+    border: 1px solid var(--bg-300);
+}
+
+.internet-packages-view .form-control:focus,
+.internet-packages-view .form-select:focus {
+    border-color: var(--accent-200);
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 140, 0.25);
+}
+
+.internet-packages-view .is-invalid {
+    border-color: #dc3545;
+}
+
+.internet-packages-view .invalid-feedback {
+    display: block;
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+    .internet-packages-view .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    .internet-packages-view h2 {
+        font-size: 1.5rem;
+    }
+    
+    .price-section .price {
+        font-size: 1.25rem;
     }
 }
 

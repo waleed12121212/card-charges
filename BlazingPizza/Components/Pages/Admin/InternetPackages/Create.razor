@@ -1,0 +1,184 @@
+@page "/admin/internetpackages/create"
+@using BlazingPizza.Shared
+@using BlazingPizza.Shared.Interfaces
+@using Microsoft.AspNetCore.Authorization
+@inject IInternetPackageRepository InternetPackageRepository
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@attribute [Authorize(Roles = "Admin")]
+@layout BlazingPizza.Components.Layout.AdminLayout
+@rendermode InteractiveServer
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">إضافة حزمة إنترنت جديدة</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-left">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/internetpackages/index">حزم الإنترنت</a></li>
+                    <li class="breadcrumb-item active">إضافة حزمة</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">بيانات الحزمة الجديدة</h3>
+            </div>
+            <div class="card-body">
+                <EditForm Model="package" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="alert alert-danger" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="name">اسم الحزمة *</label>
+                                <InputText id="name" class="form-control" @bind-Value="package.Name" />
+                                <ValidationMessage For="@(() => package.Name)" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="packageType">نوع الحزمة</label>
+                                <InputSelect id="packageType" class="form-control" @bind-Value="package.PackageType">
+                                    <option value="">اختر نوع الحزمة</option>
+                                    <option value="يومي">يومي</option>
+                                    <option value="أسبوعي">أسبوعي</option>
+                                    <option value="شهري">شهري</option>
+                                    <option value="سنوي">سنوي</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="carrierType">الشريحة *</label>
+                                <InputSelect id="carrierType" class="form-control" @bind-Value="package.CarrierType">
+                                    <option value="">اختر الشريحة</option>
+                                    <option value="@CarrierType.جوال">جوال</option>
+                                    <option value="@CarrierType.أوريدو">أوريدو</option>
+                                    <option value="@CarrierType.سيليكوم">سيليكوم</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="dataAmount">حجم البيانات (MB) *</label>
+                                <InputNumber id="dataAmount" class="form-control" @bind-Value="package.DataAmountMB" />
+                                <ValidationMessage For="@(() => package.DataAmountMB)" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="validityDays">فترة الصلاحية (أيام) *</label>
+                                <InputNumber id="validityDays" class="form-control" @bind-Value="package.ValidityDays" />
+                                <ValidationMessage For="@(() => package.ValidityDays)" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="price">السعر *</label>
+                                <InputNumber id="price" class="form-control" @bind-Value="package.Price" />
+                                <ValidationMessage For="@(() => package.Price)" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="cost">التكلفة</label>
+                                <InputNumber id="cost" class="form-control" @bind-Value="package.Cost" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="sortOrder">ترتيب العرض</label>
+                                <InputNumber id="sortOrder" class="form-control" @bind-Value="package.SortOrder" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="apiProductId">معرف المنتج في API</label>
+                                <InputNumber id="apiProductId" class="form-control" @bind-Value="package.ApiProductId" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <InputCheckbox id="isActive" class="form-check-input" @bind-Value="package.IsActive" />
+                                    <label class="form-check-label" for="isActive">
+                                        نشط
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">الوصف</label>
+                        <InputTextArea id="description" class="form-control" rows="3" @bind-Value="package.Description" />
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                            @if (isSubmitting)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status"></span>
+                                <span>جاري الحفظ...</span>
+                            }
+                            else
+                            {
+                                <i class="fas fa-save"></i>
+                                <span>حفظ</span>
+                            }
+                        </button>
+                        <a href="/admin/internetpackages/index" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> إلغاء
+                        </a>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private InternetPackage package = new InternetPackage { IsActive = true };
+    private bool isSubmitting = false;
+
+    private async Task HandleValidSubmit()
+    {
+        isSubmitting = true;
+        try
+        {
+            await InternetPackageRepository.CreateAsync(package);
+            await JSRuntime.InvokeVoidAsync("alert", "تم إضافة الحزمة بنجاح");
+            Navigation.NavigateTo("/admin/internetpackages/index");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"حدث خطأ: {ex.Message}");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+} 

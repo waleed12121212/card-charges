@@ -19,6 +19,7 @@ builder.Services.AddRazorComponents()
 
 // Add Security
 builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<AuthenticationStateProvider, BlazingPizza.Components.Account.PersistingRevalidatingAuthenticationStateProvider>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -50,6 +51,8 @@ builder.Services.AddScoped<INotificationRepository , NotificationRepository>();
 builder.Services.AddScoped<IRefillCardRepository , RefillCardRepository>();
 builder.Services.AddScoped<IRechargeRepository , RechargeRepository>();
 builder.Services.AddScoped<ITransactionRepository , TransactionRepository>();
+builder.Services.AddScoped<IInternetPackageRepository, BlazingPizza.Repositories.InternetPackageRepository>();
+builder.Services.AddScoped<IInternetPackagePurchaseRepository, BlazingPizza.Repositories.InternetPackagePurchaseRepository>();
 builder.Services.AddScoped<HttpClient>(sp =>
 {
     var navigationManager = sp.GetRequiredService<Microsoft.AspNetCore.Components.NavigationManager>();
@@ -66,10 +69,8 @@ var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
 using (var scope = scopeFactory.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<PizzaStoreContext>();
-    if (db.Database.EnsureCreated())
-    {
-        SeedData.Initialize(db);
-    }
+    db.Database.EnsureCreated();
+    SeedData.Initialize(db);
 }
 
 

@@ -4,6 +4,7 @@ using BlazingPizza;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazingPizza.Migrations
 {
     [DbContext(typeof(PizzaStoreContext))]
-    partial class PizzaStoreContextModelSnapshot : ModelSnapshot
+    [Migration("20250729215008_AddInternetPackages")]
+    partial class AddInternetPackages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,7 +123,7 @@ namespace BlazingPizza.Migrations
                     b.Property<int?>("ApiProductId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CarrierType")
+                    b.Property<int>("CarrierId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Cost")
@@ -166,6 +169,8 @@ namespace BlazingPizza.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CarrierId");
+
                     b.ToTable("InternetPackages");
                 });
 
@@ -180,9 +185,6 @@ namespace BlazingPizza.Migrations
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("CarrierType")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("datetime2");
@@ -458,6 +460,17 @@ namespace BlazingPizza.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("BlazingPizza.Shared.InternetPackage", b =>
+                {
+                    b.HasOne("BlazingPizza.Shared.Carrier", "Carrier")
+                        .WithMany()
+                        .HasForeignKey("CarrierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Carrier");
                 });
 
             modelBuilder.Entity("BlazingPizza.Shared.InternetPackagePurchase", b =>

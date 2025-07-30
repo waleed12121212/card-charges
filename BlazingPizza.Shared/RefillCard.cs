@@ -1,3 +1,5 @@
+namespace BlazingPizza.Shared;
+
 public class RefillCard
 {
     public int id { get; set; }
