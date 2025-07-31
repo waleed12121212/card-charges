@@ -4,8 +4,9 @@ using BlazingPizza.Shared;
 using BlazingPizza.Shared.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using BlazingPizza.Services;
 
-[Route("api/recharge")]
+[Route("api/[controller]")]
 [ApiController]
 [IgnoreAntiforgeryToken]
 public class RechargeController : ControllerBase
@@ -13,17 +14,23 @@ public class RechargeController : ControllerBase
     private readonly IRechargeRepository _rechargeRepo;
     private readonly ITransactionRepository _transactionRepo;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly NotificationService _notificationService;
 
-    public RechargeController(IRechargeRepository rechargeRepo, ITransactionRepository transactionRepo, IHttpContextAccessor httpContextAccessor)
+    public RechargeController(
+        IRechargeRepository rechargeRepo, 
+        ITransactionRepository transactionRepo, 
+        IHttpContextAccessor httpContextAccessor,
+        NotificationService notificationService)
     {
         _rechargeRepo = rechargeRepo;
         _transactionRepo = transactionRepo;
         _httpContextAccessor = httpContextAccessor;
+        _notificationService = notificationService;
     }
 
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> CreateRecharge(Recharge recharge)
+    public async Task<ActionResult<Recharge>> Create(Recharge recharge)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -51,6 +58,13 @@ public class RechargeController : ControllerBase
         recharge.Date = DateTime.Now;
 
         await _rechargeRepo.AddAsync(recharge);
+
+        // Create credit top-up notification
+        await _notificationService.CreateCreditTopUpNotificationAsync(
+            userId, 
+            recharge.Amount, 
+            recharge.PhoneNumber
+        );
 
         return Ok(recharge);
     }

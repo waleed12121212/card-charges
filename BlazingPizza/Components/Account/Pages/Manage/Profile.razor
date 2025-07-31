@@ -3,6 +3,7 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
 @inject BlazingPizza.PizzaStoreContext Db
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor HttpContextAccessor
@@ -49,18 +50,32 @@ else
     <div class="profile-edit-overlay" @onclick="CloseEdit">
         <div class="profile-edit-dialog" @onclick:stopPropagation>
             <h3 class="profile-edit-title">تعديل البيانات الشخصية</h3>
+
+            @if (!string.IsNullOrEmpty(EditMessage))
+            {
+                <div class="alert @(EditSuccess ? "alert-success" : "alert-danger") mb-3">
+                    @EditMessage
+                </div>
+            }
+
             <EditForm Model="EditModel" OnValidSubmit="SaveEdit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
                 <div class="profile-edit-field">
                     <label>الاسم</label>
                     <InputText @bind-Value="EditModel.UserName" class="profile-edit-input" />
+                    <ValidationMessage For="() => EditModel.UserName" />
                 </div>
                 <div class="profile-edit-field">
                     <label>البريد الإلكتروني</label>
                     <InputText @bind-Value="EditModel.Email" class="profile-edit-input" />
+                    <ValidationMessage For="() => EditModel.Email" />
                 </div>
                 <div class="profile-edit-field">
                     <label>رقم الجوال</label>
                     <InputText @bind-Value="EditModel.PhoneNumber" class="profile-edit-input" />
+                    <ValidationMessage For="() => EditModel.PhoneNumber" />
                 </div>
                 <div class="profile-edit-actions">
                     <button type="submit" class="profile-btn-new">حفظ</button>
@@ -80,6 +95,13 @@ else
 
     bool ShowEdit = false;
     EditProfileModel EditModel = new();
+    string? EditMessage = "";
+    bool EditSuccess = false;
+
+    // متغيرات لحفظ القيم الأصلية
+    string originalUserName = "";
+    string originalEmail = "";
+    string originalPhoneNumber = "";
 
     protected override async Task OnInitializedAsync( )
     {
@@ -97,9 +119,16 @@ else
             isLoading = false;
             return;
         }
+
         UserName = user.UserName;
         Email = user.Email ?? "";
         PhoneNumber = user.PhoneNumber ?? "";
+
+        // حفظ القيم الأصلية
+        originalUserName = UserName;
+        originalEmail = Email;
+        originalPhoneNumber = PhoneNumber;
+
         EditModel.UserName = UserName;
         EditModel.Email = Email;
         EditModel.PhoneNumber = PhoneNumber;
@@ -109,6 +138,8 @@ else
     void CloseEdit( )
     {
         ShowEdit = false;
+        EditMessage = "";
+        EditSuccess = false;
         // إعادة القيم القديمة في حال الإلغاء
         EditModel.UserName = UserName;
         EditModel.Email = Email;
@@ -117,18 +148,83 @@ else
 
     async Task SaveEdit( )
     {
+        // التحقق من أن شيئاً واحداً على الأقل تم تعديله
+        bool hasChanges = false;
+
+        if (EditModel.UserName != originalUserName)
+            hasChanges = true;
+
+        if (EditModel.Email != originalEmail)
+            hasChanges = true;
+
+        if (EditModel.PhoneNumber != originalPhoneNumber)
+            hasChanges = true;
+
+        if (!hasChanges)
+        {
+            EditMessage = "يجب تعديل شيء واحد على الأقل قبل الحفظ.";
+            EditSuccess = false;
+            return;
+        }
+
         var userId = HttpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return;
-        var user = await Db.Users.FindAsync(userId);
-        if (user == null) return;
-        user.UserName = EditModel.UserName;
-        user.Email = EditModel.Email;
-        user.PhoneNumber = EditModel.PhoneNumber;
-        await Db.SaveChangesAsync();
-        UserName = user.UserName;
-        Email = user.Email ?? "";
-        PhoneNumber = user.PhoneNumber ?? "";
-        ShowEdit = false;
+
+        try
+        {
+            var user = await Db.Users.FindAsync(userId);
+            if (user == null) return;
+
+            // التحقق من عدم تكرار البريد الإلكتروني لمستخدم آخر
+            if (EditModel.Email != originalEmail && await Db.Users.AnyAsync(u => u.Email == EditModel.Email && u.Id != userId))
+            {
+                EditMessage = "البريد الإلكتروني مستخدم بالفعل.";
+                EditSuccess = false;
+                return;
+            }
+
+            // التحقق من عدم تكرار رقم الجوال لمستخدم آخر
+            if (EditModel.PhoneNumber != originalPhoneNumber && await Db.Users.AnyAsync(u => u.PhoneNumber == EditModel.PhoneNumber && u.Id != userId))
+            {
+                EditMessage = "رقم الجوال مستخدم بالفعل.";
+                EditSuccess = false;
+                return;
+            }
+
+            // التحقق من عدم تكرار اسم المستخدم لمستخدم آخر
+            if (EditModel.UserName != originalUserName && await Db.Users.AnyAsync(u => u.UserName == EditModel.UserName && u.Id != userId))
+            {
+                EditMessage = "اسم المستخدم مستخدم بالفعل.";
+                EditSuccess = false;
+                return;
+            }
+
+            user.UserName = EditModel.UserName;
+            user.Email = EditModel.Email;
+            user.PhoneNumber = EditModel.PhoneNumber;
+            await Db.SaveChangesAsync();
+
+            UserName = user.UserName;
+            Email = user.Email ?? "";
+            PhoneNumber = user.PhoneNumber ?? "";
+
+            // تحديث القيم الأصلية
+            originalUserName = UserName;
+            originalEmail = Email;
+            originalPhoneNumber = PhoneNumber;
+
+            EditMessage = "تم حفظ التعديلات بنجاح!";
+            EditSuccess = true;
+
+            await Task.Delay(1500);
+            ShowEdit = false;
+            EditMessage = "";
+        }
+        catch (Exception ex)
+        {
+            EditMessage = $"حدث خطأ: {ex.Message}";
+            EditSuccess = false;
+        }
     }
 
     void ChangePassword( )
@@ -137,11 +233,11 @@ else
 
     class EditProfileModel
     {
-        [Required]
+        [Required(ErrorMessage = "اسم المستخدم مطلوب")]
         public string UserName { get; set; } = "";
-        [Required, EmailAddress]
+        [Required(ErrorMessage = "البريد الإلكتروني مطلوب"), EmailAddress(ErrorMessage = "البريد الإلكتروني غير صحيح")]
         public string Email { get; set; } = "";
-        [Phone]
+        [Phone(ErrorMessage = "رقم الجوال غير صحيح")]
         public string PhoneNumber { get; set; } = "";
     }
 } 

@@ -22,8 +22,8 @@ internal sealed class PersistingRevalidatingAuthenticationStateProvider : Revali
     private Task<AuthenticationState>? authenticationStateTask;
 
     public PersistingRevalidatingAuthenticationStateProvider(
-        ILoggerFactory loggerFactory,
-        IServiceScopeFactory serviceScopeFactory,
+        ILoggerFactory loggerFactory ,
+        IServiceScopeFactory serviceScopeFactory ,
         PersistentComponentState persistentComponentState)
         : base(loggerFactory)
     {
@@ -31,13 +31,13 @@ internal sealed class PersistingRevalidatingAuthenticationStateProvider : Revali
         state = persistentComponentState;
 
         AuthenticationStateChanged += OnAuthenticationStateChanged;
-        subscription = state.RegisterOnPersisting(OnPersistingAsync, RenderMode.InteractiveWebAssembly);
+        subscription = state.RegisterOnPersisting(OnPersistingAsync , RenderMode.InteractiveWebAssembly);
     }
 
     protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(30);
 
     protected override async Task<bool> ValidateAuthenticationStateAsync(
-        AuthenticationState authenticationState, CancellationToken cancellationToken)
+        AuthenticationState authenticationState , CancellationToken cancellationToken)
     {
         // Get the user manager from a new scope to ensure it fetches fresh data
         await using var scope = scopeFactory.CreateAsyncScope();
@@ -61,7 +61,7 @@ internal sealed class PersistingRevalidatingAuthenticationStateProvider : Revali
         this.authenticationStateTask = authenticationStateTask;
     }
 
-    private async Task OnPersistingAsync()
+    private async Task OnPersistingAsync( )
     {
         if (authenticationStateTask is null)
         {
@@ -74,17 +74,17 @@ internal sealed class PersistingRevalidatingAuthenticationStateProvider : Revali
         if (principal.Identity?.IsAuthenticated == true)
         {
             var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var email = principal.FindFirst(ClaimTypes.Name)?.Value ?? 
-                       principal.FindFirst(ClaimTypes.Email)?.Value ?? 
+            var email = principal.FindFirst(ClaimTypes.Name)?.Value ??
+                       principal.FindFirst(ClaimTypes.Email)?.Value ??
                        principal.Identity.Name ?? "";
             var role = principal.FindFirst(ClaimTypes.Role)?.Value ?? "";
 
             if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(email))
             {
-                state.PersistAsJson("UserInfo", new UserInfo
+                state.PersistAsJson("UserInfo" , new UserInfo
                 {
-                    UserId = userId,
-                    Email = email,
+                    UserId = userId ,
+                    Email = email ,
                 });
 
                 Console.WriteLine($"[Server] Persisted UserInfo: UserId={userId}, Email={email}, Role={role}");
@@ -98,4 +98,4 @@ internal sealed class PersistingRevalidatingAuthenticationStateProvider : Revali
         AuthenticationStateChanged -= OnAuthenticationStateChanged;
         base.Dispose(disposing);
     }
-} 
+}

@@ -14,6 +14,7 @@ public class PizzaStoreContext : DbContext
     public DbSet<Carrier> Carriers { get; set; }
     public DbSet<RefillCard> RefillCards { get; set; }
     public DbSet<NotificationSubscription> NotificationSubscriptions { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
     public DbSet<Recharge> Recharges { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<InternetPackage> InternetPackages { get; set; }

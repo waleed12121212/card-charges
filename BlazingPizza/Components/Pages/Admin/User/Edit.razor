@@ -89,6 +89,11 @@ else
     private bool isSubmitting = false;
     private bool IsSuccess = false;
     private bool isLoading = true;
+    
+    // متغيرات لحفظ القيم الأصلية
+    private string originalEmail = string.Empty;
+    private string originalPhoneNumber = string.Empty;
+    private string originalRole = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -107,6 +112,12 @@ else
             isLoading = false;
             return;
         }
+        
+        // حفظ القيم الأصلية
+        originalEmail = userEntity.Email ?? string.Empty;
+        originalPhoneNumber = userEntity.PhoneNumber ?? string.Empty;
+        originalRole = userEntity.Role;
+        
         Input = new InputModel
         {
             UserName = userEntity.UserName,
@@ -120,6 +131,29 @@ else
     private async Task UpdateUser()
     {
         if (Input == null || userEntity == null) return;
+        
+        // التحقق من أن شيئاً واحداً على الأقل تم تعديله
+        bool hasChanges = false;
+        
+        if (!string.IsNullOrWhiteSpace(Input.Password))
+            hasChanges = true;
+        
+        if ((Input.Email ?? string.Empty) != originalEmail)
+            hasChanges = true;
+            
+        if ((Input.PhoneNumber ?? string.Empty) != originalPhoneNumber)
+            hasChanges = true;
+            
+        if (Input.Role != originalRole)
+            hasChanges = true;
+        
+        if (!hasChanges)
+        {
+            Message = "يجب تعديل شيء واحد على الأقل قبل الحفظ.";
+            IsSuccess = false;
+            return;
+        }
+        
         isSubmitting = true;
         Message = string.Empty;
         IsSuccess = false;
@@ -127,26 +161,29 @@ else
         try
         {
             // تحقق من البريد الإلكتروني إذا تم تعديله ولمستخدم آخر
-            if (!string.IsNullOrEmpty(Input.Email) && await Db.Users.AnyAsync(u => u.Email == Input.Email && u.Id != userEntity.Id))
+            if (!string.IsNullOrEmpty(Input.Email) && Input.Email != originalEmail && await Db.Users.AnyAsync(u => u.Email == Input.Email && u.Id != userEntity.Id))
             {
                 Message = "البريد الإلكتروني مستخدم بالفعل.";
                 return;
             }
             // تحقق من رقم الجوال إذا تم تعديله ولمستخدم آخر
-            if (!string.IsNullOrEmpty(Input.PhoneNumber) && await Db.Users.AnyAsync(u => u.PhoneNumber == Input.PhoneNumber && u.Id != userEntity.Id))
+            if (!string.IsNullOrEmpty(Input.PhoneNumber) && Input.PhoneNumber != originalPhoneNumber && await Db.Users.AnyAsync(u => u.PhoneNumber == Input.PhoneNumber && u.Id != userEntity.Id))
             {
                 Message = "رقم الجوال مستخدم بالفعل.";
                 return;
             }
+            
             // تحديث البيانات
             userEntity.Email = Input.Email;
             userEntity.PhoneNumber = Input.PhoneNumber;
             userEntity.Role = Input.Role;
+            
             // تغيير كلمة المرور إذا تم إدخالها
             if (!string.IsNullOrWhiteSpace(Input.Password))
             {
                 userEntity.PasswordHash = BCrypt.Net.BCrypt.HashPassword(Input.Password);
             }
+            
             Db.Users.Update(userEntity);
             await Db.SaveChangesAsync();
             Message = "تم حفظ التعديلات بنجاح!";

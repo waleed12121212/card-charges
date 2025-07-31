@@ -78,7 +78,7 @@
                                         <td>@package.CarrierDisplayName</td>
                                         <td>@package.DataAmountDisplay</td>
                                         <td>@package.ValidityDisplay</td>
-                                        <td>@package.Price.ToString("C")</td>
+                                        <td>@($"{package.Price:N2} ₪")</td>
                                         <td>@package.PackageType</td>
                                         <td>
                                             @if (package.IsActive)
@@ -112,19 +112,19 @@
 @code {
     private List<InternetPackage>? packages;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync( )
     {
         await LoadPackages();
     }
 
-    private async Task LoadPackages()
+    private async Task LoadPackages( )
     {
         packages = await InternetPackageRepository.GetAllAsync();
     }
 
     private async Task DeletePackage(int id)
     {
-        if (!await JSRuntime.InvokeAsync<bool>("confirm", "هل أنت متأكد من حذف هذه الحزمة؟"))
+        if (!await JSRuntime.InvokeAsync<bool>("confirm" , "هل أنت متأكد من حذف هذه الحزمة؟"))
             return;
 
         var success = await InternetPackageRepository.DeleteAsync(id);
@@ -135,7 +135,7 @@
         }
         else
         {
-            await JSRuntime.InvokeVoidAsync("alert", "حدث خطأ أثناء حذف الحزمة");
+            await JSRuntime.InvokeVoidAsync("alert" , "حدث خطأ أثناء حذف الحزمة");
         }
     }
 } 

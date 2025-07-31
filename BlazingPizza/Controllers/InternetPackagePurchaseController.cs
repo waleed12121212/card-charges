@@ -3,6 +3,7 @@ using BlazingPizza.Shared.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using BlazingPizza.Services;
 
 namespace BlazingPizza.Controllers;
 
@@ -14,15 +15,18 @@ public class InternetPackagePurchaseController : ControllerBase
     private readonly IInternetPackagePurchaseRepository _repository;
     private readonly IInternetPackageRepository _packageRepository;
     private readonly ITransactionRepository _transactionRepository;
+    private readonly NotificationService _notificationService;
 
     public InternetPackagePurchaseController(
         IInternetPackagePurchaseRepository repository,
         IInternetPackageRepository packageRepository,
-        ITransactionRepository transactionRepository)
+        ITransactionRepository transactionRepository,
+        NotificationService notificationService)
     {
         _repository = repository;
         _packageRepository = packageRepository;
         _transactionRepository = transactionRepository;
+        _notificationService = notificationService;
     }
 
     [HttpGet]
@@ -143,7 +147,6 @@ public class InternetPackagePurchaseController : ControllerBase
             UserId = currentUserId,
             InternetPackageId = request.InternetPackageId,
             PhoneNumber = request.PhoneNumber,
-            CarrierType = carrierType.Value,
             Amount = package.Price,
             PurchaseDate = DateTime.Now,
             ExpiryDate = DateTime.Now.AddDays(package.ValidityDays),
@@ -153,6 +156,15 @@ public class InternetPackagePurchaseController : ControllerBase
         };
 
         var createdPurchase = await _repository.CreateAsync(purchase);
+
+        // Create package purchase notification
+        await _notificationService.CreatePackagePurchaseNotificationAsync(
+            currentUserId,
+            package.Name,
+            package.Price,
+            request.PhoneNumber
+        );
+
         return CreatedAtAction(nameof(GetById), new { id = createdPurchase.Id }, createdPurchase);
     }
 

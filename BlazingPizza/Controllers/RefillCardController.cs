@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using BlazingPizza.Shared;
 using BlazingPizza.Shared.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using BlazingPizza.Services;
 
 [Route("api/refillcard")]
 [ApiController]
@@ -12,15 +13,18 @@ public class RefillCardController : ControllerBase
     private readonly IRefillCardRepository _refillCardRepo;
     private readonly ITransactionRepository _transactionRepo;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly NotificationService _notificationService;
 
     public RefillCardController(
         IRefillCardRepository refillCardRepo,
         ITransactionRepository transactionRepo,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        NotificationService notificationService)
     {
         _refillCardRepo = refillCardRepo;
         _transactionRepo = transactionRepo;
         _httpContextAccessor = httpContextAccessor;
+        _notificationService = notificationService;
     }
 
     [HttpGet]
@@ -102,7 +106,7 @@ public class RefillCardController : ControllerBase
 
     [HttpPost("purchase")]
     [Authorize]
-    public async Task<IActionResult> PurchaseRefillCard([FromBody] RefillCardPurchaseRequest request)
+    public async Task<IActionResult> Purchase([FromBody] RefillCardPurchaseRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -128,6 +132,13 @@ public class RefillCardController : ControllerBase
         };
 
         await _transactionRepo.AddAsync(transaction);
+
+        // Create purchase notification
+        await _notificationService.CreatePurchaseNotificationAsync(
+            userId, 
+            $"{request.Quantity} {refillCard.ProductName}", 
+            transaction.Amount
+        );
 
         return Ok(new { 
             success = true,

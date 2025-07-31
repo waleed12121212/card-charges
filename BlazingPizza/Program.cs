@@ -53,6 +53,10 @@ builder.Services.AddScoped<IRechargeRepository , RechargeRepository>();
 builder.Services.AddScoped<ITransactionRepository , TransactionRepository>();
 builder.Services.AddScoped<IInternetPackageRepository, BlazingPizza.Repositories.InternetPackageRepository>();
 builder.Services.AddScoped<IInternetPackagePurchaseRepository, BlazingPizza.Repositories.InternetPackagePurchaseRepository>();
+
+// Add notification service
+builder.Services.AddScoped<BlazingPizza.Services.NotificationService>();
+
 builder.Services.AddScoped<HttpClient>(sp =>
 {
     var navigationManager = sp.GetRequiredService<Microsoft.AspNetCore.Components.NavigationManager>();
