@@ -2,9 +2,12 @@
 @using BlazingPizza.Shared
 @using BlazingPizza
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using BlazingPizza.Shared.Interfaces
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
+@inject IImageService ImageService
 @attribute [Authorize(Roles = "Admin")]
 @layout BlazingPizza.Components.Layout.AdminLayout
 @rendermode InteractiveServer
@@ -215,6 +218,12 @@
                                 <small class="text-success">تم اختيار: @uploadedFileName</small>
                             </div>
                         }
+                        @if (!string.IsNullOrEmpty(imageUploadError))
+                        {
+                            <div class="mt-2">
+                                <small class="text-danger">@imageUploadError</small>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -281,6 +290,7 @@
     private bool isSubmitting = false;
     private IBrowserFile? selectedImageFile;
     private string uploadedFileName = string.Empty;
+    private string imageUploadError = string.Empty;
     private bool showValidationError = false;
 
     protected override async Task OnInitializedAsync()
@@ -318,7 +328,8 @@
     private void OnImageFileChanged(InputFileChangeEventArgs e)
     {
         selectedImageFile = e.File;
-        uploadedFileName = e.File.Name;
+        uploadedFileName = e.File?.Name ?? string.Empty;
+        imageUploadError = string.Empty;
         StateHasChanged();
     }
 
@@ -347,51 +358,42 @@
             // Upload image if selected
             if (selectedImageFile != null)
             {
-                var imageFileName = await UploadImage(selectedImageFile);
-                refillCard.imageName = imageFileName;
+                try
+                {
+                    var imageFileName = await ImageService.UploadImageAsync(selectedImageFile, "refillcard");
+                    refillCard.imageName = imageFileName;
+                    Console.WriteLine($"Image uploaded successfully: {imageFileName}");
+                }
+                catch (Exception ex)
+                {
+                    imageUploadError = ex.Message;
+                    await JSRuntime.InvokeVoidAsync("alert", $"خطأ في رفع الصورة: {ex.Message}");
+                    return;
+                }
             }
 
             var response = await Http.PostAsJsonAsync("api/refillcard", refillCard);
-
+            
             if (response.IsSuccessStatusCode)
             {
-                await JSRuntime.InvokeVoidAsync("alert", "تم حفظ بطاقة الشحن بنجاح");
+                await JSRuntime.InvokeVoidAsync("alert", "تم إنشاء بطاقة الشحن بنجاح");
                 Navigation.NavigateTo("/admin/refillcards/index");
             }
             else
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                await JSRuntime.InvokeVoidAsync("alert", $"خطأ في حفظ بطاقة الشحن: {errorMessage}");
+                await JSRuntime.InvokeVoidAsync("alert", $"خطأ في إنشاء بطاقة الشحن: {errorMessage}");
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Exception: {ex.Message}");
-            await JSRuntime.InvokeVoidAsync("alert", $"خطأ في حفظ بطاقة الشحن: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"خطأ: {ex.Message}");
         }
         finally
         {
             isSubmitting = false;
             StateHasChanged();
         }
-    }
-
-    private async Task<string> UploadImage(IBrowserFile file)
-    {
-        var fileName = $"{Guid.NewGuid()}_{file.Name}";
-        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "refillcard", fileName);
-
-        // Ensure directory exists
-        var directory = Path.GetDirectoryName(path);
-        if (!Directory.Exists(directory))
-        {
-            Directory.CreateDirectory(directory!);
-        }
-
-        using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024); // 5MB max
-        using var fileStream = File.Create(path);
-        await stream.CopyToAsync(fileStream);
-
-        return fileName;
     }
 } 

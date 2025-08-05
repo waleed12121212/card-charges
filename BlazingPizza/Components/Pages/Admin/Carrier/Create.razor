@@ -2,9 +2,12 @@
 @page "/admin/carrier/create"
 @using BlazingPizza.Shared
 @using BlazingPizza
+@using Microsoft.AspNetCore.Components.Forms
+@using BlazingPizza.Shared.Interfaces
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
+@inject IImageService ImageService
 @layout BlazingPizza.Components.Layout.AdminLayout
 @rendermode InteractiveServer
 
@@ -107,6 +110,12 @@
                                 <small class="text-success">تم اختيار: @uploadedFileName</small>
                             </div>
                         }
+                        @if (!string.IsNullOrEmpty(imageUploadError))
+                        {
+                            <div class="mt-2">
+                                <small class="text-danger">@imageUploadError</small>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -172,6 +181,7 @@
             private bool underMaintenanceValue = false;
             private IBrowserFile? selectedImageFile;
             private string uploadedFileName = string.Empty;
+            private string imageUploadError = string.Empty;
             private bool showValidationError = false;
 
             protected override void OnInitialized( )
@@ -187,7 +197,8 @@
             private void OnImageFileChanged(InputFileChangeEventArgs e)
             {
                 selectedImageFile = e.File;
-                uploadedFileName = e.File.Name;
+                uploadedFileName = e.File?.Name ?? string.Empty;
+                imageUploadError = string.Empty;
                 StateHasChanged();
             }
 
@@ -219,9 +230,18 @@
                     // Upload image if selected
                     if (selectedImageFile != null)
                     {
-                        var imageFileName = await UploadImage(selectedImageFile);
-                        carrier.imageName = imageFileName;
-                        Console.WriteLine($"Image uploaded: {imageFileName}");
+                        try
+                        {
+                            var imageFileName = await ImageService.UploadImageAsync(selectedImageFile, "carrier");
+                            carrier.imageName = imageFileName;
+                            Console.WriteLine($"Image uploaded successfully: {imageFileName}");
+                        }
+                        catch (Exception ex)
+                        {
+                            imageUploadError = ex.Message;
+                            await JSRuntime.InvokeVoidAsync("alert", $"خطأ في رفع الصورة: {ex.Message}");
+                            return;
+                        }
                     }
 
                     var response = await Http.PostAsJsonAsync("api/carriers" , carrier);
@@ -229,20 +249,20 @@
 
                     if (response.IsSuccessStatusCode)
                     {
-                        await JSRuntime.InvokeVoidAsync("alert" , "تم حفظ الشركة بنجاح");
+                        await JSRuntime.InvokeVoidAsync("alert" , "تم إنشاء الشركة بنجاح");
                         Navigation.NavigateTo("/admin/carrier/index");
                     }
                     else
                     {
                         var errorMessage = await response.Content.ReadAsStringAsync();
                         Console.WriteLine($"Error: {errorMessage}");
-                        await JSRuntime.InvokeVoidAsync("alert" , $"خطأ في حفظ الشركة: {errorMessage}");
+                        await JSRuntime.InvokeVoidAsync("alert" , $"خطأ في إنشاء الشركة: {errorMessage}");
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Exception: {ex.Message}");
-                    await JSRuntime.InvokeVoidAsync("alert" , $"خطأ في حفظ الشركة: {ex.Message}");
+                    await JSRuntime.InvokeVoidAsync("alert" , $"خطأ: {ex.Message}");
                 }
                 finally
                 {
@@ -263,25 +283,6 @@
             {
                 await JSRuntime.InvokeVoidAsync("alert" , "الزر يعمل!");
                 Console.WriteLine("TestButton called");
-            }
-
-            private async Task<string> UploadImage(IBrowserFile file)
-            {
-                var fileName = $"{Guid.NewGuid()}_{file.Name}";
-                var path = Path.Combine(Directory.GetCurrentDirectory() , "wwwroot" , "img" , "carrier" , fileName);
-
-                // Ensure directory exists
-                var directory = Path.GetDirectoryName(path);
-                if (!Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory!);
-                }
-
-                using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024); // 5MB max
-                using var fileStream = File.Create(path);
-                await stream.CopyToAsync(fileStream);
-
-                return fileName;
             }
         }
     </div>

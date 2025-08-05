@@ -10,20 +10,6 @@ public class NotificationRepository : INotificationRepository
     {
         _context = context;
     }
-    
-    public async Task SubscribeToNotifications(NotificationSubscription subscription)
-    {
-        var existing = await _context.NotificationSubscriptions.FindAsync(subscription.UserId);
-        if (existing == null)
-        {
-            _context.NotificationSubscriptions.Add(subscription);
-        }
-        else
-        {
-            _context.Entry(existing).CurrentValues.SetValues(subscription);
-        }
-        await _context.SaveChangesAsync();
-    }
 
     public async Task<Notification> CreateNotificationAsync(Notification notification)
     {
@@ -38,7 +24,7 @@ public class NotificationRepository : INotificationRepository
         return await _context.Notifications.FindAsync(id);
     }
 
-    public async Task<List<Notification>> GetUserNotificationsAsync(string userId, int limit = 50)
+    public async Task<List<Notification>> GetUserNotificationsAsync(string userId , int limit = 50)
     {
         return await _context.Notifications
             .Where(n => n.UserId == userId)
@@ -70,12 +56,12 @@ public class NotificationRepository : INotificationRepository
         var notifications = await _context.Notifications
             .Where(n => n.UserId == userId && !n.IsRead)
             .ToListAsync();
-        
+
         foreach (var notification in notifications)
         {
             notification.IsRead = true;
         }
-        
+
         await _context.SaveChangesAsync();
     }
 

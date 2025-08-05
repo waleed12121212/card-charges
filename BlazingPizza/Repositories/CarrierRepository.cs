@@ -1,17 +1,22 @@
 using BlazingPizza;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BlazingPizza.Shared.Interfaces;
 
 public class CarrierRepository : ICarrierRepository
 {
     private readonly PizzaStoreContext _context;
-    public CarrierRepository(PizzaStoreContext context)
+    private readonly IImageService _imageService;
+    
+    public CarrierRepository(PizzaStoreContext context, IImageService imageService)
     {
         _context = context;
+        _imageService = imageService;
     }
-    
-    public async Task<List<Carrier>> GetCarriers()
+
+    public async Task<List<Carrier>> GetCarriers( )
     {
         return await _context.Carriers.ToListAsync();
     }
@@ -43,6 +48,14 @@ public class CarrierRepository : ICarrierRepository
         if (existingCarrier == null)
         {
             return null;
+        }
+
+        // Delete old image if it's being changed and it's not empty
+        if (!string.IsNullOrEmpty(existingCarrier.imageName) && 
+            existingCarrier.imageName != carrier.imageName &&
+            !string.IsNullOrEmpty(carrier.imageName))
+        {
+            await _imageService.DeleteImageAsync(existingCarrier.imageName, "carrier");
         }
 
         // Ensure string properties are not null
@@ -79,6 +92,12 @@ public class CarrierRepository : ICarrierRepository
         if (carrier == null)
         {
             return false;
+        }
+
+        // Delete associated image
+        if (!string.IsNullOrEmpty(carrier.imageName))
+        {
+            await _imageService.DeleteImageAsync(carrier.imageName, "carrier");
         }
 
         _context.Carriers.Remove(carrier);

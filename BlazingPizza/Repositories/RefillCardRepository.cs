@@ -9,10 +9,12 @@ namespace BlazingPizza;
 public class RefillCardRepository : IRefillCardRepository
 {
     private readonly PizzaStoreContext _context;
+    private readonly IImageService _imageService;
 
-    public RefillCardRepository(PizzaStoreContext context)
+    public RefillCardRepository(PizzaStoreContext context, IImageService imageService)
     {
         _context = context;
+        _imageService = imageService;
     }
 
     public async Task<List<RefillCard>> GetByCarrierId(int carrierId)
@@ -63,6 +65,14 @@ public class RefillCardRepository : IRefillCardRepository
         if (existingCard == null)
             return null;
 
+        // Delete old image if it's being changed and it's not empty
+        if (!string.IsNullOrEmpty(existingCard.imageName) && 
+            existingCard.imageName != refillCard.imageName &&
+            !string.IsNullOrEmpty(refillCard.imageName))
+        {
+            await _imageService.DeleteImageAsync(existingCard.imageName, "refillcard");
+        }
+
         // Update properties
         existingCard.ProductName = refillCard.ProductName ?? string.Empty;
         existingCard.CardAmount = refillCard.CardAmount;
@@ -111,6 +121,12 @@ public class RefillCardRepository : IRefillCardRepository
         var refillCard = await _context.RefillCards.FindAsync(id);
         if (refillCard == null)
             return false;
+
+        // Delete associated image
+        if (!string.IsNullOrEmpty(refillCard.imageName))
+        {
+            await _imageService.DeleteImageAsync(refillCard.imageName, "refillcard");
+        }
 
         _context.RefillCards.Remove(refillCard);
         await _context.SaveChangesAsync();

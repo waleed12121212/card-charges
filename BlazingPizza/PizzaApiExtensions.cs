@@ -10,29 +10,30 @@ public static class PizzaApiExtensions
     public static WebApplication MapPizzaApi(this WebApplication app)
     {
         // Subscribe to notifications
-        app.MapPut("/notifications/subscribe", [Authorize] async (
-            HttpContext context,
-            PizzaStoreContext db,
-            NotificationSubscription subscription) => {
+        app.MapPut("/notifications/subscribe" , [Authorize] async (
+            HttpContext context ,
+            PizzaStoreContext db ,
+            Notification subscription) =>
+        {
 
-                // We're storing at most one subscription per user, so delete old ones.
-                // Alternatively, you could let the user register multiple subscriptions from different browsers/devices.
-                var userId = GetUserId(context);
-                if (userId is null)
-                {
-                    return Results.Unauthorized();
-                }
-                var oldSubscriptions = db.NotificationSubscriptions.Where(e => e.UserId == userId);
-                db.NotificationSubscriptions.RemoveRange(oldSubscriptions);
+            // We're storing at most one subscription per user, so delete old ones.
+            // Alternatively, you could let the user register multiple subscriptions from different browsers/devices.
+            var userId = GetUserId(context);
+            if (userId is null)
+            {
+                return Results.Unauthorized();
+            }
+            var oldSubscriptions = db.Notifications.Where(e => e.UserId == userId);
+            db.Notifications.RemoveRange(oldSubscriptions);
 
-                // Store new subscription
-                subscription.UserId = userId;
-                db.NotificationSubscriptions.Attach(subscription);
+            // Store new subscription
+            subscription.UserId = userId;
+            db.Notifications.Attach(subscription);
 
-                await db.SaveChangesAsync();
-                return Results.Ok(subscription);
+            await db.SaveChangesAsync();
+            return Results.Ok(subscription);
 
-            });
+        });
 
         return app;
     }

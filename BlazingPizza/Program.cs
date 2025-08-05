@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using BlazingPizza.Shared.Interfaces;
+using BlazingPizza.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +54,9 @@ builder.Services.AddScoped<IRechargeRepository , RechargeRepository>();
 builder.Services.AddScoped<ITransactionRepository , TransactionRepository>();
 builder.Services.AddScoped<IInternetPackageRepository, BlazingPizza.Repositories.InternetPackageRepository>();
 builder.Services.AddScoped<IInternetPackagePurchaseRepository, BlazingPizza.Repositories.InternetPackagePurchaseRepository>();
+
+// Add image service
+builder.Services.AddScoped<IImageService, ImageService>();
 
 // Add notification service
 builder.Services.AddScoped<BlazingPizza.Services.NotificationService>();
@@ -105,9 +109,6 @@ app.MapControllers();
 app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode()
         .AddInteractiveWebAssemblyRenderMode()
-        .AddAdditionalAssemblies(
-            typeof(BlazingPizza.Client._Imports).Assembly ,
-            typeof(BlazingPizza.ComponentsLibrary._Imports).Assembly
-        );
+        .AddAdditionalAssemblies(typeof(BlazingPizza.Client._Imports).Assembly);
 
 app.Run();

@@ -13,7 +13,6 @@ public class PizzaStoreContext : DbContext
     public DbSet<CarrierStoreUser> Users { get; set; }
     public DbSet<Carrier> Carriers { get; set; }
     public DbSet<RefillCard> RefillCards { get; set; }
-    public DbSet<NotificationSubscription> NotificationSubscriptions { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<Recharge> Recharges { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
@@ -60,14 +59,14 @@ public class PizzaStoreContext : DbContext
         // Configure decimal precision
         modelBuilder.Entity<InternetPackage>()
             .Property(ip => ip.Price)
-            .HasPrecision(18, 2);
+            .HasPrecision(18 , 2);
 
         modelBuilder.Entity<InternetPackage>()
             .Property(ip => ip.Cost)
-            .HasPrecision(18, 2);
+            .HasPrecision(18 , 2);
 
         modelBuilder.Entity<InternetPackagePurchase>()
             .Property(ipp => ipp.Amount)
-            .HasPrecision(18, 2);
+            .HasPrecision(18 , 2);
     }
 }
