@@ -1,0 +1,256 @@
+@using System.Security.Claims
+@using BlazingPizza.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject PinService PinService
+@inject PinSessionService PinSessionService
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@if (ShowDialog)
+{
+    <div class="pin-overlay">
+        <div class="pin-dialog">
+            <div class="pin-header">
+                <h3>التحقق من الرقم السري</h3>
+                <button class="pin-close-btn" @onclick="OnCancel">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="pin-content">
+                <p>يرجى إدخال الرقم السري للوصول إلى هذا القسم</p>
+                
+                <div class="pin-inputs-container" style="display: flex; gap: 12px; justify-content: center; margin-bottom: 1.5rem;">
+                    @for (int i = 0; i < 6; i++)
+                    {
+                        int index = i;
+                        <input @key="@($"pin-{index}")"
+                               id="@($"pin-input-{index}")"
+                               class="pin-input"
+                               style="width: 50px; height: 50px; border: 2px solid #ccc; border-radius: 8px; text-align: center; font-size: 1.5rem; font-weight: bold;"
+                               type="password"
+                               maxlength="1"
+                               @bind="pinDigits[index]"
+                               @onkeydown="@((e) => OnPinKeyDown(e, index))"
+                               @oninput="@((e) => OnPinInput(e, index))"
+                               inputmode="numeric"
+                               pattern="[0-9]"
+                               autocomplete="off" />
+                    }
+                </div>
+                
+                <div class="pin-actions">
+                    <button class="btn btn-primary" @onclick="VerifyPin" 
+                            disabled="@(isPinProcessing || !IsPinComplete)">
+                        @if (isPinProcessing)
+                        {
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>جاري التحقق...</span>
+                        }
+                        else
+                        {
+                            <span>تأكيد</span>
+                        }
+                    </button>
+                    
+                    <button class="btn btn-secondary" @onclick="OnCancel" disabled="@isPinProcessing">
+                        <i class="fas fa-times"></i>
+                        إلغاء
+                    </button>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger mt-3">
+                        @errorMessage
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool ShowDialog { get; set; }
+    [Parameter] public EventCallback OnPinVerified { get; set; }
+    [Parameter] public EventCallback OnCancelled { get; set; }
+    [Parameter] public string PendingAction { get; set; } = "";
+
+    private string[] pinDigits = new string[] { "", "", "", "", "", "" };
+    private bool isPinProcessing = false;
+    private string errorMessage = string.Empty;
+
+    private bool IsPinComplete => pinDigits.All(d => !string.IsNullOrEmpty(d));
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ShowDialog)
+        {
+            // Clear PIN digits when dialog is shown
+            for (int i = 0; i < pinDigits.Length; i++)
+            {
+                pinDigits[i] = "";
+            }
+            errorMessage = "";
+            
+            // Focus first input field after a short delay
+            await Task.Delay(100);
+            await FocusField(0);
+        }
+    }
+
+    private async Task OnPinKeyDown(KeyboardEventArgs e, int index)
+    {
+        if (e.Key == "Backspace")
+        {
+            if (!string.IsNullOrEmpty(pinDigits[index]))
+            {
+                pinDigits[index] = "";
+            }
+            else if (index > 0)
+            {
+                pinDigits[index - 1] = "";
+                await FocusField(index - 1);
+            }
+            StateHasChanged();
+        }
+        else if (e.Key == "ArrowLeft" && index > 0)
+        {
+            await FocusField(index - 1);
+        }
+        else if (e.Key == "ArrowRight" && index < 5)
+        {
+            await FocusField(index + 1);
+        }
+        else if (e.Key == "Enter" && IsPinComplete)
+        {
+            await VerifyPin();
+        }
+    }
+
+    private async Task OnPinInput(ChangeEventArgs e, int index)
+    {
+        string value = e.Value?.ToString() ?? "";
+        
+        if (string.IsNullOrEmpty(value))
+        {
+            pinDigits[index] = "";
+            return;
+        }
+
+        if (value.Length > 0 && char.IsDigit(value[0]))
+        {
+            pinDigits[index] = value[0].ToString();
+            
+            if (index < 5)
+            {
+                await FocusField(index + 1);
+            }
+            else if (IsPinComplete)
+            {
+                await VerifyPin();
+            }
+        }
+        else
+        {
+            pinDigits[index] = "";
+        }
+        
+        StateHasChanged();
+    }
+
+    private async Task FocusField(int index)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("focusElement", $"pin-input-{index}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error focusing field {index}: {ex.Message}");
+        }
+    }
+
+    private async Task VerifyPin()
+    {
+        if (!IsPinComplete)
+        {
+            errorMessage = "يرجى إدخال الرقم السري كاملاً";
+            return;
+        }
+
+        isPinProcessing = true;
+        errorMessage = string.Empty;
+        string enteredPin = string.Join("", pinDigits);
+        StateHasChanged();
+
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                errorMessage = "خطأ في المصادقة";
+                return;
+            }
+
+            var result = await PinService.VerifyPinAsync(userId, enteredPin);
+            
+            if (result.Success)
+            {
+                // Set PIN as verified in session
+                await PinSessionService.SetPinVerifiedAsync(userId);
+                
+                // Clear PIN digits for security
+                for (int i = 0; i < pinDigits.Length; i++)
+                {
+                    pinDigits[i] = "";
+                }
+                
+                await OnPinVerified.InvokeAsync();
+            }
+            else
+            {
+                errorMessage = result.Message;
+                
+                // Clear PIN digits after failed attempt
+                for (int i = 0; i < pinDigits.Length; i++)
+                {
+                    pinDigits[i] = "";
+                }
+                
+                await Task.Delay(100);
+                await FocusField(0);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"حدث خطأ أثناء التحقق: {ex.Message}";
+            
+            for (int i = 0; i < pinDigits.Length; i++)
+            {
+                pinDigits[i] = "";
+            }
+        }
+        finally
+        {
+            isPinProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnCancel()
+    {
+        // Clear PIN digits
+        for (int i = 0; i < pinDigits.Length; i++)
+        {
+            pinDigits[i] = "";
+        }
+        errorMessage = "";
+        isPinProcessing = false;
+        
+        await OnCancelled.InvokeAsync();
+    }
+} 

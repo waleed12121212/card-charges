@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using BlazingPizza.Shared.Interfaces;
 using BlazingPizza.Repositories;
+using BlazingPizza.Services;
+using BlazingPizza.Middleware;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +64,16 @@ builder.Services.AddScoped<IImageService, ImageService>();
 // Add notification service
 builder.Services.AddScoped<BlazingPizza.Services.NotificationService>();
 
+// Add PIN services
+builder.Services.AddScoped<PinService>();
+builder.Services.AddScoped<PinSessionService>(serviceProvider =>
+{
+    var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+    // ProtectedSessionStorage is only available in Blazor Server components context
+    var protectedSessionStorage = serviceProvider.GetService<ProtectedSessionStorage>();
+    return new PinSessionService(httpContextAccessor, protectedSessionStorage);
+});
+
 builder.Services.AddScoped<HttpClient>(sp =>
 {
     var navigationManager = sp.GetRequiredService<Microsoft.AspNetCore.Components.NavigationManager>();
@@ -68,7 +81,23 @@ builder.Services.AddScoped<HttpClient>(sp =>
 });
 
 builder.Services.AddControllers();
+
 builder.Services.AddHttpContextAccessor();
+
+// Add distributed memory cache for session support
+builder.Services.AddDistributedMemoryCache();
+
+// Add session support for PIN verification
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.Name = ".AspNetCore.Session";
+    options.Cookie.SameSite = SameSiteMode.Lax;
+});
+
+builder.Services.AddAntiforgery();
 
 var app = builder.Build();
 
@@ -89,7 +118,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error" , createScopeForErrors: true);
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
@@ -97,10 +126,16 @@ else
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+
+app.UseSession();
+
 app.UseAntiforgery();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add PIN protection middleware - Disabled: Now handled by individual page components
+// app.UseMiddleware<PinProtectionMiddleware>();
 
 app.MapPizzaApi();
 

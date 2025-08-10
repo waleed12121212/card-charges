@@ -2,6 +2,8 @@
 @page "/admin/carrier/index"
 @using BlazingPizza.Shared
 @using BlazingPizza
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime

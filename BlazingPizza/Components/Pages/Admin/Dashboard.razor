@@ -1,5 +1,212 @@
 ﻿@page "/admin/dashboard"
 @using BlazingPizza.Components.Layout
 @using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@using BlazingPizza.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @attribute [Authorize(Roles = "Admin")]
 @layout AdminLayout
+@rendermode InteractiveServer
+@inject PinService PinService
+@inject PinSessionService PinSessionService
+@inject IHttpContextAccessor HttpContextAccessor
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>لوحة التحكم</PageTitle>
+
+@if (isLoading)
+{
+    <div class="text-center" style="margin: 2rem;">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+    </div>
+}
+else if (isPinLocked)
+{
+    <div class="pin-locked-container" style="text-align: center; margin: 4rem auto; max-width: 500px; padding: 2rem; border-radius: 10px; background: #f8f9fa; border: 1px solid #dee2e6;">
+        <div class="pin-locked-icon" style="font-size: 4rem; color: #dc3545; margin-bottom: 1rem;">
+            <i class="fas fa-lock"></i>
+        </div>
+        <h2 style="color: #dc3545; margin-bottom: 1rem;">تم قفل الحساب مؤقتاً</h2>
+        <p style="font-size: 1.1rem; margin-bottom: 1rem;">تم قفل حسابك لمدة @lockoutMinutes دقيقة بسبب المحاولات الخاطئة المتعددة.</p>
+        <p style="color: #6c757d;">يرجى المحاولة مرة أخرى لاحقاً.</p>
+        <button class="btn btn-secondary mt-3" @onclick="GoBackToHome">
+            <i class="fas fa-arrow-right"></i>
+            العودة للرئيسية
+        </button>
+    </div>
+}
+else if (!isPinVerified)
+{
+    <!-- PIN verification will be shown as overlay -->
+}
+else
+{
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">لوحة التحكم</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item active">الرئيسية</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <p>المستخدمين</p>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-person-add"></i>
+                        </div>
+                        <a href="/admin/user/index" class="small-box-footer">
+                            المزيد من المعلومات <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <p>الشركات</p>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-stats-bars"></i>
+                        </div>
+                        <a href="/admin/carrier/index" class="small-box-footer">
+                            المزيد من المعلومات <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <p>بطاقات الشحن</p>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-card"></i>
+                        </div>
+                        <a href="/admin/refillcards/index" class="small-box-footer">
+                            المزيد من المعلومات <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <p>حزم الإنترنت</p>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-wifi"></i>
+                        </div>
+                        <a href="/admin/internetpackages/index" class="small-box-footer">
+                            المزيد من المعلومات <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<BlazingPizza.Components.Shared.PinVerificationDialog ShowDialog="@showPinVerification"
+                                                      OnPinVerified="@OnPinVerified"
+                                                      OnCancelled="@OnPinCancelled"
+                                                      PendingAction="admin-dashboard" />
+
+@code {
+    private bool isLoading = true;
+    private bool showPinVerification = false;
+    private bool isPinVerified = false;
+    private bool isPinLocked = false;
+    private int lockoutMinutes = 0;
+
+    protected override async Task OnInitializedAsync( )
+    {
+        await CheckPinRequirement();
+    }
+
+    private async Task CheckPinRequirement( )
+    {
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                isLoading = false;
+                return;
+            }
+
+            // Check if PIN is already verified in session
+            var isAlreadyVerified = await PinSessionService.IsPinVerifiedAsync(userId);
+            if (isAlreadyVerified)
+            {
+                isPinVerified = true;
+                isLoading = false;
+                return;
+            }
+
+            // Check if user has PIN set and it's required
+            var pinStatus = await PinService.GetPinStatusAsync(userId);
+
+            if (pinStatus.HasPin && pinStatus.IsRequired && !pinStatus.IsLocked)
+            {
+                showPinVerification = true;
+                isLoading = false;
+            }
+            else if (pinStatus.IsLocked)
+            {
+                isPinLocked = true;
+                lockoutMinutes = pinStatus.LockoutMinutes;
+                isLoading = false;
+            }
+            else
+            {
+                // No PIN required or PIN is locked, allow access
+                isPinVerified = true;
+                isLoading = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error checking PIN requirement: {ex.Message}");
+            // On error, allow access
+            isPinVerified = true;
+            isLoading = false;
+        }
+    }
+
+    private async Task OnPinVerified( )
+    {
+        isPinVerified = true;
+        showPinVerification = false;
+        StateHasChanged();
+    }
+
+    private async Task OnPinCancelled( )
+    {
+        showPinVerification = false;
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void GoBackToHome()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}

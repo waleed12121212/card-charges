@@ -1,0 +1,223 @@
+/* Profile PIN Management Styles */
+.pin-status-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.pin-status-badge.pin-active {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.pin-status-badge.pin-inactive {
+    background: rgba(255, 193, 7, 0.1);
+    color: #FFC107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.profile-btn-pin-new {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+}
+
+.profile-btn-pin-new:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+.pin-management-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.pin-management-container {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.pin-management-menu h3 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+.pin-menu-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 2rem;
+}
+
+.pin-menu-btn {
+    background: rgba(102, 126, 234, 0.1);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    color: #667eea;
+    padding: 16px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.pin-menu-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.pin-menu-btn.pin-set-btn {
+    background: rgba(76, 175, 80, 0.1);
+    border-color: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+}
+
+.pin-menu-btn.pin-set-btn:hover {
+    background: rgba(76, 175, 80, 0.2);
+    border-color: #4CAF50;
+}
+
+.pin-cancel-btn, .pin-back-btn {
+    background: rgba(108, 117, 125, 0.1);
+    border: 1px solid rgba(108, 117, 125, 0.3);
+    color: #6c757d;
+    padding: 12px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 1rem auto 0;
+    transition: all 0.3s ease;
+}
+
+.pin-cancel-btn:hover, .pin-back-btn:hover {
+    background: rgba(108, 117, 125, 0.2);
+    transform: translateY(-2px);
+}
+
+.pin-removal-confirmation {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.pin-warning-icon {
+    font-size: 4rem;
+    color: #ff6b6b;
+    margin-bottom: 1rem;
+}
+
+.pin-removal-confirmation h4 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.pin-removal-confirmation p {
+    margin-bottom: 0.5rem;
+    color: #666;
+}
+
+.pin-warning-text {
+    color: #ff6b6b !important;
+    font-weight: 500;
+    margin-bottom: 2rem !important;
+}
+
+.pin-confirmation-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.pin-confirm-remove-btn {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.pin-confirm-remove-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
+}
+
+.pin-confirm-remove-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.pin-cancel-remove-btn {
+    background: rgba(108, 117, 125, 0.1);
+    border: 1px solid rgba(108, 117, 125, 0.3);
+    color: #6c757d;
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.pin-cancel-remove-btn:hover {
+    background: rgba(108, 117, 125, 0.2);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .pin-management-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .pin-confirmation-actions {
+        flex-direction: column;
+    }
+    
+    .pin-confirm-remove-btn,
+    .pin-cancel-remove-btn {
+        width: 100%;
+        justify-content: center;
+    }
+} 

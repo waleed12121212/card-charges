@@ -1,0 +1,190 @@
+@page "/test-pin"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@using BlazingPizza.Services
+@inject IHttpContextAccessor HttpContextAccessor
+@inject PinService PinService
+@inject PinSessionService PinSessionService
+
+<PageTitle>اختبار نظام الرقم السري</PageTitle>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-shield-alt"></i> اختبار نظام الرقم السري</h4>
+                </div>
+                <div class="card-body">
+                    @if (isLoading)
+                    {
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="sr-only">جاري التحميل...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>حالة الرقم السري الحالية</h5>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>تم تعيين رقم سري:</strong></td>
+                                        <td>
+                                            @if (pinStatus?.HasPin == true)
+                                            {
+                                                <span class="badge badge-success"><i class="fas fa-check"></i> نعم</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-warning"><i class="fas fa-times"></i> لا</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>مطلوب للوصول:</strong></td>
+                                        <td>
+                                            @if (pinStatus?.IsRequired == true)
+                                            {
+                                                <span class="badge badge-info"><i class="fas fa-check"></i> نعم</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-secondary"><i class="fas fa-times"></i> لا</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>مقفل حالياً:</strong></td>
+                                        <td>
+                                            @if (pinStatus?.IsLocked == true)
+                                            {
+                                                <span class="badge badge-danger"><i class="fas fa-lock"></i> نعم (@pinStatus.LockoutMinutes دقيقة)</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-success"><i class="fas fa-unlock"></i> لا</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>المحاولات المتبقية:</strong></td>
+                                        <td>
+                                            <span class="badge badge-info">@pinStatus?.RemainingAttempts</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>تم التحقق في الجلسة:</strong></td>
+                                        <td>
+                                            @if (isVerifiedInSession)
+                                            {
+                                                <span class="badge badge-success"><i class="fas fa-check-circle"></i> نعم</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-warning"><i class="fas fa-exclamation-circle"></i> لا</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>الإجراءات المتاحة</h5>
+                                <div class="list-group">
+                                    <a href="/Account/Manage/Profile" class="list-group-item list-group-item-action">
+                                        <i class="fas fa-user-cog"></i> إدارة الرقم السري من الملف الشخصي
+                                    </a>
+                                    <a href="/pin-verification" class="list-group-item list-group-item-action">
+                                        <i class="fas fa-key"></i> صفحة التحقق من الرقم السري
+                                    </a>
+                                    <button class="list-group-item list-group-item-action" @onclick="RefreshStatus">
+                                        <i class="fas fa-refresh"></i> تحديث الحالة
+                                    </button>
+                                    @if (isVerifiedInSession)
+                                    {
+                                        <button class="list-group-item list-group-item-action text-warning" @onclick="ClearSession">
+                                            <i class="fas fa-sign-out-alt"></i> مسح جلسة الرقم السري
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-info-circle"></i> معلومات مهمة</h5>
+                            <ul class="mb-0">
+                                <li><strong>الصفحات المحمية:</strong> لوحة التحكم الإدارية، البضائع الرقمية، شحن الرصيد، باقات الإنترنت</li>
+                                <li><strong>مدة الجلسة:</strong> 30 دقيقة بعد آخر نشاط</li>
+                                <li><strong>الحماية:</strong> 3 محاولات خاطئة تؤدي لقفل الحساب لمدة 15 دقيقة</li>
+                                <li><strong>التشفير:</strong> يتم تشفير الرقم السري باستخدام BCrypt</li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool isLoading = true;
+    private PinStatusResult? pinStatus;
+    private bool isVerifiedInSession = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStatus();
+    }
+
+    private async Task LoadStatus()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var userId = HttpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!string.IsNullOrEmpty(userId))
+            {
+                pinStatus = await PinService.GetPinStatusAsync(userId);
+                isVerifiedInSession = await PinSessionService.IsPinVerifiedAsync(userId);
+            }
+        }
+        catch (Exception)
+        {
+            // Handle error
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task RefreshStatus()
+    {
+        await LoadStatus();
+    }
+
+    private async Task ClearSession()
+    {
+        try
+        {
+            var userId = HttpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!string.IsNullOrEmpty(userId))
+            {
+                await PinSessionService.ClearPinSessionAsync(userId);
+                await LoadStatus();
+            }
+        }
+        catch (Exception)
+        {
+            // Handle error
+        }
+    }
+} 

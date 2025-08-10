@@ -1,0 +1,212 @@
+@page "/pin-verification"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using BlazingPizza.Services
+@using System.Security.Claims
+@inject PinService PinService
+@inject PinSessionService PinSessionService
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>التحقق من الرقم السري</PageTitle>
+
+<link href="~/css/pin-input.css" rel="stylesheet" />
+<link href="~/css/pin-verification.css" rel="stylesheet" />
+<script src="~/js/pin-helper.js"></script>
+
+<div class="pin-verification-page">
+    @if (isLoading)
+    {
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>جاري التحقق...</p>
+        </div>
+    }
+    else if (pinStatus?.IsLocked == true)
+    {
+        <div class="pin-locked-container">
+            <div class="pin-locked-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h2>تم قفل الحساب مؤقتاً</h2>
+            <p>تم قفل حسابك لمدة @pinStatus.LockoutMinutes دقيقة بسبب المحاولات الخاطئة المتعددة.</p>
+            <p>يرجى المحاولة مرة أخرى لاحقاً.</p>
+            <button class="pin-back-btn" @onclick="GoBack">
+                <i class="fas fa-arrow-right"></i>
+                العودة
+            </button>
+        </div>
+    }
+    else if (!pinStatus?.HasPin == true)
+    {
+        <div class="pin-not-set-container">
+            <div class="pin-not-set-icon">
+                <i class="fas fa-key"></i>
+            </div>
+            <h2>لم يتم تعيين رقم سري</h2>
+            <p>يجب تعيين رقم سري من صفحة الملف الشخصي أولاً.</p>
+            <button class="pin-profile-btn" @onclick="GoToProfile">
+                <i class="fas fa-user-cog"></i>
+                الذهاب للملف الشخصي
+            </button>
+        </div>
+    }
+    else
+    {
+        <BlazingPizza.Components.Shared.PinInput 
+            Title="تأكيد الهوية"
+            Description="يرجى إدخال الرقم السري للمتابعة"
+            SubmitButtonText="تأكيد"
+            ShowKeypad="@showKeypad"
+            IsLoading="@isVerifying"
+            ErrorMessage="@errorMessage"
+            SuccessMessage="@successMessage"
+            OnPinSubmitted="HandlePinSubmission" />
+
+        @if (pinStatus?.RemainingAttempts > 0 && pinStatus?.RemainingAttempts < 3)
+        {
+            <div class="pin-attempts-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                المحاولات المتبقية: @pinStatus.RemainingAttempts
+            </div>
+        }
+
+        <div class="pin-help-section">
+            <button class="pin-help-toggle" @onclick="ToggleKeypad">
+                @if (showKeypad)
+                {
+                    <i class="fas fa-keyboard"></i>
+                    <span>إخفاء لوحة الأرقام</span>
+                }
+                else
+                {
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>إظهار لوحة الأرقام</span>
+                }
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private bool isVerifying = false;
+    private bool showKeypad = false;
+    private string errorMessage = "";
+    private string successMessage = "";
+    private PinStatusResult? pinStatus;
+    private string? returnUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get return URL from query parameters
+        var uri = new Uri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        returnUrl = query["returnUrl"] ?? "/";
+
+        var userId = HttpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            NavigationManager.NavigateTo("/Account/Login");
+            return;
+        }
+
+        // Check if PIN is already verified in session
+        var isAlreadyVerified = await PinSessionService.IsPinVerifiedAsync(userId);
+        if (isAlreadyVerified)
+        {
+            NavigationManager.NavigateTo(returnUrl);
+            return;
+        }
+
+        // Get PIN status
+        pinStatus = await PinService.GetPinStatusAsync(userId);
+        isLoading = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Auto-detect mobile devices to show keypad
+            showKeypad = await JSRuntime.InvokeAsync<bool>("eval", 
+                "/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)");
+        }
+    }
+
+    private async Task HandlePinSubmission(string pin)
+    {
+        isVerifying = true;
+        errorMessage = "";
+        successMessage = "";
+        StateHasChanged();
+
+        try
+        {
+            var userId = HttpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                NavigationManager.NavigateTo("/Account/Login");
+                return;
+            }
+
+            var result = await PinService.VerifyPinAsync(userId, pin);
+            
+            if (result.Success)
+            {
+                successMessage = "تم التحقق بنجاح!";
+                StateHasChanged();
+                
+                // Set PIN as verified in session
+                await PinSessionService.SetPinVerifiedAsync(userId);
+                
+                // Wait a moment to show success message
+                await Task.Delay(1000);
+                
+                // Redirect to original page
+                NavigationManager.NavigateTo(returnUrl ?? "/");
+            }
+            else
+            {
+                errorMessage = result.Message;
+                
+                if (result.IsLocked)
+                {
+                    // Refresh PIN status to show lock screen
+                    pinStatus = await PinService.GetPinStatusAsync(userId);
+                }
+                else
+                {
+                    // Update remaining attempts
+                    pinStatus = await PinService.GetPinStatusAsync(userId);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.";
+        }
+        finally
+        {
+            isVerifying = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleKeypad()
+    {
+        showKeypad = !showKeypad;
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void GoToProfile()
+    {
+        NavigationManager.NavigateTo("/Account/Manage/Profile");
+    }
+} 
