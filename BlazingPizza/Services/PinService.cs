@@ -9,7 +9,7 @@ public class PinService
     private readonly PizzaStoreContext _context;
     private const int MAX_PIN_ATTEMPTS = 3;
     private const int LOCKOUT_MINUTES = 15;
-    private const int PIN_SESSION_MINUTES = 30; // مدة تذكر الرقم السري في الجلسة
+    private const int PIN_SESSION_MINUTES = 30;
 
     public PinService(PizzaStoreContext context)
     {
@@ -30,17 +30,17 @@ public class PinService
     /// <summary>
     /// التحقق من صحة الرقم السري
     /// </summary>
-    public bool VerifyPin(string pin, string hash)
+    public bool VerifyPin(string pin , string hash)
     {
         Console.WriteLine($"VerifyPin - PIN: '{pin}', Hash exists: {!string.IsNullOrEmpty(hash)}");
-        
+
         if (string.IsNullOrEmpty(pin) || string.IsNullOrEmpty(hash))
         {
             Console.WriteLine("PIN or hash is empty");
             return false;
         }
 
-        var result = BCrypt.Net.BCrypt.Verify(pin, hash);
+        var result = BCrypt.Net.BCrypt.Verify(pin , hash);
         Console.WriteLine($"BCrypt verification result: {result}");
         return result;
     }
@@ -48,7 +48,7 @@ public class PinService
     /// <summary>
     /// تعيين رقم سري جديد للمستخدم
     /// </summary>
-    public async Task<bool> SetPinAsync(string userId, string pin)
+    public async Task<bool> SetPinAsync(string userId , string pin)
     {
         try
         {
@@ -73,24 +73,24 @@ public class PinService
     /// <summary>
     /// التحقق من الرقم السري مع معالجة المحاولات الخاطئة
     /// </summary>
-    public async Task<PinVerificationResult> VerifyPinAsync(string userId, string pin)
+    public async Task<PinVerificationResult> VerifyPinAsync(string userId , string pin)
     {
         Console.WriteLine($"PinService.VerifyPinAsync - UserId: {userId}, PIN: '{pin}' (length: {pin?.Length})");
-        
+
         var user = await _context.Users.FindAsync(userId);
         if (user == null)
         {
             Console.WriteLine("User not found");
-            return new PinVerificationResult { Success = false, Message = "المستخدم غير موجود" };
+            return new PinVerificationResult { Success = false , Message = "المستخدم غير موجود" };
         }
 
         Console.WriteLine($"User found - PinHash exists: {!string.IsNullOrEmpty(user.PinHash)}");
-        
+
         // التحقق من وجود رقم سري
         if (string.IsNullOrEmpty(user.PinHash))
         {
             Console.WriteLine("No PIN hash found for user");
-            return new PinVerificationResult { Success = false, Message = "لم يتم تعيين رقم سري" };
+            return new PinVerificationResult { Success = false , Message = "لم يتم تعيين رقم سري" };
         }
 
         // التحقق من القفل
@@ -98,20 +98,20 @@ public class PinService
         {
             var remainingMinutes = (int)(user.PinLockedUntil.Value - DateTime.UtcNow).TotalMinutes + 1;
             Console.WriteLine($"User is locked until {user.PinLockedUntil.Value}, remaining minutes: {remainingMinutes}");
-            return new PinVerificationResult 
-            { 
-                Success = false, 
-                IsLocked = true,
-                Message = $"الحساب مقفل لمدة {remainingMinutes} دقيقة" 
+            return new PinVerificationResult
+            {
+                Success = false ,
+                IsLocked = true ,
+                Message = $"الحساب مقفل لمدة {remainingMinutes} دقيقة"
             };
         }
 
         Console.WriteLine($"Current PIN attempts: {user.PinAttempts}");
-        
+
         // التحقق من صحة الرقم السري
-        var pinVerificationResult = VerifyPin(pin, user.PinHash);
+        var pinVerificationResult = VerifyPin(pin , user.PinHash);
         Console.WriteLine($"PIN verification result: {pinVerificationResult}");
-        
+
         if (pinVerificationResult)
         {
             // نجح التحقق - إعادة تعيين المحاولات وتحديث آخر استخدام
@@ -121,24 +121,24 @@ public class PinService
             user.PinLastUsed = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
-            return new PinVerificationResult { Success = true, Message = "تم التحقق بنجاح" };
+            return new PinVerificationResult { Success = true , Message = "تم التحقق بنجاح" };
         }
         else
         {
             Console.WriteLine("PIN verification failed, incrementing attempts");
             user.PinAttempts++;
-            
+
             if (user.PinAttempts >= MAX_PIN_ATTEMPTS)
             {
                 user.PinLockedUntil = DateTime.UtcNow.AddMinutes(LOCKOUT_MINUTES);
                 await _context.SaveChangesAsync();
-                
+
                 Console.WriteLine($"User locked due to {user.PinAttempts} failed attempts");
-                return new PinVerificationResult 
-                { 
-                    Success = false, 
-                    IsLocked = true,
-                    Message = $"تم قفل الحساب لمدة {LOCKOUT_MINUTES} دقيقة بسبب المحاولات الخاطئة" 
+                return new PinVerificationResult
+                {
+                    Success = false ,
+                    IsLocked = true ,
+                    Message = $"تم قفل الحساب لمدة {LOCKOUT_MINUTES} دقيقة بسبب المحاولات الخاطئة"
                 };
             }
             else
@@ -146,10 +146,10 @@ public class PinService
                 await _context.SaveChangesAsync();
                 int remainingAttempts = MAX_PIN_ATTEMPTS - user.PinAttempts;
                 Console.WriteLine($"PIN failed, remaining attempts: {remainingAttempts}");
-                return new PinVerificationResult 
-                { 
-                    Success = false, 
-                    Message = $"رقم سري خاطئ. المحاولات المتبقية: {remainingAttempts}" 
+                return new PinVerificationResult
+                {
+                    Success = false ,
+                    Message = $"رقم سري خاطئ. المحاولات المتبقية: {remainingAttempts}"
                 };
             }
         }
@@ -166,11 +166,11 @@ public class PinService
 
         return new PinStatusResult
         {
-            HasPin = !string.IsNullOrEmpty(user.PinHash),
-            IsRequired = user.IsPinRequired,
-            IsLocked = user.PinLockedUntil.HasValue && user.PinLockedUntil.Value > DateTime.UtcNow,
-            RemainingAttempts = MAX_PIN_ATTEMPTS - user.PinAttempts,
-            LockoutMinutes = user.PinLockedUntil.HasValue ? 
+            HasPin = !string.IsNullOrEmpty(user.PinHash) ,
+            IsRequired = user.IsPinRequired ,
+            IsLocked = user.PinLockedUntil.HasValue && user.PinLockedUntil.Value > DateTime.UtcNow ,
+            RemainingAttempts = MAX_PIN_ATTEMPTS - user.PinAttempts ,
+            LockoutMinutes = user.PinLockedUntil.HasValue ?
                 (int)(user.PinLockedUntil.Value - DateTime.UtcNow).TotalMinutes + 1 : 0
         };
     }
@@ -215,4 +215,4 @@ public class PinStatusResult
     public bool IsLocked { get; set; }
     public int RemainingAttempts { get; set; }
     public int LockoutMinutes { get; set; }
-} 
+}

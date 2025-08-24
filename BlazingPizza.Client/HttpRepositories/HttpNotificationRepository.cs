@@ -49,4 +49,40 @@ public class HttpNotificationRepository : INotificationRepository
         var response = await _httpClient.GetFromJsonAsync<int>($"api/notifications/user/{userId}/unread-count");
         return response;
     }
+
+    // New method implementations
+    public async Task<int> GetUserNotificationsCountAsync(string userId)
+    {
+        var response = await _httpClient.GetFromJsonAsync<int>($"api/notifications/user/{userId}/count");
+        return response;
+    }
+
+    public async Task<List<Notification>> GetNotificationsByTypeAsync(string userId, NotificationType type, int limit = 20)
+    {
+        var response = await _httpClient.GetFromJsonAsync<List<Notification>>($"api/notifications/user/{userId}/type/{type}?limit={limit}");
+        return response ?? new List<Notification>();
+    }
+
+    public async Task<List<Notification>> GetRecentNotificationsAsync(string userId, int hours = 24)
+    {
+        var response = await _httpClient.GetFromJsonAsync<List<Notification>>($"api/notifications/user/{userId}/recent?hours={hours}");
+        return response ?? new List<Notification>();
+    }
+
+    public async Task DeleteOldNotificationsAsync(string userId, int daysOld = 30)
+    {
+        await _httpClient.DeleteAsync($"api/notifications/user/{userId}/old?daysOld={daysOld}");
+    }
+
+    public async Task<Dictionary<NotificationType, int>> GetNotificationSummaryAsync(string userId)
+    {
+        var response = await _httpClient.GetFromJsonAsync<Dictionary<NotificationType, int>>($"api/notifications/user/{userId}/summary");
+        return response ?? new Dictionary<NotificationType, int>();
+    }
+
+    public async Task<List<Notification>> SearchNotificationsAsync(string userId, string searchTerm, int limit = 20)
+    {
+        var response = await _httpClient.GetFromJsonAsync<List<Notification>>($"api/notifications/user/{userId}/search?q={Uri.EscapeDataString(searchTerm)}&limit={limit}");
+        return response ?? new List<Notification>();
+    }
 }

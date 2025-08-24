@@ -2,7 +2,7 @@ using BlazingPizza.Shared;
 using BlazingPizza.Shared.Interfaces;
 using System.Net.Http.Json;
 
-namespace BlazingPizza.Client.Repositories;
+namespace BlazingPizza.Client.HttpRepositories;
 
 public class HttpInternetPackagePurchaseRepository : IInternetPackagePurchaseRepository
 {
@@ -62,4 +62,4 @@ public class HttpInternetPackagePurchaseRepository : IInternetPackagePurchaseRep
         var response = await _httpClient.GetFromJsonAsync<List<InternetPackagePurchase>>($"api/internetpackagepurchases/active/{phoneNumber}");
         return response ?? new List<InternetPackagePurchase>();
     }
-} 
+}

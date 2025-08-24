@@ -68,6 +68,67 @@ public class NotificationRepository : INotificationRepository
     public async Task<int> GetUnreadCountAsync(string userId)
     {
         return await _context.Notifications
-            .CountAsync(n => n.UserId == userId && !n.IsRead);
+            .Where(n => n.UserId == userId && !n.IsRead)
+            .CountAsync();
+    }
+
+    // New method to get total notifications count
+    public async Task<int> GetUserNotificationsCountAsync(string userId)
+    {
+        return await _context.Notifications
+            .Where(n => n.UserId == userId)
+            .CountAsync();
+    }
+
+    // New method to get notifications by type
+    public async Task<List<Notification>> GetNotificationsByTypeAsync(string userId, NotificationType type, int limit = 20)
+    {
+        return await _context.Notifications
+            .Where(n => n.UserId == userId && n.Type == type)
+            .OrderByDescending(n => n.CreatedAt)
+            .Take(limit)
+            .ToListAsync();
+    }
+
+    // New method to get recent notifications (last 24 hours)
+    public async Task<List<Notification>> GetRecentNotificationsAsync(string userId, int hours = 24)
+    {
+        var cutoffTime = DateTime.Now.AddHours(-hours);
+        return await _context.Notifications
+            .Where(n => n.UserId == userId && n.CreatedAt >= cutoffTime)
+            .OrderByDescending(n => n.CreatedAt)
+            .ToListAsync();
+    }
+
+    // New method to delete old notifications
+    public async Task DeleteOldNotificationsAsync(string userId, int daysOld = 30)
+    {
+        var cutoffDate = DateTime.Now.AddDays(-daysOld);
+        var oldNotifications = await _context.Notifications
+            .Where(n => n.UserId == userId && n.CreatedAt < cutoffDate)
+            .ToListAsync();
+
+        _context.Notifications.RemoveRange(oldNotifications);
+        await _context.SaveChangesAsync();
+    }
+
+    // New method to get notification summary by type
+    public async Task<Dictionary<NotificationType, int>> GetNotificationSummaryAsync(string userId)
+    {
+        return await _context.Notifications
+            .Where(n => n.UserId == userId)
+            .GroupBy(n => n.Type)
+            .ToDictionaryAsync(g => g.Key, g => g.Count());
+    }
+
+    // New method to search notifications
+    public async Task<List<Notification>> SearchNotificationsAsync(string userId, string searchTerm, int limit = 20)
+    {
+        return await _context.Notifications
+            .Where(n => n.UserId == userId && 
+                       (n.Title.Contains(searchTerm) || n.Message.Contains(searchTerm)))
+            .OrderByDescending(n => n.CreatedAt)
+            .Take(limit)
+            .ToListAsync();
     }
 }

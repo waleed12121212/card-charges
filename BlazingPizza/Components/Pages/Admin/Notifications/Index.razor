@@ -1,0 +1,484 @@
+@page "/admin/notifications"
+@using BlazingPizza.Components.Layout
+@using Microsoft.AspNetCore.Authorization
+@using System.ComponentModel.DataAnnotations
+@using BlazingPizza.Services
+@using OneSignalApi.Model
+@attribute [Authorize(Roles = "Admin")]
+@layout AdminLayout
+@rendermode InteractiveServer
+@inject OneSignalService OneSignalService
+@inject NotificationService NotificationService
+@inject INotificationRepository NotificationRepository
+@inject IUserService UserService
+@inject IJSRuntime JSRuntime
+@inject ILogger<Index> Logger
+
+<PageTitle>إدارة الإشعارات</PageTitle>
+
+<div class="content-header">
+    <div class="row mb-2">
+        <div class="col-sm-6">
+            <h1 class="m-0">إدارة الإشعارات</h1>
+        </div>
+        <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-left">
+                <li class="breadcrumb-item"><a href="/admin/dashboard">الرئيسية</a></li>
+                <li class="breadcrumb-item active">إدارة الإشعارات</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <!-- User Statistics Card -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">إحصائيات المستخدمين</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" @onclick="LoadUserStats">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-users text-primary"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h4>@userStats.ActiveUsers</h4>
+                                        <p>مستخدم نشط</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-bell text-info"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h4>@userStats.TotalNotificationsSent</h4>
+                                        <p>إشعار مُرسل اليوم</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-broadcast-tower text-success"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h4>@userStats.BroadcastReach</h4>
+                                        <p>نطاق الوصول المتوقع</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Send New Notification Card -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">إرسال إشعار جديد</h3>
+                    </div>
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(successMessage))
+                        {
+                            <div class="alert alert-success alert-dismissible">
+                                <button type="button" class="btn-close" @onclick="() => successMessage = null"></button>
+                                <i class="fas fa-check-circle"></i> @successMessage
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger alert-dismissible">
+                                <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+                                <i class="fas fa-exclamation-circle"></i> @errorMessage
+                            </div>
+                        }
+
+                        <EditForm Model="@newNotification" OnValidSubmit="@SendNotification" FormName="NotificationForm">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="text-danger" />
+
+                            <div class="form-group">
+                                <label for="title">عنوان الإشعار <span class="text-danger">*</span></label>
+                                <InputText id="title" class="form-control" @bind-Value="newNotification.Title" placeholder="أدخل عنوان الإشعار" />
+                                <ValidationMessage For="@(() => newNotification.Title)" class="text-danger" />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="message">نص الإشعار <span class="text-danger">*</span></label>
+                                <InputTextArea id="message" class="form-control" rows="4" @bind-Value="newNotification.Message" placeholder="أدخل نص الإشعار"></InputTextArea>
+                                <ValidationMessage For="@(() => newNotification.Message)" class="text-danger" />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="notificationType">نوع الإشعار</label>
+                                <InputSelect id="notificationType" class="form-control" @bind-Value="newNotification.NotificationType">
+                                    <option value="System">إشعار نظام</option>
+                                    <option value="Warning">تحذير</option>
+                                </InputSelect>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="actionUrl">رابط الإجراء (اختياري)</label>
+                                <InputText id="actionUrl" class="form-control" @bind-Value="newNotification.ActionUrl" placeholder="https://example.com" />
+                                <ValidationMessage For="@(() => newNotification.ActionUrl)" class="text-danger" />
+                                <small class="form-text text-muted">رابط ينتقل إليه المستخدم عند النقر على الإشعار</small>
+                            </div>
+
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary" disabled="@isLoading">
+                                    @if (isLoading)
+                                    {
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        <span>جاري الإرسال...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span>إرسال الإشعار</span>
+                                    }
+                                </button>
+                                <button type="button" class="btn btn-secondary ml-2" @onclick="ClearForm">
+                                    <i class="fas fa-times"></i>
+                                    إلغاء
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Notification History Card -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">سجل الإشعارات المرسلة</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" @onclick="LoadNotificationHistory">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if (isLoadingHistory)
+                        {
+                            <div class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">جاري التحميل...</span>
+                                </div>
+                            </div>
+                        }
+                        else if (notificationHistory.Any() || localNotifications.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>العنوان</th>
+                                            <th>المحتوى</th>
+                                            <th>نوع الإشعار</th>
+                                            <th>تاريخ الإرسال</th>
+                                            <th>الحالة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var notification in notificationHistory)
+                                        {
+                                            <tr>
+                                                <td>@GetNotificationTitle(notification)</td>
+                                                <td>@GetNotificationContent(notification)</td>
+                                                <td>@GetNotificationType(notification)</td>
+                                                <td>@GetSentTime(notification)</td>
+                                                <td>
+                                                    <span class="badge badge-success">مرسل</span>
+                                                </td>
+                                            </tr>
+                                        }
+                                        @foreach (var notification in localNotifications)
+                                        {
+                                            <tr>
+                                                <td>@notification.Title</td>
+                                                <td>@notification.Message</td>
+                                                <td>@GetNotificationType(notification)</td>
+                                                <td>@notification.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                                <td>
+                                                    <span class="badge badge-info">محلي</span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted">
+                                <i class="fas fa-bell-slash fa-3x mb-3"></i>
+                                <p>لا توجد إشعارات مرسلة بعد</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private NewNotificationModel newNotification = new();
+    private List<NotificationWithMeta> notificationHistory = new();
+    private List<BlazingPizza.Shared.Notification> localNotifications = new();
+    private UserStatistics userStats = new();
+    private bool isLoading = false;
+    private bool isLoadingHistory = false;
+    private string? successMessage;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync( )
+    {
+        try
+        {
+            await LoadUserStats();
+            await LoadNotificationHistory();
+            await LoadLocalNotifications();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex , "Error initializing admin notifications page");
+            errorMessage = "خطأ في تحميل البيانات";
+        }
+    }
+
+    private async Task LoadUserStats()
+    {
+        try
+        {
+            Logger.LogInformation("Loading user statistics");
+            
+            userStats.ActiveUsers = await UserService.GetActiveUserCountAsync();
+            userStats.BroadcastReach = userStats.ActiveUsers; // Same as active users for broadcast
+            
+            // Get today's notification count
+            var today = DateTime.Today;
+            var todayNotifications = await NotificationRepository.GetUserNotificationsAsync("admin", 1000);
+            userStats.TotalNotificationsSent = todayNotifications
+                .Count(n => n.CreatedAt.Date == today);
+                
+            Logger.LogInformation($"User stats loaded: {userStats.ActiveUsers} active users, {userStats.TotalNotificationsSent} notifications sent today");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load user statistics");
+            userStats = new UserStatistics();
+        }
+    }
+
+    private async Task SendNotification( )
+    {
+        isLoading = true;
+        errorMessage = null;
+        successMessage = null;
+
+        try
+        {
+            Logger.LogInformation($"Sending notification: {newNotification.Title} of type {newNotification.NotificationType} to all users");
+
+            // إرسال الإشعار دائماً لجميع المستخدمين
+            await NotificationService.SendBroadcastNotificationAsync(
+                newNotification.Title ,
+                newNotification.Message ,
+                newNotification.ActionUrl,
+                newNotification.NotificationType);
+
+            Logger.LogInformation("Broadcast notification sent successfully to all users");
+
+            successMessage = "تم إرسال الإشعار بنجاح لجميع المستخدمين!";
+            await JSRuntime.InvokeVoidAsync("showToast" , "success" , "نجح الإرسال" , successMessage);
+
+            ClearForm();
+            await LoadNotificationHistory();
+            await LoadLocalNotifications();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex , $"Failed to send notification: {newNotification.Title}");
+            errorMessage = $"فشل في إرسال الإشعار: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("showToast" , "error" , "فشل الإرسال" , errorMessage);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadNotificationHistory( )
+    {
+        isLoadingHistory = true;
+        try
+        {
+            Logger.LogInformation("Loading OneSignal notification history");
+            notificationHistory = await OneSignalService.GetNotificationHistoryAsync() ?? new List<NotificationWithMeta>();
+            Logger.LogInformation($"Loaded {notificationHistory.Count} OneSignal notifications");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex , "Failed to load OneSignal notification history");
+            notificationHistory = new List<NotificationWithMeta>();
+            await JSRuntime.InvokeVoidAsync("showToast" , "warning" , "تحذير" , "فشل في تحميل سجل OneSignal");
+        }
+        finally
+        {
+            isLoadingHistory = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadLocalNotifications( )
+    {
+        try
+        {
+            Logger.LogInformation("Loading local notifications");
+            // Load admin notifications from local database
+            localNotifications = await NotificationRepository.GetUserNotificationsAsync("admin" , 50);
+            var segmentNotifications = await NotificationRepository.GetUserNotificationsAsync("admin_segment" , 50);
+            localNotifications.AddRange(segmentNotifications);
+            localNotifications = localNotifications.OrderByDescending(n => n.CreatedAt).ToList();
+            Logger.LogInformation($"Loaded {localNotifications.Count} local notifications");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex , "Failed to load local notifications");
+            await JSRuntime.InvokeVoidAsync("showToast" , "error" , "خطأ" , $"خطأ في تحميل الإشعارات المحلية: {ex.Message}");
+        }
+    }
+
+    private void ClearForm()
+    {
+        newNotification = new NewNotificationModel
+        {
+            Title = string.Empty,
+            Message = string.Empty,
+            NotificationType = NotificationType.System,
+            ActionUrl = string.Empty
+        };
+    }
+
+    private async Task SendQuickNotification(string title , string message)
+    {
+        if (isLoading) return;
+        
+        isLoading = true;
+        errorMessage = null;
+        successMessage = null;
+
+        try
+        {
+            Logger.LogInformation($"Sending quick notification: {title}");
+
+            await NotificationService.SendBroadcastNotificationAsync(title, message, null, NotificationType.System);
+
+            successMessage = $"تم إرسال '{title}' بنجاح!";
+            await JSRuntime.InvokeVoidAsync("showToast" , "success" , "نجح الإرسال" , successMessage);
+
+            await LoadUserStats();
+            await LoadNotificationHistory();
+            await LoadLocalNotifications();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex , $"Failed to send quick notification: {title}");
+            errorMessage = $"فشل في إرسال '{title}': {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("showToast" , "error" , "فشل الإرسال" , errorMessage);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private string GetNotificationTitle(NotificationWithMeta notification)
+    {
+        if (notification.Headings != null)
+        {
+            return notification.Headings.Ar ?? notification.Headings.En ?? "بدون عنوان";
+        }
+        return "بدون عنوان";
+    }
+
+    private string GetNotificationContent(NotificationWithMeta notification)
+    {
+        if (notification.Contents != null)
+        {
+            return notification.Contents.Ar ?? notification.Contents.En ?? "بدون محتوى";
+        }
+        return "بدون محتوى";
+    }
+
+    private string GetNotificationType(NotificationWithMeta notification)
+    {
+        // OneSignal notifications are always broadcast notifications
+        return "إشعار عام";
+    }
+
+    private string GetNotificationType(BlazingPizza.Shared.Notification notification)
+    {
+        return notification.Type.ToString();
+    }
+
+    private string GetSentTime(NotificationWithMeta notification)
+    {
+        if (notification.SendAfter.HasValue)
+        {
+            return notification.SendAfter.Value.ToString("yyyy-MM-dd HH:mm");
+        }
+        else if (notification.CompletedAt.HasValue)
+        {
+            return notification.CompletedAt.Value.ToString("yyyy-MM-dd HH:mm");
+        }
+        return "غير محدد";
+    }
+
+    public class NewNotificationModel
+    {
+        [Required(ErrorMessage = "عنوان الإشعار مطلوب")]
+        [MaxLength(100 , ErrorMessage = "عنوان الإشعار لا يجب أن يتجاوز 100 حرف")]
+        public string Title { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "نص الإشعار مطلوب")]
+        [MaxLength(500 , ErrorMessage = "نص الإشعار لا يجب أن يتجاوز 500 حرف")]
+        public string Message { get; set; } = string.Empty;
+
+        public NotificationType NotificationType { get; set; } = NotificationType.System;
+
+        [Url(ErrorMessage = "رابط الإجراء يجب أن يكون رابط صالح")]
+        public string? ActionUrl { get; set; }
+    }
+
+    public class UserStatistics
+    {
+        public int ActiveUsers { get; set; }
+        public int TotalNotificationsSent { get; set; }
+        public int BroadcastReach { get; set; }
+    }
+} 

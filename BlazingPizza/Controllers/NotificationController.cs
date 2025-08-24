@@ -11,10 +11,14 @@ namespace BlazingPizza.Controllers;
 public class NotificationController : ControllerBase
 {
     private readonly INotificationRepository _notificationRepository;
+    private readonly ILogger<NotificationController> _logger;
 
-    public NotificationController(INotificationRepository notificationRepository)
+    public NotificationController(
+        INotificationRepository notificationRepository,
+        ILogger<NotificationController> logger)
     {
         _notificationRepository = notificationRepository;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -73,6 +77,89 @@ public class NotificationController : ControllerBase
 
         var count = await _notificationRepository.GetUnreadCountAsync(userId);
         return Ok(count);
+    }
+
+    [HttpGet("user/{userId}/count")]
+    public async Task<ActionResult<int>> GetUserNotificationsCount(string userId)
+    {
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (currentUserId != userId && !User.IsInRole("Admin"))
+        {
+            return Forbid();
+        }
+
+        var count = await _notificationRepository.GetUserNotificationsCountAsync(userId);
+        return Ok(count);
+    }
+
+    [HttpGet("user/{userId}/type/{type}")]
+    public async Task<ActionResult<List<Notification>>> GetNotificationsByType(string userId, NotificationType type, [FromQuery] int limit = 20)
+    {
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (currentUserId != userId && !User.IsInRole("Admin"))
+        {
+            return Forbid();
+        }
+
+        var notifications = await _notificationRepository.GetNotificationsByTypeAsync(userId, type, limit);
+        return Ok(notifications);
+    }
+
+    [HttpGet("user/{userId}/recent")]
+    public async Task<ActionResult<List<Notification>>> GetRecentNotifications(string userId, [FromQuery] int hours = 24)
+    {
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (currentUserId != userId && !User.IsInRole("Admin"))
+        {
+            return Forbid();
+        }
+
+        var notifications = await _notificationRepository.GetRecentNotificationsAsync(userId, hours);
+        return Ok(notifications);
+    }
+
+    [HttpGet("user/{userId}/summary")]
+    public async Task<ActionResult<Dictionary<NotificationType, int>>> GetNotificationSummary(string userId)
+    {
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (currentUserId != userId && !User.IsInRole("Admin"))
+        {
+            return Forbid();
+        }
+
+        var summary = await _notificationRepository.GetNotificationSummaryAsync(userId);
+        return Ok(summary);
+    }
+
+    [HttpGet("user/{userId}/search")]
+    public async Task<ActionResult<List<Notification>>> SearchNotifications(string userId, [FromQuery] string q, [FromQuery] int limit = 20)
+    {
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (currentUserId != userId && !User.IsInRole("Admin"))
+        {
+            return Forbid();
+        }
+
+        if (string.IsNullOrWhiteSpace(q))
+        {
+            return BadRequest("Search term cannot be empty");
+        }
+
+        var notifications = await _notificationRepository.SearchNotificationsAsync(userId, q, limit);
+        return Ok(notifications);
+    }
+
+    [HttpDelete("user/{userId}/old")]
+    public async Task<IActionResult> DeleteOldNotifications(string userId, [FromQuery] int daysOld = 30)
+    {
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (currentUserId != userId && !User.IsInRole("Admin"))
+        {
+            return Forbid();
+        }
+
+        await _notificationRepository.DeleteOldNotificationsAsync(userId, daysOld);
+        return Ok();
     }
 
     [HttpPut("{id}/read")]

@@ -62,7 +62,7 @@ namespace BlazingPizza.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("BlazingPizza.Shared.Carrier", b =>
@@ -121,7 +121,7 @@ namespace BlazingPizza.Migrations
 
                     b.HasKey("id");
 
-                    b.ToTable("Carriers");
+                    b.ToTable("Carriers", (string)null);
                 });
 
             modelBuilder.Entity("BlazingPizza.Shared.InternetPackage", b =>
@@ -181,7 +181,7 @@ namespace BlazingPizza.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("InternetPackages");
+                    b.ToTable("InternetPackages", (string)null);
                 });
 
             modelBuilder.Entity("BlazingPizza.Shared.InternetPackagePurchase", b =>
@@ -237,7 +237,7 @@ namespace BlazingPizza.Migrations
 
                     b.HasIndex("TransactionId");
 
-                    b.ToTable("InternetPackagePurchases");
+                    b.ToTable("InternetPackagePurchases", (string)null);
                 });
 
             modelBuilder.Entity("BlazingPizza.Shared.Notification", b =>
@@ -284,7 +284,7 @@ namespace BlazingPizza.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("BlazingPizza.Shared.Recharge", b =>
@@ -320,7 +320,7 @@ namespace BlazingPizza.Migrations
 
                     b.HasIndex("TransactionId");
 
-                    b.ToTable("Recharges");
+                    b.ToTable("Recharges", (string)null);
                 });
 
             modelBuilder.Entity("BlazingPizza.Shared.RefillCard", b =>
@@ -460,7 +460,7 @@ namespace BlazingPizza.Migrations
 
                     b.HasIndex("CarrierID");
 
-                    b.ToTable("RefillCards");
+                    b.ToTable("RefillCards", (string)null);
                 });
 
             modelBuilder.Entity("BlazingPizza.Shared.Transaction", b =>
@@ -494,7 +494,7 @@ namespace BlazingPizza.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("Transactions", (string)null);
                 });
 
             modelBuilder.Entity("BlazingPizza.Shared.InternetPackagePurchase", b =>

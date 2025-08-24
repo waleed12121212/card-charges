@@ -4,53 +4,83 @@
 @using System.Security.Claims
 @using BlazingPizza.Shared
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.SignalR.Client
+@implements IAsyncDisposable
 
 <div class="notification-panel">
     <div class="notification-header">
-        <h5>الإشعارات</h5>
+        <div class="header-content">
+            <h5>
+                <i class="fas fa-bell"></i>
+                الإشعارات
+            </h5>
         @if (unreadCount > 0)
         {
-            <span class="badge badge-danger">@unreadCount</span>
+                <span class="badge badge-danger pulse">@unreadCount</span>
         }
+        </div>
+        <div class="header-actions">
         @if (notifications.Any(n => !n.IsRead))
         {
-            <button class="btn btn-sm btn-link" @onclick="MarkAllAsRead">
-                تحديد الكل كمقروء
+                <button class="btn btn-sm btn-link mark-all-btn" @onclick="MarkAllAsRead" title="تحديد الكل كمقروء">
+                    <i class="fas fa-check-double"></i>
+                </button>
+            }
+            <button class="btn btn-sm btn-link refresh-btn" @onclick="LoadNotifications" title="تحديث">
+                <i class="fas fa-sync-alt @(isLoading ? "fa-spin" : "")"></i>
             </button>
-        }
+        </div>
     </div>
+
+    <!-- Search and Filter Section -->
+    <div class="notification-controls">
+        <div class="search-container">
+            <input type="text" class="form-control search-input" placeholder="البحث في الإشعارات..." 
+                   @bind="searchTerm" @bind:after="OnSearchChange" />
+            <i class="fas fa-search search-icon"></i>
+        </div>
+        <div class="filter-container">
+            <select class="form-select filter-select" @bind="selectedFilter" @bind:after="OnFilterChange">
+                <option value="all">جميع الإشعارات</option>
+                <option value="unread">غير المقروءة</option>
+                <option value="Purchase">المشتريات</option>
+                <option value="CreditTopUp">شحن الرصيد</option>
+                <option value="PackagePurchase">الباقات</option>
+                <option value="System">النظام</option>
+                <option value="Warning">التحذيرات</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Real-time Status Indicator -->
+    @if (hubConnection?.State == HubConnectionState.Connected)
+    {
+        <div class="connection-status connected">
+            <i class="fas fa-circle"></i>
+            متصل للإشعارات المباشرة
+        </div>
+    }
 
     <div class="notification-list">
         @if (isLoading)
         {
-            <div class="text-center p-3">
+            <div class="loading-container">
                 <div class="spinner-border spinner-border-sm" role="status">
                     <span class="sr-only">جاري التحميل...</span>
                 </div>
+                <span>جاري تحميل الإشعارات...</span>
             </div>
         }
-        else if (notifications.Any())
+        else if (filteredNotifications.Any())
         {
-            @foreach (var notification in notifications.Take(10))
+            @foreach (var notification in filteredNotifications.Take(displayLimit))
             {
-                <div class="notification-item @(notification.IsRead ? "read" : "unread")"
-                     @onclick="() => MarkAsRead(notification.Id)">
-                    <div class="notification-content">
-                        <div class="notification-title">
-                            @notification.Title
-                            @if (!notification.IsRead)
-                            {
-                                <span class="new-indicator"></span>
-                            }
-                        </div>
-                        <div class="notification-message">
-                            @notification.Message
-                        </div>
-                        <div class="notification-time">
-                            @GetTimeAgo(notification.CreatedAt)
-                        </div>
-                    </div>
-                    <div class="notification-type-icon">
+                <div class="notification-item @(notification.IsRead ? "read" : "unread") notification-@(notification.Type.ToString().ToLower())"
+                     @onclick="() => MarkAsRead(notification.Id)"
+                     @onmouseenter="() => ShowNotificationActions(notification.Id)"
+                     @onmouseleave="() => HideNotificationActions()">
+                    
+                    <div class="notification-icon">
                         @switch (notification.Type)
                         {
                             case NotificationType.Purchase:
@@ -68,61 +98,264 @@
                             case NotificationType.Warning:
                                 <i class="fas fa-exclamation-triangle text-warning"></i>
                                 break;
-                            case NotificationType.Success:
-                                <i class="fas fa-check-circle text-success"></i>
-                                break;
                             default:
                                 <i class="fas fa-bell text-info"></i>
                                 break;
                         }
                     </div>
+
+                    <div class="notification-content">
+                        <div class="notification-title">
+                            @notification.Title
+                            @if (!notification.IsRead)
+                            {
+                                <span class="new-indicator"></span>
+                            }
+                        </div>
+                        <div class="notification-message">
+                            @notification.Message
+                        </div>
+                        <div class="notification-meta">
+                            <span class="notification-time">@GetTimeAgo(notification.CreatedAt)</span>
+                        </div>
+                    </div>
+
+                    <div class="notification-actions @(hoveredNotificationId == notification.Id ? "visible" : "")">
+                        @if (!notification.IsRead)
+                        {
+                            <button class="btn btn-sm btn-outline-primary" @onclick:stopPropagation="true" @onclick="() => MarkAsRead(notification.Id)" title="تحديد كمقروء">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        }
+                        @if (!string.IsNullOrEmpty(notification.ActionUrl))
+                        {
+                            <a href="@notification.ActionUrl" class="btn btn-sm btn-outline-info" target="_blank" title="فتح الرابط">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (filteredNotifications.Count > displayLimit)
+            {
+                <div class="load-more-container">
+                    <button class="btn btn-outline-primary btn-sm" @onclick="LoadMore">
+                        <i class="fas fa-chevron-down"></i>
+                        عرض المزيد (@(filteredNotifications.Count - displayLimit) إشعار إضافي)
+                    </button>
                 </div>
             }
         }
+        else if (!string.IsNullOrEmpty(searchTerm))
+        {
+            <div class="empty-state">
+                <i class="fas fa-search fa-2x"></i>
+                <p>لا توجد نتائج للبحث عن "<strong>@searchTerm</strong>"</p>
+                <button class="btn btn-sm btn-link" @onclick="ClearSearch">مسح البحث</button>
+            </div>
+        }
         else
         {
-            <div class="text-center p-3 text-muted">
-                <i class="fas fa-bell-slash"></i>
+            <div class="empty-state">
+                <i class="fas fa-bell-slash fa-2x"></i>
                 <p>لا توجد إشعارات</p>
             </div>
         }
     </div>
+
+    <!-- Notification Stats -->
+    @if (notificationStats != null)
+    {
+        <div class="notification-stats">
+            <div class="stat-item">
+                <span class="stat-value">@notificationStats.TotalCount</span>
+                <span class="stat-label">المجموع</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value text-danger">@notificationStats.UnreadCount</span>
+                <span class="stat-label">غير مقروءة</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value text-success">@notificationStats.ReadCount</span>
+                <span class="stat-label">مقروءة</span>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
     private List<Notification> notifications = new();
+    private List<Notification> filteredNotifications = new();
+    private NotificationStats? notificationStats;
     private int unreadCount = 0;
     private bool isLoading = true;
     private string? currentUserId;
+    private string searchTerm = "";
+    private string selectedFilter = "all";
+    private int displayLimit = 10;
+    private int? hoveredNotificationId;
+    private HubConnection? hubConnection;
 
-    protected override async Task OnInitializedAsync( )
+    protected override async Task OnInitializedAsync()
     {
+        await GetCurrentUser();
         await LoadNotifications();
+        await InitializeSignalR();
     }
 
-    private async Task LoadNotifications( )
+    private async Task GetCurrentUser()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        currentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    }
+
+    private async Task InitializeSignalR()
+    {
+        if (string.IsNullOrEmpty(currentUserId)) return;
+
         try
         {
-            isLoading = true;
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            currentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            hubConnection = new HubConnectionBuilder()
+                .WithUrl("/notificationHub")
+                .Build();
 
-            if (!string.IsNullOrEmpty(currentUserId))
+            hubConnection.On<object>("ReceiveNotification", async (notificationData) =>
             {
-                notifications = await NotificationRepository.GetUserNotificationsAsync(currentUserId , 50);
-                unreadCount = await NotificationRepository.GetUnreadCountAsync(currentUserId);
-            }
+                await InvokeAsync(async () =>
+                {
+                    await LoadNotifications();
+                    await ShowToast("إشعار جديد!", "تم استلام إشعار جديد", "success");
+                });
+            });
+
+            hubConnection.On<object>("ReceiveBroadcast", async (notificationData) =>
+            {
+                await InvokeAsync(async () =>
+                {
+                    await LoadNotifications();
+                    await ShowToast("إشعار عام", "تم استلام إشعار عام جديد", "info");
+                });
+            });
+
+            await hubConnection.StartAsync();
         }
         catch (Exception ex)
         {
-            await JSRuntime.ShowError("خطأ" , "فشل في تحميل الإشعارات");
+            await JSRuntime.InvokeVoidAsync("console.error", $"SignalR connection failed: {ex.Message}");
+        }
+    }
+
+    private async Task LoadNotifications()
+    {
+        if (string.IsNullOrEmpty(currentUserId)) return;
+
+        try
+        {
+            isLoading = true;
+            notifications = await NotificationRepository.GetUserNotificationsAsync(currentUserId, 100);
+                unreadCount = await NotificationRepository.GetUnreadCountAsync(currentUserId);
+            await LoadNotificationStats();
+            ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", $"Failed to load notifications: {ex.Message}");
+            await ShowToast("خطأ", "فشل في تحميل الإشعارات", "error");
         }
         finally
         {
             isLoading = false;
             StateHasChanged();
         }
+    }
+
+    private async Task LoadNotificationStats()
+    {
+        if (string.IsNullOrEmpty(currentUserId)) return;
+
+        try
+        {
+            var totalCount = await NotificationRepository.GetUserNotificationsCountAsync(currentUserId);
+            notificationStats = new NotificationStats
+            {
+                TotalCount = totalCount,
+                UnreadCount = unreadCount,
+                ReadCount = totalCount - unreadCount
+            };
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", $"Failed to load notification stats: {ex.Message}");
+        }
+    }
+
+    private void ApplyFilters()
+    {
+        var filtered = notifications.AsEnumerable();
+
+        // Apply search filter
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            filtered = filtered.Where(n => 
+                n.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                n.Message.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Apply type filter
+        if (selectedFilter != "all")
+        {
+            if (selectedFilter == "unread")
+            {
+                filtered = filtered.Where(n => !n.IsRead);
+            }
+            else if (Enum.TryParse<NotificationType>(selectedFilter, out var notificationType))
+            {
+                filtered = filtered.Where(n => n.Type == notificationType);
+            }
+        }
+
+        filteredNotifications = filtered.ToList();
+    }
+
+    private async Task OnSearchChange()
+    {
+        ApplyFilters();
+        await Task.Delay(1); // Allow UI to update
+        StateHasChanged();
+    }
+
+    private async Task OnFilterChange()
+    {
+        ApplyFilters();
+        displayLimit = 10; // Reset display limit when filter changes
+        await Task.Delay(1);
+        StateHasChanged();
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = "";
+        ApplyFilters();
+        StateHasChanged();
+    }
+
+    private void LoadMore()
+    {
+        displayLimit += 10;
+        StateHasChanged();
+    }
+
+    private void ShowNotificationActions(int notificationId)
+    {
+        hoveredNotificationId = notificationId;
+        StateHasChanged();
+    }
+
+    private void HideNotificationActions()
+    {
+        hoveredNotificationId = null;
+        StateHasChanged();
     }
 
     private async Task MarkAsRead(int notificationId)
@@ -134,21 +367,23 @@
             if (notification != null && !notification.IsRead)
             {
                 notification.IsRead = true;
-                unreadCount = Math.Max(0 , unreadCount - 1);
+                unreadCount = Math.Max(0, unreadCount - 1);
+                await LoadNotificationStats();
+                ApplyFilters();
                 StateHasChanged();
             }
         }
         catch (Exception ex)
         {
-            await JSRuntime.ShowError("خطأ" , "فشل في تحديث الإشعار");
+            await ShowToast("خطأ", "فشل في تحديث الإشعار", "error");
         }
     }
 
-    private async Task MarkAllAsRead( )
+    private async Task MarkAllAsRead()
     {
+        if (string.IsNullOrEmpty(currentUserId)) return;
+
         try
-        {
-            if (!string.IsNullOrEmpty(currentUserId))
             {
                 await NotificationRepository.MarkAllAsReadAsync(currentUserId);
                 foreach (var notification in notifications)
@@ -156,12 +391,14 @@
                     notification.IsRead = true;
                 }
                 unreadCount = 0;
+            await LoadNotificationStats();
+            ApplyFilters();
                 StateHasChanged();
-            }
+            await ShowToast("تم", "تم تحديد جميع الإشعارات كمقروءة", "success");
         }
         catch (Exception ex)
         {
-            await JSRuntime.ShowError("خطأ" , "فشل في تحديث الإشعارات");
+            await ShowToast("خطأ", "فشل في تحديث الإشعارات", "error");
         }
     }
 
@@ -181,8 +418,36 @@
         return dateTime.ToString("dd/MM/yyyy");
     }
 
-    public async Task RefreshNotifications( )
+    private async Task ShowToast(string title, string message, string type)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("showToast", type, title, message);
+        }
+        catch
+        {
+            // Fallback if showToast is not available
+            await JSRuntime.InvokeVoidAsync("alert", $"{title}: {message}");
+        }
+    }
+
+    public async Task RefreshNotifications()
     {
         await LoadNotifications();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+
+    public class NotificationStats
+    {
+        public int TotalCount { get; set; }
+        public int UnreadCount { get; set; }
+        public int ReadCount { get; set; }
     }
 } 

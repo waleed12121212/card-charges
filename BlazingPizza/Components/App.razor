@@ -14,6 +14,18 @@
 	<link rel="stylesheet" href="BlazingPizza.styles.css" />
 	<link href="_content/BlazingPizza.ComponentsLibrary/leaflet/leaflet.css" rel="stylesheet" />
 	<link rel="manifest" href="manifest.json" />
+	<!-- OneSignal Web Push SDK -->
+	<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+	<script>
+		window.OneSignalDeferred = window.OneSignalDeferred || [];
+		OneSignalDeferred.push(async function(OneSignal) {
+			await OneSignal.init({
+				appId: "26fc254f-ad37-45e8-a0d5-ea6702ed0652",
+				safari_web_id: "web.onesignal.auto.28671d66-3da8-4a50-bcc4-1b29e015670b",
+				notifyButton: { enable: true }
+			});
+		});
+	</script>
 	<HeadOutlet />
 </head>
 <body>
@@ -23,7 +35,7 @@
 	<script src="_content/BlazingPizza.ComponentsLibrary/pushNotifications.js"></script>
 	<script src="_content/BlazingPizza.ComponentsLibrary/deliveryMap.js"></script>
 	<script src="_content/BlazingPizza.ComponentsLibrary/leaflet/leaflet.js"></script>
-	<script src="js/notifications.js"></script>
+	<script src="js/notifications.js?v=2.0"></script>
 	<script src="js/pin-helper.js"></script>
 	<script>navigator.serviceWorker.register('service-worker.js');</script>
 </body>

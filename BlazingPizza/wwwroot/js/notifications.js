@@ -1,166 +1,260 @@
-// Notification functions for BlazingPizza
-window.blazingPizzaNotifications = {
-    // Show a toast notification
-    showToast: function (title, message, type = 'success', duration = 5000) {
-        // Remove existing toasts first
-        this.removeExistingToasts();
+// Enhanced Notification Functions
+window.notificationHelpers = {
+    // Toast notification system
+    showToast: function(type, title, message, duration = 5000) {
+        const toastContainer = document.querySelector('.toast-container') || this.createToastContainer();
         
-        // Create toast container if it doesn't exist
-        let container = document.getElementById('toast-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'toast-container';
-            container.className = 'toast-container';
-            container.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 9999;
-                max-width: 350px;
-            `;
-            document.body.appendChild(container);
-        }
-
-        // Create toast element
         const toast = document.createElement('div');
-        toast.className = `toast show toast-${type}`;
-        toast.setAttribute('role', 'alert');
-        toast.setAttribute('aria-live', 'assertive');
-        toast.setAttribute('aria-atomic', 'true');
-        
-        // Toast styles
-        const typeColors = {
-            success: { bg: '#d4edda', border: '#c3e6cb', text: '#155724' },
-            error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24' },
-            warning: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404' },
-            info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460' }
-        };
-        
-        const colors = typeColors[type] || typeColors.success;
-        
-        toast.style.cssText = `
-            background-color: ${colors.bg};
-            border: 1px solid ${colors.border};
-            color: ${colors.text};
-            margin-bottom: 10px;
-            border-radius: 0.375rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            max-width: 350px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            direction: rtl;
-            text-align: right;
-        `;
-
-        // Toast content
+        toast.className = `toast-notification ${type}`;
         toast.innerHTML = `
-            <div style="display: flex; align-items: flex-start; padding: 0.75rem;">
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; margin-bottom: 0.25rem; font-size: 0.875rem;">
-                        ${this.escapeHtml(title)}
-                    </div>
-                    <div style="font-size: 0.875rem; opacity: 0.8;">
-                        ${this.escapeHtml(message)}
-                    </div>
+            <div class="toast-icon">
+                ${this.getToastIcon(type)}
                 </div>
-                <button type="button" style="
-                    background: none;
-                    border: none;
-                    font-size: 1.25rem;
-                    font-weight: 700;
-                    line-height: 1;
-                    color: ${colors.text};
-                    opacity: 0.5;
-                    cursor: pointer;
-                    padding: 0;
-                    margin-left: 0.75rem;
-                " onclick="this.parentElement.parentElement.remove()">×</button>
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
             </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
         `;
 
-        // Add to container
-        container.appendChild(toast);
+        toastContainer.appendChild(toast);
 
         // Auto remove after duration
-        if (duration > 0) {
             setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.style.opacity = '0';
-                    toast.style.transition = 'opacity 0.3s ease';
-                    setTimeout(() => {
-                        if (toast.parentNode) {
-                            toast.remove();
-                        }
-                    }, 300);
+            if (toast.parentElement) {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
                 }
             }, duration);
-        }
 
         return toast;
     },
 
-    // Show success notification
-    showSuccess: function (title, message, duration = 5000) {
-        return this.showToast(title, message, 'success', duration);
+    createToastContainer: function() {
+        const container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+        return container;
     },
 
-    // Show error notification
-    showError: function (title, message, duration = 7000) {
-        return this.showToast(title, message, 'error', duration);
+    getToastIcon: function(type) {
+        const icons = {
+            success: '<i class="fas fa-check-circle text-success"></i>',
+            error: '<i class="fas fa-exclamation-circle text-danger"></i>',
+            warning: '<i class="fas fa-exclamation-triangle text-warning"></i>',
+            info: '<i class="fas fa-info-circle text-info"></i>'
+        };
+        return icons[type] || icons.info;
     },
 
-    // Show warning notification
-    showWarning: function (title, message, duration = 6000) {
-        return this.showToast(title, message, 'warning', duration);
-    },
-
-    // Show info notification
-    showInfo: function (title, message, duration = 5000) {
-        return this.showToast(title, message, 'info', duration);
-    },
-
-    // Remove existing toasts
-    removeExistingToasts: function () {
-        const existingToasts = document.querySelectorAll('.toast');
-        existingToasts.forEach(toast => {
-            toast.style.opacity = '0';
-            toast.style.transition = 'opacity 0.2s ease';
+    // Notification panel animations
+    animateNotificationCount: function(element) {
+        if (element) {
+            element.style.animation = 'bounce 0.6s ease';
             setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.remove();
+                element.style.animation = '';
+            }, 600);
+        }
+    },
+
+    // Smooth scroll to notification
+    scrollToNotification: function(notificationId) {
+        const notification = document.querySelector(`[data-notification-id="${notificationId}"]`);
+        if (notification) {
+            notification.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+            
+            // Highlight the notification
+            notification.style.backgroundColor = '#fff3cd';
+            setTimeout(() => {
+                notification.style.backgroundColor = '';
+            }, 2000);
+        }
+    },
+
+    // Initialize notification panel features
+    initializeNotificationPanel: function() {
+        console.log('Initializing notification panel...');
+        
+        // Add keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'n') {
+                e.preventDefault();
+                const notificationPanel = document.querySelector('.notification-panel');
+                if (notificationPanel) {
+                    notificationPanel.scrollIntoView({ behavior: 'smooth' });
                 }
-            }, 200);
+            }
+        });
+
+        // Add intersection observer for lazy loading
+        const observerOptions = {
+            root: document.querySelector('.notification-list'),
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe notification items
+        document.querySelectorAll('.notification-item').forEach(item => {
+            observer.observe(item);
         });
     },
 
-    // Escape HTML to prevent XSS
-    escapeHtml: function (text) {
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+    // Web Notifications API integration
+    requestNotificationPermission: async function() {
+        if (!("Notification" in window)) {
+            console.log("This browser does not support notifications");
+            return false;
+        }
+
+        if (Notification.permission === "granted") {
+            return true;
+        }
+
+        if (Notification.permission !== "denied") {
+            const permission = await Notification.requestPermission();
+            return permission === "granted";
+        }
+
+        return false;
     },
 
-    // Show notification based on type
-    showNotification: function (notification) {
-        const typeMap = {
-            1: 'success', // Purchase
-            2: 'success', // CreditTopUp
-            3: 'success', // PackagePurchase
-            4: 'info',    // System
-            5: 'warning', // Warning
-            6: 'success'  // Success
-        };
+    showBrowserNotification: function(title, message, options = {}) {
+        if (Notification.permission === "granted") {
+            const notification = new Notification(title, {
+                body: message,
+                icon: '/img/logo2.png',
+                badge: '/img/notification-badge.png',
+                tag: 'pizza-notification',
+                requireInteraction: false,
+                ...options
+            });
+
+            notification.onclick = function() {
+                window.focus();
+                notification.close();
+            };
+
+            // Auto close after 5 seconds
+            setTimeout(() => notification.close(), 5000);
+        }
+    },
+
+    // Sound notifications
+    playNotificationSound: function(type = 'default') {
+        // Create a simple notification sound using Web Audio API
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Different frequencies for different notification types
+            const frequencies = {
+                default: 440,
+                success: 523.25,
+                error: 220,
+                warning: 349.23,
+                info: 261.63
+            };
+            
+            oscillator.frequency.value = frequencies[type] || frequencies.default;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        } catch (e) {
+            console.log('Could not play notification sound:', e);
+        }
+    },
+
+    // Badge count management
+    updateBadgeCount: function(count) {
+        // Update favicon badge (if supported)
+        this.updateFaviconBadge(count);
         
-        const type = typeMap[notification.type] || 'info';
-        return this.showToast(notification.title, notification.message, type);
+        // Update page title
+        const baseTitle = 'Blazing Pizza';
+        document.title = count > 0 ? `(${count}) ${baseTitle}` : baseTitle;
+    },
+
+    updateFaviconBadge: function(count) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 32;
+        canvas.height = 32;
+        const ctx = canvas.getContext('2d');
+
+        // Draw the base favicon
+        const favicon = document.querySelector('link[rel="icon"]');
+        if (favicon) {
+            const img = new Image();
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, 32, 32);
+                
+                if (count > 0) {
+                    // Draw badge
+                    ctx.fillStyle = '#dc3545';
+                    ctx.beginPath();
+                    ctx.arc(24, 8, 8, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // Draw count
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.textAlign = 'center';
+                    const text = count > 99 ? '99+' : count.toString();
+                    ctx.fillText(text, 24, 12);
+                }
+                
+                // Update favicon
+                const link = document.querySelector('link[rel="icon"]') || document.createElement('link');
+                link.type = 'image/png';
+                link.rel = 'icon';
+                link.href = canvas.toDataURL();
+                document.head.appendChild(link);
+            };
+            img.src = favicon.href;
+        }
     }
 };
 
-// Legacy support for existing alert calls
-window.showNotification = function (title, message, type = 'success') {
-    window.blazingPizzaNotifications.showToast(title, message, type);
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    window.notificationHelpers.initializeNotificationPanel();
+    window.notificationHelpers.requestNotificationPermission();
+});
+
+// Global functions for Blazor interop
+window.showToast = function(type, title, message) {
+    window.notificationHelpers.showToast(type, title, message);
+};
+
+window.updateNotificationBadge = function(count) {
+    window.notificationHelpers.updateBadgeCount(count);
+};
+
+window.playNotificationSound = function(type) {
+    window.notificationHelpers.playNotificationSound(type);
+};
+
+window.showBrowserNotification = function(title, message, options) {
+    window.notificationHelpers.showBrowserNotification(title, message, options);
 }; 

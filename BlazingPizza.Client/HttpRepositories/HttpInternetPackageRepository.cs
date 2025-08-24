@@ -2,7 +2,7 @@ using BlazingPizza.Shared;
 using BlazingPizza.Shared.Interfaces;
 using System.Net.Http.Json;
 
-namespace BlazingPizza.Client.Repositories;
+namespace BlazingPizza.Client.HttpRepositories;
 
 public class HttpInternetPackageRepository : IInternetPackageRepository
 {
@@ -63,11 +63,11 @@ public class HttpInternetPackageRepository : IInternetPackageRepository
         {
             var url = $"api/internetpackage/active/carrier/{(int)carrierType}";
             Console.WriteLine($"Making HTTP request to: {url}");
-            
+
             var response = await _httpClient.GetFromJsonAsync<List<InternetPackage>>(url);
-            
+
             Console.WriteLine($"HTTP response received. Package count: {response?.Count ?? 0}");
-            
+
             return response ?? new List<InternetPackage>();
         }
         catch (Exception ex)
@@ -76,4 +76,4 @@ public class HttpInternetPackageRepository : IInternetPackageRepository
             throw;
         }
     }
-} 
+}

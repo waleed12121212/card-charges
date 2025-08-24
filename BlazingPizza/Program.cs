@@ -10,9 +10,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using BlazingPizza.Shared.Interfaces;
 using BlazingPizza.Repositories;
 using BlazingPizza.Services;
-using BlazingPizza.Middleware;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-
+using BlazingPizza.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -20,10 +19,18 @@ builder.Services.AddRazorComponents()
         .AddInteractiveServerComponents()
         .AddInteractiveWebAssemblyComponents();
 
+// Add SignalR
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+});
+
 
 // Add Security
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<AuthenticationStateProvider, BlazingPizza.Components.Account.PersistingRevalidatingAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider , BlazingPizza.Components.Account.PersistingRevalidatingAuthenticationStateProvider>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -55,14 +62,20 @@ builder.Services.AddScoped<INotificationRepository , NotificationRepository>();
 builder.Services.AddScoped<IRefillCardRepository , RefillCardRepository>();
 builder.Services.AddScoped<IRechargeRepository , RechargeRepository>();
 builder.Services.AddScoped<ITransactionRepository , TransactionRepository>();
-builder.Services.AddScoped<IInternetPackageRepository, BlazingPizza.Repositories.InternetPackageRepository>();
-builder.Services.AddScoped<IInternetPackagePurchaseRepository, BlazingPizza.Repositories.InternetPackagePurchaseRepository>();
+builder.Services.AddScoped<IInternetPackageRepository , BlazingPizza.Repositories.InternetPackageRepository>();
+builder.Services.AddScoped<IInternetPackagePurchaseRepository , BlazingPizza.Repositories.InternetPackagePurchaseRepository>();
 
 // Add image service
-builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IImageService , ImageService>();
 
 // Add notification service
 builder.Services.AddScoped<BlazingPizza.Services.NotificationService>();
+
+// Add user service for notification management
+builder.Services.AddScoped<IUserService , UserService>();
+
+// Add OneSignal service
+builder.Services.AddScoped<OneSignalService>();
 
 // Add PIN services
 builder.Services.AddScoped<PinService>();
@@ -71,7 +84,7 @@ builder.Services.AddScoped<PinSessionService>(serviceProvider =>
     var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
     // ProtectedSessionStorage is only available in Blazor Server components context
     var protectedSessionStorage = serviceProvider.GetService<ProtectedSessionStorage>();
-    return new PinSessionService(httpContextAccessor, protectedSessionStorage);
+    return new PinSessionService(httpContextAccessor , protectedSessionStorage);
 });
 
 builder.Services.AddScoped<HttpClient>(sp =>
@@ -106,8 +119,7 @@ var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
 using (var scope = scopeFactory.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<PizzaStoreContext>();
-    db.Database.EnsureCreated();
-    SeedData.Initialize(db);
+    db.Database.Migrate();
 }
 
 
@@ -118,7 +130,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler("/Error" , createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
@@ -140,6 +152,9 @@ app.UseAuthorization();
 app.MapPizzaApi();
 
 app.MapControllers();
+
+// Map SignalR Hub for real-time notifications
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode()

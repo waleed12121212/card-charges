@@ -55,15 +55,14 @@
     }
     else
     {
-        <BlazingPizza.Components.Shared.PinInput 
-            Title="تأكيد الهوية"
-            Description="يرجى إدخال الرقم السري للمتابعة"
-            SubmitButtonText="تأكيد"
-            ShowKeypad="@showKeypad"
-            IsLoading="@isVerifying"
-            ErrorMessage="@errorMessage"
-            SuccessMessage="@successMessage"
-            OnPinSubmitted="HandlePinSubmission" />
+        <BlazingPizza.Components.Shared.PinInput Title="تأكيد الهوية"
+                                                 Description="يرجى إدخال الرقم السري للمتابعة"
+                                                 SubmitButtonText="تأكيد"
+                                                 ShowKeypad="@showKeypad"
+                                                 IsLoading="@isVerifying"
+                                                 ErrorMessage="@errorMessage"
+                                                 SuccessMessage="@successMessage"
+                                                 OnPinSubmitted="HandlePinSubmission" />
 
         @if (pinStatus?.RemainingAttempts > 0 && pinStatus?.RemainingAttempts < 3)
         {
@@ -99,7 +98,7 @@
     private PinStatusResult? pinStatus;
     private string? returnUrl;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync( )
     {
         // Get return URL from query parameters
         var uri = new Uri(NavigationManager.Uri);
@@ -131,7 +130,7 @@
         if (firstRender)
         {
             // Auto-detect mobile devices to show keypad
-            showKeypad = await JSRuntime.InvokeAsync<bool>("eval", 
+            showKeypad = await JSRuntime.InvokeAsync<bool>("eval" ,
                 "/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)");
         }
     }
@@ -152,26 +151,26 @@
                 return;
             }
 
-            var result = await PinService.VerifyPinAsync(userId, pin);
-            
+            var result = await PinService.VerifyPinAsync(userId , pin);
+
             if (result.Success)
             {
                 successMessage = "تم التحقق بنجاح!";
                 StateHasChanged();
-                
+
                 // Set PIN as verified in session
                 await PinSessionService.SetPinVerifiedAsync(userId);
-                
+
                 // Wait a moment to show success message
                 await Task.Delay(1000);
-                
+
                 // Redirect to original page
                 NavigationManager.NavigateTo(returnUrl ?? "/");
             }
             else
             {
                 errorMessage = result.Message;
-                
+
                 if (result.IsLocked)
                 {
                     // Refresh PIN status to show lock screen
@@ -195,17 +194,17 @@
         }
     }
 
-    private void ToggleKeypad()
+    private void ToggleKeypad( )
     {
         showKeypad = !showKeypad;
     }
 
-    private void GoBack()
+    private void GoBack( )
     {
         NavigationManager.NavigateTo("/");
     }
 
-    private void GoToProfile()
+    private void GoToProfile( )
     {
         NavigationManager.NavigateTo("/Account/Manage/Profile");
     }
